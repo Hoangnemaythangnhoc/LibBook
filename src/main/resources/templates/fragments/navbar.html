@@ -1,0 +1,117 @@
+<th:block th:fragment="navbar">
+    <style>
+        .upload-button {
+            display: block;
+            margin: 20px auto;
+            padding: 6px 12px;
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            text-align: center;
+            width: 180px;
+        }
+
+        .upload-button:hover {
+            background-color: #0b5ed7;
+            color: white;
+        }
+    </style>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <img
+                        src="../img/black_text_logo.jpeg"
+                        alt="Books Haven Logo"
+                        height="40"/>
+            </a>
+
+            <button
+                    class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarContent"
+                    aria-controls="navbarContent"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="home">Home</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a
+                                class="nav-link dropdown-toggle"
+                                href="#"
+                                id="categoriesDropdown"
+                                role="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                            Categories
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="categoriesDropdown">
+                            <li><a class="dropdown-item" href="#">Fiction</a></li>
+                            <li><a class="dropdown-item" href="#">Non-Fiction</a></li>
+                            <li><a class="dropdown-item" href="#">Mystery & Thriller</a></li>
+                            <li><a class="dropdown-item" href="#">Science Fiction & Fantasy</a></li>
+                            <li><a class="dropdown-item" href="#">Romance</a></li>
+                            <li><a class="dropdown-item" href="#">Biography & Memoir</a></li>
+                            <li><a class="dropdown-item" href="#">History</a></li>
+                            <li><a class="dropdown-item" href="#">Self-Help</a></li>
+                            <li><a class="dropdown-item" href="#">Children's Books</a></li>
+                            <li><a class="dropdown-item" href="#">Young Adult</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#new-arrivals">New Arrivals</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">About</a>
+                    </li>
+                </ul>
+
+                <form class="d-flex mx-auto" style="min-width: 300px">
+                    <div class="input-group">
+                        <input class="form-control" type="search" placeholder="Search books, authors..."
+                               aria-label="Search"/>
+                        <button class="btn btn-outline-primary" type="submit">
+                            <i class="ri-search-line"></i>
+                        </button>
+                    </div>
+                </form>
+
+        <div class="d-flex align-items-center ms-auto" style="gap: 7px">
+          <a href="/cart" class="btn btn-link position-relative ms-2">
+            <i class="ri-shopping-cart-2-line fs-5"></i>
+            <span
+              class="position-absolute top-45 start-100 translate-middle badge rounded-pill bg-danger"
+              style="margin-right: 60px">
+              0
+            </span>
+          </a>
+
+                <th:block th:if="${session.USER != null}">
+                    <form action="/profile" method="GET">
+                        <button class="btn btn-primary">Profile</button>
+                    </form>
+                    <form action="/logout" method="POST">
+                        <button class="btn btn-warning" type="submit">Logout</button>
+                    </form>
+                    <a href="/upload-product" class="upload-button">Upload New Book</a>
+
+                </th:block>
+                <!-- Nếu chưa đăng nhập -->
+                <th:block th:if="${session.USER == null}">
+                    <a href="/login" class="btn btn-outline-primary me-2">Sign In</a>
+                    <a href="/register" class="btn btn-primary">Sign Up</a>
+                </th:block>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+</th:block>

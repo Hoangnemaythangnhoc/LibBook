@@ -16,7 +16,6 @@ public class RoleRepositoryImpl implements RoleRepository {
     private static final RowMapper<Role> ROLE_ROW_MAPPER = (rs, rowNum) -> new Role(
             rs.getInt("RoleId"),
             rs.getString("RoleName")
-            // Add other fields if your Role entity has more, e.g., rs.getString("description")
     );
     public List<Role> inra() {
         String selectSql = "SELECT * FROM [role]";

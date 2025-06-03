@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="'Books Haven - ' + ${categoryName}">Books Haven - Category</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/category.css" />
+    <link rel="shortcut icon" href="https://rails-assets-us.bookshop.org/assets/favicon-63cb20989e2516343feeab429626798a43afdaa28eeaba777b7e0acde8a25dd2.png" />
+</head>
+
+<body>
+<div th:insert="~{fragments/navbar :: navbar}"></div>
+
+<!-- Category Section -->
+<section class="category-products py-5">
+    <div class="container">
+        <h2 class="text-center mb-5" th:text="'Category: ' + ${categoryName}">Category: [Category Name]</h2>
+        <div th:if="${products == null or products.isEmpty()}">
+            <p class="text-center text-muted">No products available in this category.</p>
+        </div>
+        <div th:unless="${products == null or products.isEmpty()}" class="row g-4">
+            <div class="col-lg-3 col-md-6" th:each="product : ${products}">
+                <div class="book-card bg-white rounded shadow-sm h-100">
+                    <img th:src="${product.imageFile}" class="card-img-top" alt="Book Cover" />
+                    <div class="card-body">
+                        <p class="text-primary mb-1">Book</p>
+                        <h5 class="card-title" th:text="${product.productName}"></h5>
+                        <p class="card-text text-muted" th:text="${product.description}"></p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="h5 mb-0" th:text="'$' + ${#numbers.formatDecimal(product.price, 2, 2)}"></span>
+                            <a th:href="@{/product/{id}(id=${product.productId})}" class="btn btn-outline-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div th:insert="~{fragments/footer :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/components.js"></script>
+</body>
+</html>

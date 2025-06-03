@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Admin Dashboard - LibBook</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet" href="/css/admin.css" />
+    <script defer src="/js/admin.js"></script>
+</head>
+<body>
+<div class="dashboard-container">
+    <aside class="sidebar">
+        <h2>📚 Admin Panel</h2>
+        <nav>
+            <ul>
+                <li>📊 Tổng quan</li>
+                <li>📦 Quản lý sách</li>
+                <li>🛒 Quản lý đơn hàng</li>
+                <li>👥 Quản lý người dùng</li>
+                <li>🏷️ Quản lý danh mục</li>
+                <li>💸 Quản lý giảm giá & khuyến mãi</li>
+                <li>💬 Quản lý comment</li>
+                <li>⚙️ Cài đặt</li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <h1>Bảng điều khiển</h1>
+            <div class="admin-info">
+                <span>Xin chào, Admin</span>
+                <img src="https://i.pravatar.cc/40" alt="Avatar" />
+            </div>
+        </header>
+
+        <!-- Biểu đồ thống kê -->
+        <section class="charts">
+            <h2>Biểu đồ thống kê</h2>
+            <div class="chart-grid">
+                <div class="chart-box">
+                    <h3>Doanh thu 7 ngày qua</h3>
+                    <canvas id="revenueChart"></canvas>
+                    <!-- Ví dụ dữ liệu cho biểu đồ (sẽ được xử lý trong admin.js) -->
+                    <script>
+                        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+                        new Chart(revenueCtx, {
+                            type: 'line',
+                            data: {
+                                labels: ['2025-05-27', '2025-05-28', '2025-05-29', '2025-05-30', '2025-05-31', '2025-06-01', '2025-06-02'],
+                                datasets: [{
+                                    label: 'Doanh thu (₫)',
+                                    data: [10000, 15000, 20000, 18000, 22000, 25000, 30000],
+                                    borderColor: '#36A2EB',
+                                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                    fill: true
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    y: { beginAtZero: true }
+                                }
+                            }
+                        });
+                    </script>
+                </div>
+                <div class="chart-box">
+                    <h3>Phân loại đơn hàng</h3>
+                    <canvas id="orderPieChart"></canvas>
+                    <!-- Ví dụ dữ liệu cho biểu đồ (sẽ được xử lý trong admin.js) -->
+                    <script>
+                        const orderCtx = document.getElementById('orderPieChart').getContext('2d');
+                        new Chart(orderCtx, {
+                            type: 'pie',
+                            data: {
+                                labels: ['Đã giao', 'Chờ xử lý', 'Đã hủy'],
+                                datasets: [{
+                                    data: [70, 20, 10],
+                                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                                }]
+                            }
+                        });
+                    </script>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tổng quan -->
+        <section class="overview">
+            <div class="card">
+                <h3>Doanh thu hôm nay</h3>
+                <p id="revenue">₫30,000</p>
+            </div>
+            <div class="card">
+                <h3>Số đơn hôm nay</h3>
+                <p id="orders">5</p>
+            </div>
+            <div class="card">
+                <h3>Sách bán chạy</h3>
+                <p id="top-book">The Universe Explained</p>
+            </div>
+            <div class="card">
+                <h3>Người dùng mới</h3>
+                <p id="users">2</p>
+            </div>
+        </section>
+
+        <!-- Sách mới cập nhật -->
+        <section class="recent-books">
+            <h2>Sách mới cập nhật</h2>
+            <table>
+                <thead>
+                <tr>
+                    <th>Ảnh</th>
+                    <th>Tên sách</th>
+                    <th>Tác giả</th>
+                    <th>Giá</th>
+                    <th>Ngày cập nhật</th>
+                </tr>
+                </thead>
+                <tbody id="book-table-body">
+                <!-- Ví dụ dữ liệu mẫu -->
+                <tr>
+                    <td><img src="https://www.malenybookshop.com.au/assets/full/9781864581331.jpg" alt="Book Cover" /></td>
+                    <td>The Universe Explained</td>
+                    <td>Không có tác giả</td>
+                    <td>₫25.99</td>
+                    <td>2025-06-01</td>
+                </tr>
+                <tr>
+                    <td><img src="https://example.com/mystery.jpg" alt="Book Cover" /></td>
+                    <td>The Mystery of Time</td>
+                    <td>Không có tác giả</td>
+                    <td>₫15.99</td>
+                    <td>2025-06-01</td>
+                </tr>
+                <tr>
+                    <td><img src="https://example.com/romance.jpg" alt="Book Cover" /></td>
+                    <td>Love in the Stars</td>
+                    <td>Không có tác giả</td>
+                    <td>₫19.99</td>
+                    <td>2025-06-02</td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+</body>
+</html>
