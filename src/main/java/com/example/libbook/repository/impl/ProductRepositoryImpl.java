@@ -89,15 +89,19 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public List<Product> getProductsByCategory(String category) {
+    public List<Product> getProductsByTag(String tag) {
         List<Product> products = new ArrayList<>();
-        String sql = "SELECT * FROM Product WHERE tag = ?"; // Giả định có cột 'tag' trong bảng Product
+        String sql = "SELECT p.* FROM Product p " +
+                "JOIN ProductTag pt ON p.ProductId = pt.ProductId " +
+                "JOIN Tag t ON pt.TagId = t.TagId " +
+                "WHERE t.TagName = ?";
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            statement.setString(1, category);
-            System.out.println("Executing query: " + sql + " with category: " + category);
+            System.out.println("Setting tag parameter: " + tag);
+            statement.setString(1, tag);
+            System.out.println("Executing query: " + sql + " with tag: " + tag);
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
                     Product product = new Product();
@@ -113,11 +117,11 @@ public class ProductRepositoryImpl implements ProductRepository {
                     product.setRating(resultSet.getDouble("Rating"));
                     products.add(product);
                 }
-                System.out.println("Number of products fetched for category: " + products.size());
+                System.out.println("Number of products fetched for tag '" + tag + "': " + products.size());
             }
         } catch (Exception e) {
-            System.err.println("Error fetching products by category: " + e.getMessage());
-            throw new RuntimeException("Error fetching products by category", e);
+            System.err.println("Error fetching products by tag: " + e.getMessage());
+            throw new RuntimeException("Error fetching products by tag", e);
         }
         return products;
     }

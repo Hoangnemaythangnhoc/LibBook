@@ -16,10 +16,177 @@
     <link
             rel="shortcut icon"
             href="https://rails-assets-us.bookshop.org/assets/favicon-63cb20989e2516343feeab429626798a43afdaa28eeaba777b7e0acde8a25dd2.png"/>
+    <style>
+        /* AI Help Button Styles */
+        .ai-help-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff4e50, #f9d423, #4facfe);
+            background-size: 200% 200%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 215, 0, 0.7);
+            transition: all 0.3s ease;
+            animation: gradientShift 6s ease infinite, pulse 1.5s ease infinite;
+            overflow: visible; /* Để các ngôi sao tỏa ra ngoài */
+            cursor: pointer;
+        }
+
+        .ai-help-btn:hover {
+            transform: scale(1.15);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.9);
+        }
+
+        .ai-help-btn i {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Gradient Animation */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Pulse Animation */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        /* Star Effects Container */
+        .ai-help-btn::before,
+        .ai-help-btn::after,
+        .ai-help-btn .star-1,
+        .ai-help-btn .star-2,
+        .ai-help-btn .star-3,
+        .ai-help-btn .star-4 {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 215, 0, 0.9);
+            border-radius: 50%;
+            z-index: 1;
+            animation: starSparkle 3s infinite linear;
+        }
+
+        /* Position and Delay for Stars */
+        .ai-help-btn::before {
+            animation-delay: 0s;
+        }
+
+        .ai-help-btn::after {
+            animation-delay: 0.5s;
+        }
+
+        .ai-help-btn .star-1 {
+            animation-delay: 1s;
+        }
+
+        .ai-help-btn .star-2 {
+            animation-delay: 1.5s;
+        }
+
+        .ai-help-btn .star-3 {
+            animation-delay: 2s;
+        }
+
+        .ai-help-btn .star-4 {
+            animation-delay: 2.5s;
+        }
+
+        /* Star Sparkle Animation */
+        @keyframes starSparkle {
+            0% {
+                transform: translate(0, 0) scale(0.5);
+                opacity: 1;
+            }
+            50% {
+                transform: translate(var(--x-move), var(--y-move)) scale(1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translate(var(--x-move-end), var(--y-move-end)) scale(0.2);
+                opacity: 0;
+            }
+        }
+
+        /* Define random movement for each star */
+        .ai-help-btn::before {
+            --x-move: 20px;
+            --y-move: -30px;
+            --x-move-end: 40px;
+            --y-move-end: -60px;
+        }
+
+        .ai-help-btn::after {
+            --x-move: -25px;
+            --y-move: 15px;
+            --x-move-end: -50px;
+            --y-move-end: 30px;
+        }
+
+        .ai-help-btn .star-1 {
+            --x-move: 30px;
+            --y-move: 20px;
+            --x-move-end: 60px;
+            --y-move-end: 40px;
+        }
+
+        .ai-help-btn .star-2 {
+            --x-move: -15px;
+            --y-move: -25px;
+            --x-move-end: -30px;
+            --y-move-end: -50px;
+        }
+
+        .ai-help-btn .star-3 {
+            --x-move: 10px;
+            --y-move: 35px;
+            --x-move-end: 20px;
+            --y-move-end: 70px;
+        }
+
+        .ai-help-btn .star-4 {
+            --x-move: -30px;
+            --y-move: -10px;
+            --x-move-end: -60px;
+            --y-move-end: -20px;
+        }
+
+        /* Glow Effect */
+        .ai-help-btn .glow-layer {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+            animation: glow 3s ease infinite;
+            z-index: 1;
+        }
+
+        @keyframes glow {
+            0% { transform: scale(0.9); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.5; }
+        }
+    </style>
 </head>
 <body>
 <!-- Navbar Placeholder -->
 <div th:insert="~{fragments/navbar :: navbar}"></div>
+
 <!-- Product Details -->
 <section class="product-details py-5 mt-5">
     <div class="container">
@@ -142,6 +309,146 @@
                 </div>
             </div>
         </div>
+
+        <!-- AI Help Button -->
+        <div class="ai-help-btn" title="AI Help">
+            <i class="ri-robot-line"></i>
+            <span class="star-1"></span>
+            <span class="star-2"></span>
+            <span class="star-3"></span>
+            <span class="star-4"></span>
+            <span class="glow-layer"></span>
+        </div>
+    </div>
+</section>
+
+<!-- Reviews and Comments -->
+<section class="reviews-comments py-5">
+    <div class="container">
+        <h3 class="mb-4">Reviews and Comments</h3>
+        <div class="row g-4">
+            <!-- Reviews Section -->
+            <div class="col-lg-6">
+                <h4 class="mb-3">Customer Reviews</h4>
+                <div class="mb-4">
+                    <div class="d-flex align-items-center mb-2">
+                        <h5 class="me-2 mb-0" th:text="${product.rating} + ' / 5'">4.5 / 5</h5>
+                        <div class="star-rating">
+                            <i class="ri-star-fill text-warning" th:each="i : ${#numbers.sequence(1, 5)}"
+                               th:classappend="${i <= product.rating} ? 'text-warning' : 'text-muted'"></i>
+                        </div>
+                        <span class="ms-2 text-muted">(15 reviews)</span>
+                    </div>
+                </div>
+
+                <!-- Add Review Form -->
+                <div class="card p-3 mb-4">
+                    <h5>Add Your Review</h5>
+                    <form>
+                        <div class="mb-3">
+                            <label for="rating" class="form-label">Rating</label>
+                            <select id="rating" class="form-select" name="rating">
+                                <option value="5">5 stars</option>
+                                <option value="4">4 stars</option>
+                                <option value="3">3 stars</option>
+                                <option value="2">2 stars</option>
+                                <option value="1">1 star</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="review-text" class="form-label">Your Review</label>
+                            <textarea id="review-text" class="form-control" rows="3"
+                                      placeholder="Write your review here..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Review</button>
+                    </form>
+                </div>
+
+                <!-- Sample Reviews -->
+                <div class="review-list">
+                    <div class="card p-3 mb-2">
+                        <div class="d-flex align-items-center mb-2">
+                            <img src="https://i.pravatar.cc/40" alt="User Avatar" class="rounded-circle me-2"
+                                 style="width: 40px; height: 40px;"/>
+                            <div>
+                                <strong>John Doe</strong>
+                                <div class="star-rating">
+                                    <i class="ri-star-fill text-warning"></i>
+                                    <i class="ri-star-fill text-warning"></i>
+                                    <i class="ri-star-fill text-warning"></i>
+                                    <i class="ri-star-fill text-warning"></i>
+                                    <i class="ri-star-fill text-muted"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-muted">Great book! I learned a lot about the universe. Highly recommend!</p>
+                        <small class="text-muted">Posted on 2025-06-01</small>
+                    </div>
+                    <div class="card p-3 mb-2">
+                        <div class="d-flex align-items-center mb-2">
+                            <img src="https://i.pravatar.cc/40?img=2" alt="User Avatar" class="rounded-circle me-2"
+                                 style="width: 40px; height: 40px;"/>
+                            <div>
+                                <strong>Jane Smith</strong>
+                                <div class="star-rating">
+                                    <i class="ri-star-fill text-warning"></i>
+                                    <i class="ri-star-fill text-warning"></i>
+                                    <i class="ri-star-fill text-warning"></i>
+                                    <i class="ri-star-fill text-muted"></i>
+                                    <i class="ri-star-fill text-muted"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-muted">Good book, but a bit too technical for beginners.</p>
+                        <small class="text-muted">Posted on 2025-06-02</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="col-lg-6">
+                <h4 class="mb-3">Comments</h4>
+
+                <!-- Add Comment Form -->
+                <div class="card p-3 mb-4">
+                    <h5>Add Your Comment</h5>
+                    <form>
+                        <div class="mb-3">
+                            <label for="comment-text" class="form-label">Your Comment</label>
+                            <textarea id="comment-text" class="form-control" rows="3"
+                                      placeholder="Write your comment here..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Comment</button>
+                    </form>
+                </div>
+
+                <!-- Sample Comments -->
+                <div class="comment-list">
+                    <div class="card p-3 mb-2">
+                        <div class="d-flex align-items-center mb-2">
+                            <img src="https://i.pravatar.cc/40?img=3" alt="User Avatar" class="rounded-circle me-2"
+                                 style="width: 40px; height: 40px;"/>
+                            <div>
+                                <strong>Alice Brown</strong>
+                                <small class="text-muted">Posted on 2025-06-01</small>
+                            </div>
+                        </div>
+                        <p class="text-muted">I really enjoyed reading this book! Can't wait for the sequel.</p>
+                    </div>
+                    <div class="card p-3 mb-2">
+                        <div class="d-flex align-items-center mb-2">
+                            <img src="https://i.pravatar.cc/40?img=4" alt="User Avatar" class="rounded-circle me-2"
+                                 style="width: 40px; height: 40px;"/>
+                            <div>
+                                <strong>Bob Johnson</strong>
+                                <small class="text-muted">Posted on 2025-06-02</small>
+                            </div>
+                        </div>
+                        <p class="text-muted">Does anyone know if there's an audiobook version?</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -195,3 +502,5 @@
         }
     }
 </script>
+</body>
+</html>

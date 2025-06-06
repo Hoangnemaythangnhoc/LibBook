@@ -12,7 +12,15 @@ import java.util.List;
 public class TagServiceImpl implements TagService {
 
     @Autowired
-    TagRepository tagRepository;
+    private TagRepository tagRepository;
 
+    @Override
+    public List<Tag> getAllTags() {
+        return tagRepository.getAllTags();
+    }
 
+    @Override
+    public Tag getTagById(int id) {
+        return tagRepository.getTagById(id);
+    }
 }
