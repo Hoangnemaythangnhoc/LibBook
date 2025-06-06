@@ -4,10 +4,7 @@ import com.example.libbook.entity.Product;
 import com.example.libbook.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -32,5 +29,16 @@ public class ProductApiController {
         Product product = productService.getProductById(id);
         System.out.println("API: Retrieved product: " + (product != null ? product.getProductName() : "null"));
         return product != null ? ResponseEntity.ok(product) : ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/products/by-tag")
+    public ResponseEntity<List<Product>> getProductsByTag(@RequestParam("tag") String tag) {
+        System.out.println("API: Fetching products with tag: " + tag);
+        List<Product> products = productService.getProductsByTag(tag);
+        System.out.println("API: Retrieved " + (products != null ? products.size() : "null") + " products for tag: " + tag);
+        if (products == null || products.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(products);
     }
 }

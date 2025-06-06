@@ -31,10 +31,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> getProductsByCategory(String category) {
-        System.out.println("ProductServiceImpl: Calling getProductsByCategory with category: " + category);
-        List<Product> products = productRepository.getProductsByCategory(category);
-        System.out.println("ProductServiceImpl: Retrieved " + (products != null ? products.size() : "null") + " products for category");
+    public List<Product> getProductsByTag(String tag) {
+        System.out.println("ProductServiceImpl: Calling getProductsByTag with tag: " + tag);
+        List<Product> products = productRepository.getProductsByTag(tag);
+        System.out.println("ProductServiceImpl: Retrieved " + (products != null ? products.size() : "null") + " products for tag");
         return products;
     }
 }
