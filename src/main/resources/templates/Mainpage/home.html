@@ -18,33 +18,32 @@
 
         .new-arrivals .book-card {
             transition: transform 0.3s ease;
-            height: 400px; /* Chiều cao cố định cho book-card */
+            height: 400px;
             display: flex;
             flex-direction: column;
         }
 
         .new-arrivals .book-card img {
-            height: 200px; /* Chiều cao cố định cho ảnh */
+            height: 200px;
             object-fit: cover;
         }
 
         .new-arrivals .book-card .card-body {
-            flex: 1; /* Nội dung bên trong sẽ chiếm phần còn lại của chiều cao */
+            flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            overflow: hidden; /* Ẩn nội dung vượt quá */
+            overflow: hidden;
         }
 
         .new-arrivals .book-card .card-text {
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;
-            -webkit-line-clamp: 2; /* Giới hạn mô tả trong 2 dòng */
+            -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
         }
 
-        /* Chỉ số trang */
         .carousel-indicators {
             position: absolute;
             bottom: 10px;
@@ -68,7 +67,6 @@
             background-color: #000;
         }
 
-        /* Tùy chỉnh nút Bootstrap */
         .custom-carousel-buttons {
             text-align: center;
         }
@@ -92,17 +90,15 @@
                 </h1>
                 <p class="lead mb-4">Explore thousands of books at your fingertips!</p>
                 <div class="search-form mb-4">
-                    <form action="#" class="bg-white p-4 rounded shadow-sm">
+                    <form th:action="@{/category/search}" method="get" class="bg-white p-4 rounded shadow-sm">
                         <div class="row g-3">
-                            <div class="col-md-6">
-                                <input type="text" class="form-control" placeholder="Search by title or author"/>
+                            <div class="col-md-5">
+                                <input type="text" class="form-control" name="searchQuery" placeholder="Search by title or author"/>
                             </div>
-                            <div class="col-md-3">
-                                <select class="form-select">
-                                    <option selected>All Categories</option>
-                                    <option>Fiction</option>
-                                    <option>Non-Fiction</option>
-                                    <option>Children's</option>
+                            <div class="col-md-4">
+                                <select class="form-select" name="selectedTag" id="categorySelect" onchange="redirectToCategory()">
+                                    <option value="" selected>All Categories</option>
+                                    <option th:each="tag : ${tags}" th:value="${tag.tagName}" th:text="${tag.tagName}"></option>
                                 </select>
                             </div>
                             <div class="col-md-3">
@@ -162,7 +158,7 @@
 </section>
 
 <!-- New Arrivals -->
-<section class="new-arrivals py-5 bg-light">
+<section id="new-arrivals" class="new-arrivals py-5 bg-light">
     <div class="container">
         <h2 class="text-center mb-5">New Arrivals</h2>
         <div th:if="${products == null or products.isEmpty()}">
@@ -170,12 +166,6 @@
         </div>
         <div th:unless="${products == null or products.isEmpty()}" id="newArrivalsCarousel" class="carousel slide"
              data-bs-ride="carousel" style="height: 950px">
-            <!--            <ol class="carousel-indicators">-->
-            <!--                <li th:each="i : ${#numbers.sequence(0, products.size() - 1, 8)}"-->
-            <!--                    th:classappend="${i == 0} ? 'active' : ''"-->
-            <!--                    data-bs-target="#newArrivalsCarousel"-->
-            <!--                    th:attr="data-bs-slide-to=${i / 8}"></li>-->
-            <!--            </ol>-->
             <div class="carousel-inner" style="height: 900px">
                 <div th:each="i : ${#numbers.sequence(0, products.size() - 1, 8)}"
                      th:with="pageProducts=${products.subList(i, i + 8 < products.size() ? i + 8 : products.size())}"
@@ -200,7 +190,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Nút tùy chỉnh bằng Bootstrap -->
             <div class="custom-carousel-buttons">
                 <button class="btn btn-primary" id="prevButton">
                     <i class="ri-arrow-left-line"></i> Previous
@@ -222,8 +211,7 @@
                 <p class="lead mb-4">Welcome to Books Haven, your premier destination for literature of all kinds.</p>
                 <p class="mb-4">
                     We're passionate about bringing the joy of reading to everyone through our carefully curated
-                    collection of
-                    books. With thousands of titles across various genres, competitive prices, and exceptional customer
+                    collection of books. With thousands of titles across various genres, competitive prices, and exceptional customer
                     service, we strive to make every reading journey special.
                 </p>
                 <a href="#" class="btn btn-primary">Learn More</a>
@@ -311,7 +299,7 @@
 <div th:insert="~{fragments/footer :: footer}"></div>
 
 <!-- Include Chat Widget -->
-<div th:include="chat-widget :: chat-widget"></div>
+<div th:insert="~{fragments/chat-widget :: chat-widget}"></div>
 
 <!-- Bootstrap Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -319,20 +307,26 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var carousel = new bootstrap.Carousel(document.getElementById('newArrivalsCarousel'), {
-            interval: 5000, // Tự động trượt sau 5 giây
-            wrap: true // Cho phép vòng lặp
+            interval: 5000,
+            wrap: true
         });
 
-        // Thêm sự kiện cho nút Previous
         document.getElementById('prevButton').addEventListener('click', function () {
             carousel.prev();
         });
 
-        // Thêm sự kiện cho nút Next
         document.getElementById('nextButton').addEventListener('click', function () {
             carousel.next();
         });
     });
+
+    function redirectToCategory() {
+        var select = document.getElementById('categorySelect');
+        var selectedTag = select.value;
+        if (selectedTag) {
+            window.location.href = '/category/' + encodeURIComponent(selectedTag);
+        }
+    }
 </script>
 </body>
 </html>
