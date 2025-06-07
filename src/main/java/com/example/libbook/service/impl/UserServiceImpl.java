@@ -1,10 +1,13 @@
 package com.example.libbook.service.impl;
 
 import com.example.libbook.dto.UserDTO;
+import com.example.libbook.entity.User;
 import com.example.libbook.repository.UserRepository;
 import com.example.libbook.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -35,5 +38,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean isEmailExist(String email) {
         return userRepository.isEmailExist(email);
+    }
+    @Override
+    public boolean uploadAvatar(String base64,int ID) throws IOException {
+        return userRepository.updateAvatar(base64, 1,ID);
+    }
+
+    @Override
+    public User getUserByUserId(int id) {
+        return userRepository.getUserByUserId(id);
     }
 }
