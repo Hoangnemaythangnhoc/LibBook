@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en " xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8"/>
@@ -7,6 +7,7 @@
     <title>Upload New Book</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         .upload-form {
             background-color: #f8f9fa;
@@ -64,17 +65,19 @@
                 </div>
                 <div class="col-md-6">
                     <label for="price" class="form-label">Price ($)</label>
-                    <input type="number" step="0.01" class="form-control" id="price" placeholder="Enter price"
-                           required/>
+                    <input type="number" step="0.01" class="form-control" id="price" placeholder="Enter price" required/>
                 </div>
                 <div class="col-md-6">
-                    <label for="tag" class="form-label">Tag</label>
-                    <input type="text" class="form-control" id="tag" placeholder="Enter tag (e.g., Fiction)" required/>
+                    <label for="available" class="form-label">Available (Quantity)</label>
+                    <input type="number" class="form-control" id="available" placeholder="Enter quantity available" required/>
+                </div>
+                <div class="col-md-6">
+                    <label for="tags" class="form-label">Tags</label>
+                    <select class="form-control" id="tags" name="tags" multiple style="width: 100%;"></select>
                 </div>
                 <div class="col-12">
                     <label for="description" class="form-label">Description</label>
-                    <textarea class="form-control" id="description" rows="3" placeholder="Enter description"
-                              required></textarea>
+                    <textarea class="form-control" id="description" rows="3" placeholder="Enter description" required></textarea>
                 </div>
                 <div class="col-12">
                     <label for="img" class="form-label">Image File</label>
@@ -92,27 +95,51 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     const books = [];
+
+    $(document).ready(function() {
+        fetch('http://localhost:8080/api/Tag/')
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(tags => {
+                const select = $('#tags');
+                select.select2({
+                    data: tags.map(tag => ({ id: tag.tagId, text: tag.tagName })),
+                    placeholder: "Select tags...",
+                    allowClear: true
+                });
+                console.log('Tags loaded:', tags);
+            })
+            .catch(error => {
+                console.error('Error fetching tags:', error);
+                alert('Failed to load tags. Check console for details.');
+            });
+    });
 
     function renderBooks() {
         const bookList = document.getElementById('bookList');
         bookList.innerHTML = '';
         books.forEach(book => {
             const card = `
-                    <div class="col">
-                        <div class="book-card card h-100">
-                            <img src="${book.img}" class="card-img-top" alt="${book.name}">
-                            <div class="card-body">
-                                <p class="book-tag">${book.tag}</p>
-                                <h5 class="card-title">${book.name}</h5>
-                                <p class="card-text">${book.description}</p>
-                                <p class="book-author">by ${book.author}</p>
-                                <p class="card-text fw-bold">$${book.price.toFixed(2)}</p>
-                            </div>
+                <div class="col">
+                    <div class="book-card card h-100">
+                        <img src="${book.img}" class="card-img-top" alt="${book.name}">
+                        <div class="card-body">
+                            <p class="book-tag">${book.tag || 'No tags'}</p>
+                            <h5 class="card-title">${book.name}</h5>
+                            <p class="card-text">${book.description}</p>
+                            <p class="book-author">by ${book.author}</p>
+                            <p class="card-text">Available: ${book.available}</p> <!-- Hiển thị Available -->
+                            <p class="card-text fw-bold">$${book.price.toFixed(2)}</p>
                         </div>
                     </div>
-                `;
+                </div>
+            `;
             bookList.innerHTML += card;
         });
     }
@@ -123,8 +150,9 @@
         const name = document.getElementById('name').value;
         const description = document.getElementById('description').value;
         const price = parseFloat(document.getElementById('price').value);
+        const available = parseInt(document.getElementById('available').value); // Lấy Available
         const author = document.getElementById('author').value;
-        const tag = document.getElementById('tag').value;
+        const tagIds = $('#tags').val();
         const imgInput = document.getElementById('img');
         const file = imgInput.files[0];
 
@@ -133,24 +161,51 @@
             return;
         }
 
+        if (!tagIds || tagIds.length === 0) {
+            alert('Please select at least one tag!');
+            return;
+        }
+
+        if (isNaN(available) || available < 0) {
+            alert('Please enter a valid quantity for Available!');
+            return;
+        }
+
         const reader = new FileReader();
         reader.onload = function (e) {
             const imgDataUrl = e.target.result;
 
             const newBook = {
-                name,
-                description,
-                price,
-                author,
-                tag,
-                img: imgDataUrl
+                productName: name,
+                description: description,
+                price: price,
+                available: available, // Thêm Available
+                author: author,
+                imageFile: imgDataUrl
             };
 
-            books.push(newBook);
-
-            renderBooks();
-
-            this.reset();
+            fetch('http://localhost:8080/api/products?tagIds=' + (tagIds ? tagIds.join(',') : ''), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newBook)
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to upload book');
+                    return response.json();
+                })
+                .then(data => {
+                    books.push({ ...newBook, img: imgDataUrl, tag: tagIds.map(id => id).join(', ') });
+                    renderBooks();
+                    document.getElementById('uploadBookForm').reset();
+                    $('#tags').val(null).trigger('change');
+                    alert('Book uploaded successfully!');
+                })
+                .catch(error => {
+                    console.error('Error uploading book:', error);
+                    alert('Failed to upload book. Check console for details.');
+                });
         };
         reader.readAsDataURL(file);
     });
