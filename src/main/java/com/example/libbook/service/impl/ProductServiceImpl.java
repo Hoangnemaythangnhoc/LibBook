@@ -17,24 +17,36 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<Product> getAllProduct() {
         System.out.println("ProductServiceImpl: Calling getAllProduct");
-        List<Product> products = productRepository.getAllProduct();
-        System.out.println("ProductServiceImpl: Retrieved " + (products != null ? products.size() : "null") + " products");
-        return products;
+        return productRepository.getAllProduct();
     }
 
     @Override
     public Product getProductById(Long productId) {
         System.out.println("ProductServiceImpl: Calling getProductById with id: " + productId);
-        Product product = productRepository.getProductById(productId);
-        System.out.println("ProductServiceImpl: Retrieved product: " + (product != null ? product.getProductName() : "null"));
-        return product;
+        return productRepository.getProductById(productId);
     }
 
     @Override
     public List<Product> getProductsByTag(String tag) {
         System.out.println("ProductServiceImpl: Calling getProductsByTag with tag: " + tag);
-        List<Product> products = productRepository.getProductsByTag(tag);
-        System.out.println("ProductServiceImpl: Retrieved " + (products != null ? products.size() : "null") + " products for tag");
-        return products;
+        return productRepository.getProductsByTag(tag);
+    }
+
+    @Override
+    public void addProduct(Product product, List<Long> tagIds) {
+        System.out.println("ProductServiceImpl: Calling addProduct with name: " + product.getProductName());
+        productRepository.addProduct(product, tagIds);
+    }
+
+    @Override
+    public void updateProduct(Product product, List<Long> tagIds) {
+        System.out.println("ProductServiceImpl: Calling updateProduct with id: " + product.getProductId());
+        productRepository.updateProduct(product, tagIds);
+    }
+
+    @Override
+    public void softDeleteProduct(Long productId) {
+        System.out.println("ProductServiceImpl: Calling softDeleteProduct with id: " + productId);
+        productRepository.softDeleteProduct(productId);
     }
 }
