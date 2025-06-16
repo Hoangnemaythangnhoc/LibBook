@@ -1,135 +1,212 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title th:text="${tagName} + ' - Books Haven'">Category - Books Haven</title>
+    <title>Edit Book - LibBook</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet"/>
-    <link rel="stylesheet" href="/css/home.css"/>
-    <link rel="shortcut icon"
-          href="https://rails-assets-us.bookshop.org/assets/favicon-63cb20989e2516343feeab429626798a43afdaa28eeaba777b7e0acde8a25dd2.png"/>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
     <style>
-        .category-products .book-card {
-            transition: transform 0.3s ease;
-            height: 400px;
-            display: flex;
-            flex-direction: column;
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
         }
-
-        .category-products .book-card img {
-            height: 200px;
-            object-fit: cover;
+        .edit-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
-
-        .category-products .book-card .card-body {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            overflow: hidden;
+        .edit-container h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
         }
-
-        .category-products .book-card .card-text {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
+        .edit-container label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .edit-container input, .edit-container textarea, .edit-container select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .edit-container .form-control:disabled {
+            background-color: #e9ecef;
+            opacity: 1;
+        }
+        .edit-container button {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .edit-container button:hover {
+            background-color: #34495e;
+        }
+        .preview-img {
+            max-width: 200px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        .form-switch {
+            margin-top: 10px;
         }
     </style>
 </head>
-
 <body>
-<div th:insert="~{fragments/navbar :: navbar}"></div>
+<div class="edit-container">
+    <h2>Edit Book</h2>
+    <form th:action="@{/api/products/{id}(id=${product.productId})}" th:method="put" id="editBookForm" enctype="multipart/form-data">
+        <input type="hidden" th:name="productId" th:value="${product.productId}"/>
+        <input type="hidden" th:name="userId" th:value="${product.userId}"/>
 
-<!-- Hero Section -->
-<section class="hero bg-light py-5 mt-5">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6">
-                <h1 class="display-4 fw-bold mb-3">
-                    Explore
-                    <span class="text-primary" th:text="${tagName}"></span> Books
-                </h1>
-                <p class="lead mb-4">Find the best books in your favorite category!</p>
-                <div class="search-form mb-4">
-                    <form th:action="@{/category/search}" method="get" class="bg-white p-4 rounded shadow-sm">
-                        <div class="row g-3">
-                            <div class="col-md-5">
-                                <input type="text" class="form-control" name="searchQuery" placeholder="Search by title or author"/>
-                            </div>
-                            <div class="col-md-4">
-                                <select class="form-select" name="selectedTag" id="categorySelect" onchange="redirectToCategory()">
-                                    <option value="" selected>All Categories</option>
-                                    <option th:each="tag : ${tags}" th:value="${tag.tagName}" th:text="${tag.tagName}"></option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <button type="submit" class="btn btn-primary w-100">Search</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66" alt="Books"
-                     class="img-fluid rounded shadow"/>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Category Products Section -->
-<section class="category-products py-5">
-    <div class="container">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a th:href="@{/home}">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page" th:text="${tagName}"></li>
-            </ol>
-        </nav>
-
-        <h2 class="mb-4" th:text="${tagName} + ' Books'"></h2>
-
-        <div th:if="${products == null or products.isEmpty()}">
-            <p class="text-center text-muted">No products available for this category.</p>
+        <div class="mb-3">
+            <label for="productName">Book Name</label>
+            <input type="text" id="productName" th:name="productName" th:value="${product.productName}" class="form-control" required/>
         </div>
 
-        <div th:unless="${products == null or products.isEmpty()}" class="row g-4">
-            <div class="col-lg-3 col-md-6" th:each="product : ${products}">
-                <div class="book-card bg-white rounded shadow-sm">
-                    <img th:src="${product.imageFile.startsWith('http') ? product.imageFile : '/images/' + product.imageFile}"
-                         class="card-img-top" alt="Book Cover"/>
-                    <div class="card-body">
-                        <p class="text-primary mb-1">Book</p>
-                        <h5 class="card-title" th:text="${product.productName}"></h5>
-                        <p class="card-text text-muted" th:text="${product.description}"></p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="h5 mb-0" th:text="'$' + ${product.price}"></span>
-                            <a th:href="@{/product/{id}(id=${product.productId})}"
-                               class="btn btn-outline-primary">View Details</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="mb-3">
+            <label for="author">Author</label>
+            <input type="text" id="author" th:name="author" th:value="${product.author ?: 'No Author'}" class="form-control"/>
         </div>
-    </div>
-</section>
 
-<div th:insert="~{fragments/footer :: footer}"></div>
+        <div class="mb-3">
+            <label for="description">Description</label>
+            <textarea id="description" th:name="description" th:text="${product.description}" class="form-control" rows="3" required></textarea>
+        </div>
 
+        <div class="mb-3">
+            <label for="price">Price ($)</label>
+            <input type="number" id="price" th:name="price" th:value="${product.price}" step="0.01" class="form-control" required/>
+        </div>
+
+        <div class="mb-3">
+            <label for="imageFile">Image File</label>
+            <input type="file" id="imageFile" name="imageFile" class="form-control" accept="image/*" onchange="previewImage(event)"/>
+            <img th:src="${product.imageFile}" alt="Book Cover" id="preview-img" class="preview-img" style="display: ${product.imageFile ? 'block' : 'none'};"/>
+        </div>
+
+        <div class="mb-3">
+            <label for="buys">Buys</label>
+            <input type="number" id="buys" th:name="buys" th:value="${product.buys}" class="form-control" disabled/>
+            <input type="hidden" th:name="buys" th:value="${product.buys}"/>
+        </div>
+
+        <div class="mb-3">
+            <label for="available">Available</label>
+            <input type="number" id="available" th:name="available" th:value="${product.available}" class="form-control" required/>
+        </div>
+
+        <div class="mb-3">
+            <label>Status</label>
+            <div class="form-check form-switch">
+                <input type="checkbox" id="status" class="form-check-input" th:checked="${product.status == 1}">
+                <label class="form-check-label" for="status">Active (1) / Inactive (0)</label>
+            </div>
+            <input type="hidden" id="statusValue" th:name="status" th:value="${product.status}"/>
+        </div>
+
+        <div class="mb-3">
+            <label for="rating">Rating</label>
+            <input type="number" id="rating" th:name="rating" th:value="${product.rating}" step="0.1" class="form-control" disabled/>
+            <input type="hidden" th:name="rating" th:value="${product.rating}"/>
+        </div>
+
+        <div class="mb-3">
+            <label for="tags">Tags</label>
+            <select id="tags" name="tags" class="form-control" multiple>
+                <!-- Dữ liệu tag sẽ được tải động bằng JavaScript -->
+            </select>
+        </div>
+
+        <button type="submit" class="btn">Save Changes</button>
+        <a th:href="@{/staff}" class="btn btn-secondary ms-2">Cancel</a>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/js/components.js"></script>
 <script>
-    function redirectToCategory() {
-        var select = document.getElementById('categorySelect');
-        var selectedTag = select.value;
-        if (selectedTag) {
-            window.location.href = '/category/' + encodeURIComponent(selectedTag);
+    document.addEventListener('DOMContentLoaded', function() {
+        // Khởi tạo Select2 cho tags
+        const select = $('#tags');
+        fetch('/api/Tag/')
+            .then(response => response.json())
+            .then(tags => {
+                select.select2({
+                    data: tags.map(tag => ({ id: tag.tagId, text: tag.tagName })),
+                    placeholder: "Select tags...",
+                    allowClear: true
+                });
+                // Giả sử bạn có API để lấy tagIds hiện tại (cần tích hợp)
+                const currentTagIds = [/* Lấy từ backend, ví dụ: th:attr="data-tags=${product.tagIds}" */];
+                if (currentTagIds && currentTagIds.length > 0) {
+                    select.val(currentTagIds).trigger('change');
+                }
+            })
+            .catch(error => console.error('Error loading tags:', error));
+
+        // Preview image when selected
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('preview-img');
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
         }
-    }
+
+        // Add event listener for status switch
+        const statusCheckbox = document.getElementById('status');
+        const statusValue = document.getElementById('statusValue');
+        statusCheckbox.addEventListener('change', function() {
+            statusValue.value = this.checked ? 1 : 0;
+            console.log("Status updated to: " + statusValue.value); // Debug
+        });
+
+        // Handle form submission
+        document.getElementById('editBookForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const tagIds = $('#tags').val() || [];
+            const url = this.action + '?tagIds=' + tagIds.join(',');
+
+            // Debug: Kiểm tra giá trị status trước khi gửi
+            console.log("Submitting status: " + statusValue.value);
+
+            fetch(url, {
+                method: 'PUT',
+                body: formData
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to update book');
+                    }
+                    alert('Book updated successfully!');
+                    window.location.href = '/staff';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to update book. Check the console for details.');
+                });
+        });
+    });
 </script>
 </body>
 </html>
