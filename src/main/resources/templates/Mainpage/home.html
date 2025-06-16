@@ -94,12 +94,15 @@
                     <form th:action="@{/category/search}" method="get" class="bg-white p-4 rounded shadow-sm">
                         <div class="row g-3">
                             <div class="col-md-5">
-                                <input type="text" class="form-control" name="searchQuery" placeholder="Search by title or author"/>
+                                <input type="text" class="form-control" name="searchQuery"
+                                       placeholder="Search by title or author"/>
                             </div>
                             <div class="col-md-4">
-                                <select class="form-select" name="selectedTag" id="categorySelect" onchange="redirectToCategory()">
+                                <select class="form-select" name="selectedTag" id="categorySelect"
+                                        onchange="redirectToCategory()">
                                     <option value="" selected>All Categories</option>
-                                    <option th:each="tag : ${tags}" th:value="${tag.tagName}" th:text="${tag.tagName}"></option>
+                                    <option th:each="tag : ${tags}" th:value="${tag.tagName}"
+                                            th:text="${tag.tagName}"></option>
                                 </select>
                             </div>
                             <div class="col-md-3">
@@ -181,7 +184,17 @@
                                     <h5 class="card-title" th:text="${product.productName}"></h5>
                                     <p class="card-text text-muted" th:text="${product.description}"></p>
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <span class="h5 mb-0" th:text="'$' + ${product.price}"></span>
+                                        <div>
+                                            <span style="font-size: 14px; color: red"
+                                                  th:if="${product.discount > 0}"
+                                                  class="h5 mb-0 text-decoration-line-through ms-2"
+                                                  th:text="'$' + ${#numbers.formatDecimal(product.price, 2, 2)}">
+                                            </span>
+                                            <span style="font-size: 16px;font-weight: bold"
+                                                  th:with="discountedPrice=${product.discount > 0 ? product.price * (100 - product.discount) / 100 : product.price}"
+                                                  th:text="'$' + ${#numbers.formatDecimal(discountedPrice, 2, 2)}">
+                                            </span>
+                                        </div>
                                         <a th:href="@{/product/{id}(id=${product.productId})}"
                                            class="btn btn-outline-primary">View Details</a>
                                     </div>
@@ -212,7 +225,8 @@
                 <p class="lead mb-4">Welcome to Books Haven, your premier destination for literature of all kinds.</p>
                 <p class="mb-4">
                     We're passionate about bringing the joy of reading to everyone through our carefully curated
-                    collection of books. With thousands of titles across various genres, competitive prices, and exceptional customer
+                    collection of books. With thousands of titles across various genres, competitive prices, and
+                    exceptional customer
                     service, we strive to make every reading journey special.
                 </p>
                 <a href="#" class="btn btn-primary">Learn More</a>
@@ -247,7 +261,8 @@
                         </div>
                     </div>
                     <p class="text-muted">
-                        Great selection of books and amazing prices! The delivery was quick and the books arrived in perfect
+                        Great selection of books and amazing prices! The delivery was quick and the books arrived in
+                        perfect
                         condition.
                     </p>
                 </div>

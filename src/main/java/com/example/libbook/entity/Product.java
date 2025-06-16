@@ -19,6 +19,7 @@ public class Product {
     private int status;
     private double rating;
     private String author;
+    private int discount;
 
     public Long getProductId() {
         return productId;
@@ -100,6 +101,14 @@ public class Product {
         this.rating = rating;
     }
 
+    public int getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(int discount) {
+        this.discount = discount;
+    }
+
     public String getAuthor() {
         return author;
     }
@@ -107,4 +116,5 @@ public class Product {
     public void setAuthor(String author) {
         this.author = author;
     }
+
 }
