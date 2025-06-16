@@ -68,6 +68,10 @@
                     <input type="number" step="0.01" class="form-control" id="price" placeholder="Enter price" required/>
                 </div>
                 <div class="col-md-6">
+                    <label for="discount" class="form-label">Discount (%)</label>
+                    <input type="number" class="form-control" id="discount" placeholder="Enter discount (0-100)" min="0" max="100" value="0"/>
+                </div>
+                <div class="col-md-6">
                     <label for="available" class="form-label">Available (Quantity)</label>
                     <input type="number" class="form-control" id="available" placeholder="Enter quantity available" required/>
                 </div>
@@ -150,8 +154,9 @@
         const name = document.getElementById('name').value;
         const description = document.getElementById('description').value;
         const price = parseFloat(document.getElementById('price').value);
-        const available = parseInt(document.getElementById('available').value); // Lấy Available
+        const available = parseInt(document.getElementById('available').value);
         const author = document.getElementById('author').value;
+        const discount = parseInt(document.getElementById('discount').value) || 0; // Mặc định 0 nếu không nhập
         const tagIds = $('#tags').val();
         const imgInput = document.getElementById('img');
         const file = imgInput.files[0];
@@ -171,6 +176,11 @@
             return;
         }
 
+        if (discount < 0 || discount > 100) {
+            alert('Discount must be between 0 and 100!');
+            return;
+        }
+
         const reader = new FileReader();
         reader.onload = function (e) {
             const imgDataUrl = e.target.result;
@@ -179,8 +189,9 @@
                 productName: name,
                 description: description,
                 price: price,
-                available: available, // Thêm Available
+                available: available,
                 author: author,
+                discount: discount, // Thêm discount
                 imageFile: imgDataUrl
             };
 

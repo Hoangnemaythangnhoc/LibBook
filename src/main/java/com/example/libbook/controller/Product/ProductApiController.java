@@ -40,12 +40,19 @@ public class ProductApiController {
     }
 
     @PostMapping("/products")
-    public ResponseEntity<Product> addProduct(@RequestBody Product product, @RequestParam("tagIds") List<Long> tagIds) {
+    public ResponseEntity<Product> addProduct(
+            @RequestBody Product product,
+            @RequestParam("tagIds") List<Long> tagIds,
+            @RequestParam(value = "discount", required = false, defaultValue = "0") int discount) {
         System.out.println("API: Adding product with name: " + product.getProductName());
         product.setBuys(0);
         product.setUserId(2L);
         product.setStatus(1);
         product.setRating(0.0);
+        product.setDiscount(discount); // Thêm discount từ request
+        if (product.getDiscount() < 0 || product.getDiscount() > 100) {
+            return ResponseEntity.badRequest().build(); // Kiểm tra hợp lệ
+        }
         productService.addProduct(product, tagIds);
         System.out.println("API: Product added with ID: " + product.getProductId());
         return ResponseEntity.ok(product);
@@ -62,27 +69,30 @@ public class ProductApiController {
             @RequestParam("status") int status,
             @RequestParam("author") String author,
             @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
-            @RequestParam(value = "tagIds", required = false) List<Long> tagIds) {
-        System.out.println("API: Received update for product with id: " + id + ", status: " + status); // Debug
+            @RequestParam(value = "tagIds", required = false) List<Long> tagIds,
+            @RequestParam(value = "discount", required = false, defaultValue = "0") int discount) {
+        System.out.println("API: Received update for product with id: " + id + ", status: " + status);
         Product existingProduct = productService.getProductById(id);
         if (existingProduct == null) {
             System.out.println("API: Product with id " + id + " not found");
             return ResponseEntity.notFound().build();
         }
 
-        // Cập nhật thông tin sản phẩm
+        if (discount < 0 || discount > 100) {
+            return ResponseEntity.badRequest().build(); // Kiểm tra hợp lệ
+        }
+
         existingProduct.setProductName(productName);
         existingProduct.setDescription(description);
         existingProduct.setPrice(price);
         existingProduct.setAvailable(available);
         existingProduct.setUserId(userId);
-        existingProduct.setStatus(status); // Cập nhật status từ yêu cầu
+        existingProduct.setStatus(status);
         existingProduct.setAuthor(author);
+        existingProduct.setDiscount(discount); // Cập nhật discount
 
-        // Xử lý file ảnh nếu có
         if (imageFile != null && !imageFile.isEmpty()) {
             existingProduct.setImageFile(imageFile.getOriginalFilename());
-            // Có thể thêm logic lưu file vào server tại đây
         }
 
         productService.updateProduct(existingProduct, tagIds == null ? new ArrayList<>() : tagIds);
@@ -95,10 +105,10 @@ public class ProductApiController {
         System.out.println("API: Soft deleting product with id: " + id);
         try {
             productService.softDeleteProduct(id);
-            return ResponseEntity.ok().build(); // Trả về 200 OK
+            return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
             System.err.println("API: Error soft deleting product: " + e.getMessage());
-            return ResponseEntity.notFound().build(); // Trả về 404 nếu không tìm thấy
+            return ResponseEntity.notFound().build();
         }
     }
 }

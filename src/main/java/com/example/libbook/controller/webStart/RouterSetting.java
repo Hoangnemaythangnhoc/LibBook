@@ -1,7 +1,11 @@
 package com.example.libbook.controller.webStart;
 
+import com.example.libbook.entity.Order;
+import com.example.libbook.entity.OrderStatus;
 import com.example.libbook.entity.Product;
 import com.example.libbook.entity.Tag;
+import com.example.libbook.service.OrderService;
+import com.example.libbook.service.OrderStatusService;
 import com.example.libbook.service.ProductService;
 import com.example.libbook.service.TagService;
 import jakarta.servlet.http.HttpSession;
@@ -10,7 +14,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping
@@ -21,6 +27,12 @@ public class RouterSetting {
 
     @Autowired
     private TagService tagService;
+
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private OrderStatusService orderStatusService;
 
     @GetMapping("/")
     public String home(Model model) {
@@ -181,17 +193,54 @@ public class RouterSetting {
         return "profile/staff";
     }
 
-    @GetMapping("/edit-book/{id}")
-    public String editBook(@PathVariable("id") Long id, Model model) {
+//    @GetMapping("/edit-book/{id}")
+//    public String editBook(@PathVariable("id") Long id, Model model) {
+//        Product product = productService.getProductById(id);
+//        List<Tag> tags = tagService.getAllTags();
+//        if (product != null) {
+//            model.addAttribute("product", product);
+//            model.addAttribute("tags", tags);
+//            return "Mainpage/edit-book";
+//        } else {
+//            return "redirect:/staff";
+//        }
+//    }
+
+    @GetMapping("/admin/edit-book/{id}")
+    public String editBookForAdmin(@PathVariable("id") Long id, Model model) {
         Product product = productService.getProductById(id);
         List<Tag> tags = tagService.getAllTags();
         if (product != null) {
             model.addAttribute("product", product);
             model.addAttribute("tags", tags);
+            model.addAttribute("isAdmin", true);
+            return "Mainpage/edit-book";
+        } else {
+            return "redirect:/admin";
+        }
+    }
+
+    @GetMapping("/staff/edit-book/{id}")
+    public String editBookForStaff(@PathVariable("id") Long id, Model model) {
+        Product product = productService.getProductById(id);
+        List<Tag> tags = tagService.getAllTags();
+        if (product != null) {
+            model.addAttribute("product", product);
+            model.addAttribute("tags", tags);
+            model.addAttribute("isAdmin", false);
             return "Mainpage/edit-book";
         } else {
             return "redirect:/staff";
         }
+    }
+
+    @GetMapping("/admin/manage-orders")
+    public String manageOrders(Model model) {
+        List<Order> orders = orderService.getAllOrders();
+        List<OrderStatus> orderStatuses = orderStatusService.getAllOrderStatuses();
+        model.addAttribute("orders", orders);
+        model.addAttribute("orderStatuses", orderStatuses);
+        return "Mainpage/manage-orders";
     }
 
 }

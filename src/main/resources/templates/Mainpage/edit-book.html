@@ -6,7 +6,7 @@
     <title>Edit Book - LibBook</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet"/>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
 
     <style>
         body {
@@ -15,6 +15,7 @@
             margin: 0;
             padding: 20px;
         }
+
         .edit-container {
             max-width: 600px;
             margin: 0 auto;
@@ -23,15 +24,18 @@
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
+
         .edit-container h2 {
             font-size: 1.5rem;
             margin-bottom: 20px;
         }
+
         .edit-container label {
             display: block;
             font-weight: bold;
             margin-bottom: 5px;
         }
+
         .edit-container input, .edit-container textarea, .edit-container select {
             width: 100%;
             padding: 8px;
@@ -39,10 +43,12 @@
             border: 1px solid #ddd;
             border-radius: 5px;
         }
+
         .edit-container .form-control:disabled {
             background-color: #e9ecef;
             opacity: 1;
         }
+
         .edit-container button {
             background-color: #2c3e50;
             color: white;
@@ -51,14 +57,17 @@
             border-radius: 5px;
             cursor: pointer;
         }
+
         .edit-container button:hover {
             background-color: #34495e;
         }
+
         .preview-img {
             max-width: 200px;
             margin-top: 10px;
             border-radius: 5px;
         }
+
         .form-switch {
             margin-top: 10px;
         }
@@ -67,34 +76,47 @@
 <body>
 <div class="edit-container">
     <h2>Edit Book</h2>
-    <form th:action="@{/api/products/{id}(id=${product.productId})}" th:method="put" id="editBookForm" enctype="multipart/form-data">
+    <form th:action="@{/api/products/{id}(id=${product.productId})}" th:method="put" id="editBookForm"
+          enctype="multipart/form-data">
         <input type="hidden" th:name="productId" th:value="${product.productId}"/>
         <input type="hidden" th:name="userId" th:value="${product.userId}"/>
 
         <div class="mb-3">
             <label for="productName">Book Name</label>
-            <input type="text" id="productName" th:name="productName" th:value="${product.productName}" class="form-control" required/>
+            <input type="text" id="productName" th:name="productName" th:value="${product.productName}"
+                   class="form-control" required/>
         </div>
 
         <div class="mb-3">
             <label for="author">Author</label>
-            <input type="text" id="author" th:name="author" th:value="${product.author ?: 'No Author'}" class="form-control"/>
+            <input type="text" id="author" th:name="author" th:value="${product.author ?: 'No Author'}"
+                   class="form-control"/>
         </div>
 
         <div class="mb-3">
             <label for="description">Description</label>
-            <textarea id="description" th:name="description" th:text="${product.description}" class="form-control" rows="3" required></textarea>
+            <textarea id="description" th:name="description" th:text="${product.description}" class="form-control"
+                      rows="3" required></textarea>
         </div>
 
         <div class="mb-3">
             <label for="price">Price ($)</label>
-            <input type="number" id="price" th:name="price" th:value="${product.price}" step="0.01" class="form-control" required/>
+            <input type="number" id="price" th:name="price" th:value="${product.price}" step="0.01" class="form-control"
+                   required/>
+        </div>
+
+        <div class="mb-3">
+            <label for="discount">Discount (%)</label>
+            <input type="number" id="discount" th:name="discount" th:value="${product.discount}" class="form-control"
+                   min="0" max="100" required/>
         </div>
 
         <div class="mb-3">
             <label for="imageFile">Image File</label>
-            <input type="file" id="imageFile" name="imageFile" class="form-control" accept="image/*" onchange="previewImage(event)"/>
-            <img th:src="${product.imageFile}" alt="Book Cover" id="preview-img" class="preview-img" style="display: ${product.imageFile ? 'block' : 'none'};"/>
+            <input type="file" id="imageFile" name="imageFile" class="form-control" accept="image/*"
+                   onchange="previewImage(event)"/>
+            <img th:src="${product.imageFile}" alt="Book Cover" id="preview-img" class="preview-img"
+                 style="display: ${product.imageFile ? 'block' : 'none'};"/>
         </div>
 
         <div class="mb-3">
@@ -105,7 +127,8 @@
 
         <div class="mb-3">
             <label for="available">Available</label>
-            <input type="number" id="available" th:name="available" th:value="${product.available}" class="form-control" required/>
+            <input type="number" id="available" th:name="available" th:value="${product.available}" class="form-control"
+                   required/>
         </div>
 
         <div class="mb-3">
@@ -119,7 +142,8 @@
 
         <div class="mb-3">
             <label for="rating">Rating</label>
-            <input type="number" id="rating" th:name="rating" th:value="${product.rating}" step="0.1" class="form-control" disabled/>
+            <input type="number" id="rating" th:name="rating" th:value="${product.rating}" step="0.1"
+                   class="form-control" disabled/>
             <input type="hidden" th:name="rating" th:value="${product.rating}"/>
         </div>
 
@@ -131,7 +155,8 @@
         </div>
 
         <button type="submit" class="btn">Save Changes</button>
-        <a th:href="@{/staff}" class="btn btn-secondary ms-2">Cancel</a>
+        <!--        <a th:href="@{/staff}" class="btn btn-secondary ms-2">Cancel</a>-->
+        <a th:href="@{${isAdmin} ? '/admin' : '/staff'}" class="btn btn-secondary ms-2">Cancel</a>
     </form>
 </div>
 
@@ -139,14 +164,14 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Khởi tạo Select2 cho tags
         const select = $('#tags');
         fetch('/api/Tag/')
             .then(response => response.json())
             .then(tags => {
                 select.select2({
-                    data: tags.map(tag => ({ id: tag.tagId, text: tag.tagName })),
+                    data: tags.map(tag => ({id: tag.tagId, text: tag.tagName})),
                     placeholder: "Select tags...",
                     allowClear: true
                 });
@@ -164,7 +189,7 @@
             const preview = document.getElementById('preview-img');
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     preview.src = e.target.result;
                     preview.style.display = 'block';
                 };
@@ -175,20 +200,24 @@
         // Add event listener for status switch
         const statusCheckbox = document.getElementById('status');
         const statusValue = document.getElementById('statusValue');
-        statusCheckbox.addEventListener('change', function() {
+        statusCheckbox.addEventListener('change', function () {
             statusValue.value = this.checked ? 1 : 0;
             console.log("Status updated to: " + statusValue.value); // Debug
         });
 
         // Handle form submission
-        document.getElementById('editBookForm').addEventListener('submit', function(e) {
+        document.getElementById('editBookForm').addEventListener('submit', function (e) {
             e.preventDefault();
             const formData = new FormData(this);
             const tagIds = $('#tags').val() || [];
             const url = this.action + '?tagIds=' + tagIds.join(',');
 
-            // Debug: Kiểm tra giá trị status trước khi gửi
-            console.log("Submitting status: " + statusValue.value);
+            const discount = document.getElementById('discount').value;
+            if (discount < 0 || discount > 100) {
+                alert('Discount must be between 0 and 100!');
+                return;
+            }
+            formData.append('discount', discount);
 
             fetch(url, {
                 method: 'PUT',
@@ -199,7 +228,12 @@
                         throw new Error('Failed to update book');
                     }
                     alert('Book updated successfully!');
-                    window.location.href = '/staff';
+                    const currentPath = window.location.pathname;
+                    if (currentPath.startsWith('/admin')) {
+                        window.location.href = '/admin';
+                    } else if (currentPath.startsWith('/staff')) {
+                        window.location.href = '/staff';
+                    }
                 })
                 .catch(error => {
                     console.error('Error:', error);
