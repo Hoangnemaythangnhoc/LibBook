@@ -23,15 +23,21 @@
             </svg>
         </div>
         <h1 class="form__title">Log in to your Account</h1>
-        <p class="form__description">Welcome back! Please, enter your information</p>
+        <div th:if="!${message}">
+            <p class="form__description">Welcome back! Please, enter your information</p>
+        </div>
 
-        <form>
+        <div th:if="${message}">
+            <span th:text="${message}"></span>
+        </div>
+
+        <form action="/login" method="POST" >
             <label class="form-control__label">Email</label>
-            <input type="email" class="form-control" />
+            <input type="email" class="form-control" name="email" required />
 
             <label class="form-control__label">Password</label>
             <div class="password-field">
-                <input type="password" class="form-control" minlength="4" id="password" />
+                <input type="password" class="form-control" minlength="4" id="password" name="password" />
                 <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -70,12 +76,14 @@
                 <span>OR</span>
             </div>
 
-            <button type="button" class="form__submit form__submit--google">
-                <img
-                        src="https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-1024.png"
-                        alt="Google Logo" />
-                Continue with Google
-            </button>
+            <a href="https://accounts.google.com/o/oauth2/v2/auth?client_id=942686730302-38cl9bd98ca7acnf70ds0t7deebfeuu5.apps.googleusercontent.com&redirect_uri=http://localhost:8080/oauth2/callback&response_type=code&scope=openid%20email%20profile&access_type=offline&prompt=consent">
+            <button type="button" class="form__submit form__submit--google" >
+                    <img
+                            src="https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-1024.png"
+                            alt="Google Logo" />
+                    Continue with Google
+                </button>
+            </a>
         </form>
 
         <p class="form__footer">

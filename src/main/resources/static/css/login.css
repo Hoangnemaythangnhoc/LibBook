@@ -545,3 +545,14 @@ a {
         transform: none !important;
     }
 }
+.form__message {
+    margin: 10px 0;
+    font-size: 14px;
+    text-align: center;
+}
+.form__message.error {
+    color: red;
+}
+.form__message.success {
+    color: green;
+}
