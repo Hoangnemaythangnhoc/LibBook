@@ -1,4 +1,4 @@
-<th:block th:fragment="navbar">
+\<th:block th:fragment="navbar">
     <style>
         .upload-button {
             display: block;
@@ -60,6 +60,9 @@
                 </form>
 
                 <div class="d-flex align-items-center ms-auto" style="gap: 7px">
+                    <a href="/chat-widget" class="btn btn-link position-relative ms-2" id="navbarChatBtn">
+                        <i class="ri-chat-3-line fs-6"></i>
+                    </a>
                     <a href="/cart" class="btn btn-link position-relative ms-2">
                         <i class="ri-shopping-cart-2-line fs-5"></i>
                         <span class="position-absolute top-45 start-100 translate-middle badge rounded-pill bg-danger"
@@ -85,4 +88,5 @@
             </div>
         </div>
     </nav>
+    <script src="../../static/js/chat-script.js" defer></script>
 </th:block>
