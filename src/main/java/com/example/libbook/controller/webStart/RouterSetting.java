@@ -1,22 +1,19 @@
 package com.example.libbook.controller.webStart;
 
-import com.example.libbook.entity.Order;
-import com.example.libbook.entity.OrderStatus;
 import com.example.libbook.entity.Product;
 import com.example.libbook.entity.Tag;
-import com.example.libbook.service.OrderService;
-import com.example.libbook.service.OrderStatusService;
 import com.example.libbook.service.ProductService;
 import com.example.libbook.service.TagService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestMapping
@@ -27,12 +24,6 @@ public class RouterSetting {
 
     @Autowired
     private TagService tagService;
-
-    @Autowired
-    private OrderService orderService;
-
-    @Autowired
-    private OrderStatusService orderStatusService;
 
     @GetMapping("/")
     public String home(Model model) {
@@ -179,6 +170,17 @@ public class RouterSetting {
         return "Mainpage/upload-product";
     }
 
+    @GetMapping("/verify-token")
+    public String showVerifyTokenPage() {
+        return "Login/verify-token"; // Trả về template Thymeleaf verify-token.html
+    }
+
+    @GetMapping("/reset-password")
+    public String showResetPasswordPage(@RequestParam String email, Model model) {
+        model.addAttribute("email", email);
+        return "Login/reset-password";
+    }
+
     @GetMapping("/staff")
     public String staffPanel(Model model, HttpSession session) {
         if (session.getAttribute("staff") != null) {
@@ -186,61 +188,9 @@ public class RouterSetting {
             model.addAttribute("staffEmail", "staff@example.com");
             model.addAttribute("staffPhone", "0123456789");
         }
-        List<Product> products = productService.getAllProduct();
         List<Tag> tags = tagService.getAllTags();
-        model.addAttribute("products", products);
+        System.out.println("Tags for staff: " + (tags != null ? tags : "No tags fetched"));
         model.addAttribute("tags", tags);
         return "profile/staff";
     }
-
-//    @GetMapping("/edit-book/{id}")
-//    public String editBook(@PathVariable("id") Long id, Model model) {
-//        Product product = productService.getProductById(id);
-//        List<Tag> tags = tagService.getAllTags();
-//        if (product != null) {
-//            model.addAttribute("product", product);
-//            model.addAttribute("tags", tags);
-//            return "Mainpage/edit-book";
-//        } else {
-//            return "redirect:/staff";
-//        }
-//    }
-
-    @GetMapping("/admin/edit-book/{id}")
-    public String editBookForAdmin(@PathVariable("id") Long id, Model model) {
-        Product product = productService.getProductById(id);
-        List<Tag> tags = tagService.getAllTags();
-        if (product != null) {
-            model.addAttribute("product", product);
-            model.addAttribute("tags", tags);
-            model.addAttribute("isAdmin", true);
-            return "Mainpage/edit-book";
-        } else {
-            return "redirect:/admin";
-        }
-    }
-
-    @GetMapping("/staff/edit-book/{id}")
-    public String editBookForStaff(@PathVariable("id") Long id, Model model) {
-        Product product = productService.getProductById(id);
-        List<Tag> tags = tagService.getAllTags();
-        if (product != null) {
-            model.addAttribute("product", product);
-            model.addAttribute("tags", tags);
-            model.addAttribute("isAdmin", false);
-            return "Mainpage/edit-book";
-        } else {
-            return "redirect:/staff";
-        }
-    }
-
-    @GetMapping("/admin/manage-orders")
-    public String manageOrders(Model model) {
-        List<Order> orders = orderService.getAllOrders();
-        List<OrderStatus> orderStatuses = orderStatusService.getAllOrderStatuses();
-        model.addAttribute("orders", orders);
-        model.addAttribute("orderStatuses", orderStatuses);
-        return "Mainpage/manage-orders";
-    }
-
 }
