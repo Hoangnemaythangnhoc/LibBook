@@ -16,193 +16,7 @@
     <link
             rel="shortcut icon"
             href="https://rails-assets-us.bookshop.org/assets/favicon-63cb20989e2516343feeab429626798a43afdaa28eeaba777b7e0acde8a25dd2.png"/>
-    <style>
-        /* AI Help Button Styles */
-        .ai-help-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            z-index: 1000;
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #ff4e50, #f9d423, #4facfe);
-            background-size: 200% 200%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 28px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 215, 0, 0.7);
-            transition: all 0.3s ease;
-            animation: gradientShift 6s ease infinite, pulse 1.5s ease infinite;
-            overflow: visible;
-            cursor: pointer;
-        }
 
-        .ai-help-btn:hover {
-            transform: scale(1.15);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.9);
-        }
-
-        .ai-help-btn i {
-            position: relative;
-            z-index: 2;
-        }
-
-        /* Gradient Animation */
-        @keyframes gradientShift {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
-        /* Pulse Animation */
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.08);
-            }
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        /* Star Effects Container */
-        .ai-help-btn::before,
-        .ai-help-btn::after,
-        .ai-help-btn .star-1,
-        .ai-help-btn .star-2,
-        .ai-help-btn .star-3,
-        .ai-help-btn .star-4 {
-            content: '';
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background: rgba(255, 215, 0, 0.9);
-            border-radius: 50%;
-            z-index: 1;
-            animation: starSparkle 3s infinite linear;
-        }
-
-        /* Position and Delay for Stars */
-        .ai-help-btn::before {
-            animation-delay: 0s;
-        }
-
-        .ai-help-btn::after {
-            animation-delay: 0.5s;
-        }
-
-        .ai-help-btn .star-1 {
-            animation-delay: 1s;
-        }
-
-        .ai-help-btn .star-2 {
-            animation-delay: 1.5s;
-        }
-
-        .ai-help-btn .star-3 {
-            animation-delay: 2s;
-        }
-
-        .ai-help-btn .star-4 {
-            animation-delay: 2.5s;
-        }
-
-        /* Star Sparkle Animation */
-        @keyframes starSparkle {
-            0% {
-                transform: translate(0, 0) scale(0.5);
-                opacity: 1;
-            }
-            50% {
-                transform: translate(var(--x-move), var(--y-move)) scale(1);
-                opacity: 0.8;
-            }
-            100% {
-                transform: translate(var(--x-move-end), var(--y-move-end)) scale(0.2);
-                opacity: 0;
-            }
-        }
-
-        /* Define random movement for each star */
-        .ai-help-btn::before {
-            --x-move: 20px;
-            --y-move: -30px;
-            --x-move-end: 40px;
-            --y-move-end: -60px;
-        }
-
-        .ai-help-btn::after {
-            --x-move: -25px;
-            --y-move: 15px;
-            --x-move-end: -50px;
-            --y-move-end: 30px;
-        }
-
-        .ai-help-btn .star-1 {
-            --x-move: 30px;
-            --y-move: 20px;
-            --x-move-end: 60px;
-            --y-move-end: 40px;
-        }
-
-        .ai-help-btn .star-2 {
-            --x-move: -15px;
-            --y-move: -25px;
-            --x-move-end: -30px;
-            --y-move-end: -50px;
-        }
-
-        .ai-help-btn .star-3 {
-            --x-move: 10px;
-            --y-move: 35px;
-            --x-move-end: 20px;
-            --y-move-end: 70px;
-        }
-
-        .ai-help-btn .star-4 {
-            --x-move: -30px;
-            --y-move: -10px;
-            --x-move-end: -60px;
-            --y-move-end: -20px;
-        }
-
-        /* Glow Effect */
-        .ai-help-btn .glow-layer {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
-            animation: glow 3s ease infinite;
-            z-index: 1;
-        }
-
-        @keyframes glow {
-            0% {
-                transform: scale(0.9);
-                opacity: 0.5;
-            }
-            50% {
-                transform: scale(1.1);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(0.9);
-                opacity: 0.5;
-            }
-        }
-    </style>
 </head>
 <body>
 <!-- Navbar Placeholder -->
@@ -245,28 +59,11 @@
                 <div class="product-info">
                     <span class="badge bg-primary mb-2">Book</span>
                     <h1 class="mb-2" th:text="${product.productName}">Product Name</h1>
-                    <h5 class="text-muted mb-4" th:text="${product.author}">Author Not Available</h5>
+                    <h5 class="text-muted mb-4">Author Not Available</h5>
 
-                    <div class="align-items-center mb-4">
-                        <div class="d-flex-start justify-content-between align-items-center">
-                            <span style="font-size: 18px; color: red;"
-                                  th:if="${product.discount > 0}"
-                                  class="h5 mb-0 text-decoration-line-through ms-2"
-                                  th:text="'$' + ${#numbers.formatDecimal(product.price, 2, 2)}">
-                            </span>
-                            <span style="font-size: 18px; color: red; margin-right: 20px"
-                                  th:if="${product.discount > 0}"
-                                  class="h5 mb-0 text-decoration ms-2"
-                                  th:text="'(-' + ${product.discount} + '%)'">
-                            </span>
-                            <span style="font-size: 22px;font-weight: bold; margin-right: 20px"
-                                  th:with="discountedPrice=${product.discount > 0 ? product.price * (100 - product.discount) / 100 : product.price}"
-                                  th:text="'$' + ${#numbers.formatDecimal(discountedPrice, 2, 2)}">
-                            </span>
-                        </div>
-                        <div class="badge bg-success" style="margin-top: 20px"
-                             th:text="'In Stock: ' + ${product.available}">In Stock
-                        </div>
+                    <div class="d-flex align-items-center mb-4">
+                        <h2 class="mb-0 me-3" th:text="'$' + ${#numbers.formatDecimal(product.price, 2, 2)}">$0.00</h2>
+                        <span class="badge bg-success" th:text="'In Stock: ' + ${product.available}">In Stock</span>
                     </div>
 
                     <div class="mb-4">
@@ -349,7 +146,7 @@
         </div>
 
         <!-- AI Help Button -->
-        <div class="ai-help-btn" title="AI Help">
+        <div id="chatbot-icon" class="ai-help-btn" title="AI Help">
             <i class="ri-robot-line"></i>
             <span class="star-1"></span>
             <span class="star-2"></span>
@@ -357,6 +154,13 @@
             <span class="star-4"></span>
             <span class="glow-layer"></span>
         </div>
+
+        <!-- Chat window (ẩn ban đầu) -->
+        <div id="chatbot-window">
+            <div id="chatbot-response">Đang xử lý...</div>
+            <button onclick="closeChatbot()">Đóng</button>
+        </div>
+
     </div>
 </section>
 
@@ -519,9 +323,55 @@
 <!-- Footer Placeholder -->
 <div th:insert="~{fragments/footer :: footer}"></div>
 
+
+
 <!-- Bootstrap Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Custom JS -->
+<!-- Chatbot -->
+<script>
+    document.getElementById("chatbot-icon").addEventListener("click", async () => {
+        document.getElementById("chatbot-window").style.display = "block";
+
+        const productId = getProductIdFromURL();
+        const productResponse = await fetch(`/api/products/${productId}`);
+        if (!productResponse.ok) {
+            document.getElementById("chatbot-response").innerText = "Không thể tải thông tin sản phẩm. Kiểm tra ID: " + productId;
+            console.error("Fetch error:", await productResponse.text());
+            return;
+        }
+        const product = await productResponse.json();
+
+        const summary = await fetchChatbotSummary(product.productName);
+        document.getElementById("chatbot-response").innerText = summary;
+    });
+
+    function closeChatbot() {
+        document.getElementById("chatbot-window").style.display = "none";
+    }
+
+    function getProductIdFromURL() {
+        const pathParts = window.location.pathname.split("/");
+        return pathParts[pathParts.length - 1];
+    }
+
+    async function fetchChatbotSummary(bookTitle) {
+        const response = await fetch("/api/chatbot/summarize", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ title: bookTitle }),
+        });
+        if (!response.ok) {
+            console.error("Chatbot error:", await response.text());
+            return "Không thể lấy tóm tắt sách. Vui lòng thử lại sau.";
+        }
+        const data = await response.json();
+        return data.summary || "Không có tóm tắt.";
+    }
+</script>
+
 <script src="/js/components.js"></script>
 <script>
     // Quantity Selector
