@@ -12,11 +12,10 @@ import org.springframework.stereotype.Repository;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 @Repository
 public class UserRepositoryImpl implements UserRepository {
@@ -162,5 +161,99 @@ public class UserRepositoryImpl implements UserRepository {
 
         return false;
     }
+
+    @Override
+    public List<UserDTO> getCustomers() {
+        String sql = "SELECT UserId, UserName, Email, PhoneNumber, Status, CreateAt FROM [User] WHERE RoleId = 2";
+        List<UserDTO> result = new ArrayList<>();
+        try (Connection con = ConnectUtils.getInstance().openConection();
+             PreparedStatement stmt = con.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                UserDTO dto = new UserDTO();
+                dto.setUserId(rs.getInt("UserId"));
+                dto.setUserName(rs.getString("UserName"));
+                dto.setEmail(rs.getString("Email"));
+                dto.setPhoneNumber(rs.getString("PhoneNumber"));
+                dto.setStatus(rs.getBoolean("Status"));
+
+                Timestamp createAtTs = rs.getTimestamp("CreateAt");
+                dto.setCreateAt(createAtTs != null ? createAtTs.toLocalDateTime() : null);
+
+                result.add(dto);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+
+    @Override
+    public List<UserDTO> getStaffWithRoleName() {
+        String sql = "SELECT u.UserId, u.UserName, u.Email, u.PhoneNumber, u.Status, u.CreateAt, r.RoleName " +
+                "FROM [User] u JOIN [Role] r ON u.RoleId = r.RoleId WHERE u.RoleId IN (3,4,5)";
+        List<UserDTO> result = new ArrayList<>();
+        try (Connection con = ConnectUtils.getInstance().openConection();
+             PreparedStatement stmt = con.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                UserDTO dto = new UserDTO();
+                dto.setUserId(rs.getInt("UserId"));
+                dto.setUserName(rs.getString("UserName"));
+                dto.setEmail(rs.getString("Email"));
+                dto.setPhoneNumber(rs.getString("PhoneNumber"));
+                dto.setStatus(rs.getBoolean("Status"));
+
+                Timestamp createAtTs = rs.getTimestamp("CreateAt");
+                dto.setCreateAt(createAtTs != null ? createAtTs.toLocalDateTime() : null);
+
+                dto.setRoleName(rs.getString("RoleName"));
+
+                result.add(dto);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+
+    @Override
+    public boolean banUser(int userId) {
+        return updateStatus(userId, 0);
+    }
+
+    @Override
+    public boolean unbanUser(int userId) {
+        return updateStatus(userId, 1);
+    }
+
+    private boolean updateStatus(int userId, int status) {
+        String sql = "UPDATE [User] SET Status = ? WHERE UserId = ?";
+        try (Connection con = ConnectUtils.getInstance().openConection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setInt(1, status);
+            stmt.setInt(2, userId);
+            return stmt.executeUpdate() > 0;
+        } catch (Exception e) { e.printStackTrace(); }
+        return false;
+    }
+
+    @Override
+    public boolean createStaffAccount(UserDTO userDTO) {
+        String sql = "INSERT INTO [User] (UserName, RoleId, Email, Password, Status) VALUES (?, ?, ?, ?, 1)";
+        try (Connection con = ConnectUtils.getInstance().openConection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+            String userName = userDTO.getEmail().split("@")[0];
+            stmt.setString(1, userName);
+            stmt.setInt(2, userDTO.getRoleID());
+            stmt.setString(3, userDTO.getEmail());
+            stmt.setString(4, hashPassword(userDTO.getPassword()));
+            return stmt.executeUpdate() > 0;
+        } catch (Exception e) { e.printStackTrace(); }
+        return false;
+    }
+
 
 }
