@@ -8,10 +8,7 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -188,9 +185,24 @@ public class RouterSetting {
             model.addAttribute("staffEmail", "staff@example.com");
             model.addAttribute("staffPhone", "0123456789");
         }
+        List<Product> products = productService.getAllProduct();
         List<Tag> tags = tagService.getAllTags();
-        System.out.println("Tags for staff: " + (tags != null ? tags : "No tags fetched"));
+        model.addAttribute("products", products);
         model.addAttribute("tags", tags);
         return "profile/staff";
     }
+
+    @GetMapping("/edit-book/{id}")
+    public String editBook(@PathVariable("id") Long id, Model model) {
+        Product product = productService.getProductById(id);
+        List<Tag> tags = tagService.getAllTags();
+        if (product != null) {
+            model.addAttribute("product", product);
+            model.addAttribute("tags", tags);
+            return "Mainpage/edit-book";
+        } else {
+            return "redirect:/staff";
+        }
+    }
+
 }

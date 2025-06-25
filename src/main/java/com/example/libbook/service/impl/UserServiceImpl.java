@@ -49,6 +49,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.getUserByUserId(id);
     }
 
+    
     @Override
     public boolean updatePassword(String email, String password) {
         return userRepository.updatePassword(email,password);
