@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', () => {
     const chatIconBtn = document.getElementById('chatIconBtn');
     const navbarChatBtn = document.getElementById('navbarChatBtn');
