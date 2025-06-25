@@ -1,7 +1,11 @@
 package com.example.libbook.controller.Product;
 
 import com.example.libbook.dto.UserDTO;
+import com.example.libbook.entity.CartItem;
+import jakarta.mail.Message;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -15,30 +19,15 @@ import java.util.Map;
 @RequestMapping("/cart/api")
 public class CartController {
 
-    @PostMapping("/add")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> addToCart(
-            @RequestBody Map<String, Object> payload,
-            HttpSession session) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            @SuppressWarnings("unchecked")
-            List<Map<String, Object>> cart = (List<Map<String, Object>>) session.getAttribute("CART");
-            if (cart == null) {
-                cart = new ArrayList<>();
-                session.setAttribute("CART", cart);
-            }
 
-            cart.add(payload);
-            
-            response.put("success", true);
-            response.put("message", "Đã thêm vào giỏ hàng");
-            response.put("cartSize", cart.size());
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "Có lỗi xảy ra: " + e.getMessage());
+    @PostMapping("/add")
+    public ResponseEntity<?> addItemToCart(@RequestBody CartItem cartItem, HttpSession session) {
+        if (session.getAttribute("USER") == null) {
+            return new ResponseEntity<>("login", HttpStatus.UNAUTHORIZED);
+        } else {
+            int a = 1;
         }
-        return ResponseEntity.ok(response);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/update")

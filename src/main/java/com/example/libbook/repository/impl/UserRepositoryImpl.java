@@ -140,6 +140,7 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
 
+
     @Override
     public boolean updateAvatar(byte[] base64, int type, int ID) throws IOException {
         String pathImage = imageUtils.uploadAvatar(base64, type);
@@ -170,13 +171,49 @@ public class UserRepositoryImpl implements UserRepository {
                 new BeanPropertyRowMapper<>(User.class));
     }
 
+
+    @Override
+    public boolean updateAvatar(byte[] base64, int type, int ID) throws IOException {
+        String pathImage = imageUtils.uploadAvatar(base64, type);
+        ConnectUtils db = ConnectUtils.getInstance();
+        if (pathImage != null && !pathImage.isEmpty()) {
+            String sql = "UPDATE [User] SET [ProfilePicture] = ? WHERE [UserId] = ?";
+            try (Connection connection = db.openConection();
+                 PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setString(1, pathImage);
+                statement.setInt(2, ID);
+                int rowsAffected = statement.executeUpdate();
+                return rowsAffected > 0;
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return false;
+    }
+
+
+    @Override
+    public User getUserByUserId(int id) {
+        String sql = "SELECT * FROM [User] WHERE [UserId] = ?";
+        return jdbcTemplate.queryForObject(
+                sql,
+                new Object[]{id},
+                new BeanPropertyRowMapper<>(User.class)
+        );
+    }
+
+
     @Override
     public boolean updatePassword(String email, String password) {
         String hashPass = hashPassword(password);
         ConnectUtils db = ConnectUtils.getInstance();
         String sql = "UPDATE [User] SET [Password] = ? WHERE [Email] = ? ";
         try (Connection connection = db.openConection();
+
                 PreparedStatement statement = connection.prepareStatement(sql)) {
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, hashPass);
             statement.setString(2, email);
             int check = statement.executeUpdate();

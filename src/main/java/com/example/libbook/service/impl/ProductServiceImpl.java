@@ -6,7 +6,10 @@ import com.example.libbook.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -37,4 +40,30 @@ public class ProductServiceImpl implements ProductService {
         System.out.println("ProductServiceImpl: Retrieved " + (products != null ? products.size() : "null") + " products for tag");
         return products;
     }
+
+    @Override
+    public List<Product> getNewArrivals(int limit) {
+        return productRepository.getNewArrivals(limit);
+    }
+
+    @Override
+    public List<Product> getTopSellingProducts(int limit) {
+        return productRepository.getTopSellingProducts(limit);
+    }
+
+    @Override
+    public Map<String, List<Product>> getProductCombosByRandomTags(int comboCount, int booksPerCombo) {
+        List<String> tags = productRepository.getRandomTags(comboCount);
+        Map<String, List<Product>> combos = new HashMap<>();
+
+        for (String tag : tags) {
+            List<Product> taggedProducts = productRepository.getProductsByTag(tag);
+            if (!taggedProducts.isEmpty()) {
+                Collections.shuffle(taggedProducts);
+                combos.put(tag, taggedProducts.subList(0, Math.min(booksPerCombo, taggedProducts.size())));
+            }
+        }
+        return combos;
+    }
+
 }

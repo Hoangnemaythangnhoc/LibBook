@@ -9,6 +9,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +23,23 @@ public class ProductRepositoryImpl implements ProductRepository {
         this.dataSource = dataSource;
         System.out.println("ProductRepositoryImpl initialized with DataSource: " + (dataSource != null ? "Yes" : "No"));
     }
+
+    private Product mapResultSetToProduct(ResultSet rs) throws SQLException {
+        Product product = new Product();
+        product.setProductId(rs.getLong("ProductId"));
+        product.setProductName(rs.getString("ProductName"));
+        product.setDescription(rs.getString("Description"));
+        product.setBuys(rs.getInt("Buys"));
+        product.setAvailable(rs.getInt("Available"));
+        product.setPrice(rs.getDouble("Price"));
+        product.setImageFile(rs.getString("ImageFile"));
+        product.setUserId(rs.getLong("UserId"));
+        product.setStatus(rs.getInt("Status"));
+        product.setRating(rs.getDouble("Rating"));
+        product.setCreateAt(rs.getTimestamp("CreateAt"));
+        return product;
+    }
+
 
     @Override
     public List<Product> getAllProduct() {
@@ -125,4 +143,67 @@ public class ProductRepositoryImpl implements ProductRepository {
         }
         return products;
     }
+
+    @Override
+    public List<Product> getNewArrivals(int limit) {
+        List<Product> products = new ArrayList<>();
+        String sql = "SELECT * FROM Product ORDER BY CreateAt DESC OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY";
+
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, limit);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    Product product = mapResultSetToProduct(rs);
+                    products.add(product);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error fetching new arrivals", e);
+        }
+        return products;
+    }
+
+    @Override
+    public List<Product> getTopSellingProducts(int limit) {
+        List<Product> products = new ArrayList<>();
+        String sql = "SELECT * FROM Product ORDER BY Buys DESC OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY";
+
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, limit);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    Product product = mapResultSetToProduct(rs);
+                    products.add(product);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error fetching top-selling products", e);
+        }
+        return products;
+    }
+
+    public List<String> getRandomTags(int limit) {
+        List<String> tags = new ArrayList<>();
+        String sql = "SELECT TOP (?) TagName FROM Tag ORDER BY NEWID()";
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    tags.add(rs.getString("TagName"));
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error fetching random tags", e);
+        }
+        return tags;
+    }
+
+
 }

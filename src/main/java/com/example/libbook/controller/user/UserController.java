@@ -1,5 +1,6 @@
 package com.example.libbook.controller.user;
 
+
 import com.example.libbook.dto.FileUploadDTO;
 import com.example.libbook.dto.UserDTO;
 import com.example.libbook.entity.User;
@@ -36,6 +37,7 @@ public class UserController {
         this.emailTokenService = emailTokenService;
         this.imageUtils = imageUtils;
     }
+
 
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
@@ -95,6 +97,8 @@ public class UserController {
     @PostMapping("/{UserID}/avatar/")
     public ResponseEntity<String> uploadAvatar(@PathVariable("UserID") int UserID, @RequestBody FileUploadDTO base64)
             throws IOException {
+    public ResponseEntity<String> uploadAvatar(@PathVariable("UserID") int UserID, @RequestBody FileUploadDTO base64) throws IOException {
+
         byte[] image = imageUtils.decodeBase64(base64.getImageFile());
         boolean check = userService.uploadAvatar(image, UserID);
         if (check) {
@@ -113,8 +117,12 @@ public class UserController {
     }
 
     @PostMapping("/forgot-password")
+
     public ResponseEntity<Map<String, Object>> sendToken(@RequestParam String email,
             RedirectAttributes redirectAttributes) {
+
+    public ResponseEntity<Map<String, Object>> sendToken(@RequestParam String email, RedirectAttributes redirectAttributes) {
+
         Map<String, Object> response = new HashMap<>();
         if (email == null || email.isEmpty()) {
             response.put("status", "error");
@@ -181,6 +189,11 @@ public class UserController {
     public ResponseEntity<Map<String, Object>> resetPassword(@RequestParam String email,
             @RequestParam String password,
             @RequestParam("confirm-password") String confirmPassword) {
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, Object>> resetPassword(@RequestParam String email,
+                                                             @RequestParam String password,
+                                                             @RequestParam("confirm-password") String confirmPassword) {
         Map<String, Object> response = new HashMap<>();
 
         // Xử lý logic reset password
@@ -192,7 +205,11 @@ public class UserController {
 
         // Thực hiện reset password
         try {
+
             userService.updatePassword(email, password);
+
+            userService.updatePassword(email,password);
+
             response.put("status", "success");
             response.put("redirect", "/login");
             return ResponseEntity.ok(response);

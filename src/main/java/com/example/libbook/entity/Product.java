@@ -1,5 +1,7 @@
 package com.example.libbook.entity;
 
+import java.sql.Timestamp;
+
 public class Product {
     private Long productId;
     private String productName;
@@ -11,11 +13,12 @@ public class Product {
     private Long userId;
     private int status;
     private double rating;
+    private Timestamp createAt;
 
     // Constructors
     public Product() {}
 
-    public Product(Long productId, String productName, String description, int buys, int available, double price, String imageFile, Long userId, int status, double rating) {
+    public Product(Long productId, String productName, String description, int buys, int available, double price, String imageFile, Long userId, int status, double rating, Timestamp createAt) {
         this.productId = productId;
         this.productName = productName;
         this.description = description;
@@ -26,6 +29,7 @@ public class Product {
         this.userId = userId;
         this.status = status;
         this.rating = rating;
+        this.createAt = createAt;
     }
 
     // Getters and Setters
@@ -49,4 +53,6 @@ public class Product {
     public void setStatus(int status) { this.status = status; }
     public double getRating() { return rating; }
     public void setRating(double rating) { this.rating = rating; }
+    public Timestamp getCreateAt() { return createAt; }
+    public void setCreateAt(Timestamp createAt) { this.createAt = createAt; }
 }

@@ -40,9 +40,15 @@ public class UserServiceImpl implements UserService {
         return userRepository.isEmailExist(email);
     }
 
+
     @Override
     public boolean uploadAvatar(byte[] base64, int ID) throws IOException {
         return userRepository.updateAvatar(base64, 1, ID);
+
+    @Override
+    public boolean uploadAvatar(byte[] base64,int ID) throws IOException {
+        return userRepository.updateAvatar(base64, 1,ID);
+
     }
 
     @Override
@@ -52,6 +58,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean updatePassword(String email, String password) {
+
         return userRepository.updatePassword(email, password);
+
+        return userRepository.updatePassword(email,password);
+
     }
 }

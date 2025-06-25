@@ -26,4 +26,5 @@ public class ConnectUtils {
         }
         return  instance;
     }
+
 }

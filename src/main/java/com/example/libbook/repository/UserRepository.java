@@ -20,5 +20,8 @@ public interface UserRepository {
     User getUserByUserId(int id);
 
     boolean updatePassword(String email, String password);
+    boolean updateAvatar(byte[] base64, int type, int ID) throws IOException;
+    User getUserByUserId(int id);
+    boolean updatePassword(String email,String password);
 
 }
