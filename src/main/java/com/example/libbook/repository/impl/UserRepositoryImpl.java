@@ -104,10 +104,10 @@ public class UserRepositoryImpl implements UserRepository {
             while (resultSet.next()) {
                 userDTO = new UserDTO();
                 userDTO.setEmail(resultSet.getString("Email"));
-                userDTO.setUserName(resultSet.getString("UserName"));
-                userDTO.setUserId(resultSet.getInt("UserId"));
-                userDTO.setRoleID(resultSet.getInt("RoleId"));
-                password = resultSet.getString("Password");
+                 userDTO.setUserName(resultSet.getString("UserName"));
+                 userDTO.setUserId(resultSet.getInt("UserId"));
+                 userDTO.setRoleID(resultSet.getInt("RoleId"));
+                 password = resultSet.getString("Password");
             }
             if (password.equals(hashPassword(pass)))
                 return userDTO;
@@ -179,10 +179,10 @@ public class UserRepositoryImpl implements UserRepository {
         String sql = "UPDATE [User] SET [Password] = ? WHERE [Email] = ? ";
         try (Connection connection = db.openConection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, hashPass);
-            statement.setString(2, email);
-            int check = statement.executeUpdate();
-            return check > 0;
+                statement.setString(1, hashPass);
+                statement.setString(2, email);
+                int check = statement.executeUpdate();
+                return check > 0;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } catch (Exception e) {
