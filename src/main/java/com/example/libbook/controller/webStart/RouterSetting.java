@@ -8,10 +8,7 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -92,14 +89,15 @@ public class RouterSetting {
 
     @GetMapping("/category/{tagName}")
     public String categoryPage(@PathVariable String tagName,
-                               @RequestParam(value = "searchQuery", required = false) String searchQuery,
-                               Model model) {
+            @RequestParam(value = "searchQuery", required = false) String searchQuery,
+            Model model) {
         List<Product> products = productService.getProductsByTag(tagName);
         List<Tag> tags = tagService.getAllTags();
         if (searchQuery != null && !searchQuery.trim().isEmpty()) {
             products = products.stream()
                     .filter(p -> p.getProductName().toLowerCase().contains(searchQuery.toLowerCase()) ||
-                            (p.getDescription() != null && p.getDescription().toLowerCase().contains(searchQuery.toLowerCase())))
+                            (p.getDescription() != null
+                                    && p.getDescription().toLowerCase().contains(searchQuery.toLowerCase())))
                     .toList();
         }
         System.out.println("Products for tag '" + tagName + "': " + (products != null ? products.size() : "0"));
@@ -112,13 +110,14 @@ public class RouterSetting {
 
     @GetMapping("/category/search")
     public String searchProducts(@RequestParam(value = "searchQuery", required = false) String searchQuery,
-                                 Model model) {
+            Model model) {
         List<Product> products = productService.getAllProduct();
         List<Tag> tags = tagService.getAllTags();
         if (searchQuery != null && !searchQuery.trim().isEmpty()) {
             products = products.stream()
                     .filter(p -> p.getProductName().toLowerCase().contains(searchQuery.toLowerCase()) ||
-                            (p.getDescription() != null && p.getDescription().toLowerCase().contains(searchQuery.toLowerCase())))
+                            (p.getDescription() != null
+                                    && p.getDescription().toLowerCase().contains(searchQuery.toLowerCase())))
                     .toList();
         }
         System.out.println("Products for search: " + (products != null ? products.size() : "0"));
@@ -170,6 +169,17 @@ public class RouterSetting {
         return "Mainpage/upload-product";
     }
 
+    @GetMapping("/verify-token")
+    public String showVerifyTokenPage() {
+        return "Login/verify-token"; // Trả về template Thymeleaf verify-token.html
+    }
+
+    @GetMapping("/reset-password")
+    public String showResetPasswordPage(@RequestParam String email, Model model) {
+        model.addAttribute("email", email);
+        return "Login/reset-password";
+    }
+
     @GetMapping("/staff")
     public String staffPanel(Model model, HttpSession session) {
         if (session.getAttribute("staff") != null) {
@@ -177,9 +187,24 @@ public class RouterSetting {
             model.addAttribute("staffEmail", "staff@example.com");
             model.addAttribute("staffPhone", "0123456789");
         }
+        List<Product> products = productService.getAllProduct();
         List<Tag> tags = tagService.getAllTags();
-        System.out.println("Tags for staff: " + (tags != null ? tags : "No tags fetched"));
+        model.addAttribute("products", products);
         model.addAttribute("tags", tags);
         return "profile/staff";
     }
+
+    @GetMapping("/edit-book/{id}")
+    public String editBook(@PathVariable("id") Long id, Model model) {
+        Product product = productService.getProductById(id);
+        List<Tag> tags = tagService.getAllTags();
+        if (product != null) {
+            model.addAttribute("product", product);
+            model.addAttribute("tags", tags);
+            return "Mainpage/edit-book";
+        } else {
+            return "redirect:/staff";
+        }
+    }
+
 }

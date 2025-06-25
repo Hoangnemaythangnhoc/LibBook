@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-
+<html lang="en">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Books Haven - Online Bookstore</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet"/>
     <link rel="stylesheet" href="/css/home.css"/>
     <link rel="shortcut icon"
           href="https://rails-assets-us.bookshop.org/assets/favicon-63cb20989e2516343feeab429626798a43afdaa28eeaba777b7e0acde8a25dd2.png"/>
+    <link rel="stylesheet" href="../../static/css/chat-widget.css">
     <style>
         .new-arrivals .carousel-item {
             padding: 0 15px;
@@ -76,7 +76,6 @@
         }
     </style>
 </head>
-
 <body>
 <div th:insert="~{fragments/navbar :: navbar}"></div>
 
@@ -117,8 +116,10 @@
     </div>
 </section>
 
+
 <!-- Featured Categories -->
-<section class="featured-categories py-5">
+    <!-- From Uiverse.io by vinodjangid07 -->
+    <section class="featured-categories py-5">
     <div class="container">
         <h2 class="text-center mb-5">Popular Categories</h2>
         <div class="row g-4">
@@ -295,10 +296,16 @@
             </div>
         </div>
     </div>
-</section>
 
-<div th:insert="~{fragments/footer :: footer}"></div>
 
+
+
+    <div th:insert="~{fragments/footer :: footer}"></div>
+
+<!--&lt;!&ndash; Include Chat Widget &ndash;&gt;-->
+<!--<div th:insert="~{fragments/chat-widget :: chat-widget}"></div>-->
+
+<!-- Bootstrap Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/js/components.js"></script>
 <script>
@@ -324,6 +331,10 @@
             window.location.href = '/category/' + encodeURIComponent(selectedTag);
         }
     }
+    document.querySelector('.chatBtn').addEventListener('click', function() {
+        // Logic để mở/đóng widget chat
+        console.log('Chat button clicked');
+    });
 </script>
 </body>
 </html>
