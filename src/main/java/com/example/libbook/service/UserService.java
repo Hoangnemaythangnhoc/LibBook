@@ -8,12 +8,13 @@ import java.io.IOException;
 import java.util.List;
 
 public interface UserService {
-    public boolean isEmailExist(String email);
+    boolean isEmailExist(String email);
     boolean createAccount(UserDTO userDTO);
     UserDTO checkLogin (String email,String pass);
     UserDTO getUserByEmail(String email);
-    boolean uploadAvatar(String base64, int ID) throws IOException;
+    boolean uploadAvatar(byte[] base64, int ID) throws IOException;
     User getUserByUserId(int id);
+    boolean updatePassword(String email, String password);
     List<UserDTO> getCustomers();
     List<UserDTO> getStaffWithRoleName();
     boolean banUser(int userId);

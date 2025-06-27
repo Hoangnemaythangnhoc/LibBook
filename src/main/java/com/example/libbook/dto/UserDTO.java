@@ -111,5 +111,6 @@ public class UserDTO {
 
     public String getRoleName() { return roleName; }
 
+    
     public void setRoleName(String roleName) { this.roleName = roleName; }
 }
