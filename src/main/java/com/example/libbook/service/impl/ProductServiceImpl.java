@@ -16,13 +16,11 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Product> getAllProduct() {
-//        System.out.println("ProductServiceImpl: Calling getAllProduct");
         return productRepository.getAllProduct();
     }
 
     @Override
     public Product getProductById(Long productId) {
-//        System.out.println("ProductServiceImpl: Calling getProductById with id: " + productId);
         return productRepository.getProductById(productId);
     }
 

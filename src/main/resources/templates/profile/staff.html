@@ -394,7 +394,6 @@
             outline: none;
         }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
             .sidebar {
                 width: 200px;
@@ -493,7 +492,6 @@
                 </tr>
                 </thead>
                 <tbody id="book-table-body">
-                <!-- Dữ liệu sẽ được thêm động bởi JavaScript -->
                 </tbody>
             </table>
             <div class="pagination" id="pagination"></div>
@@ -565,59 +563,50 @@
     const books = [];
     const sidebarItems = document.querySelectorAll('.sidebar ul li');
     const sections = document.querySelectorAll('.main-content section');
-    let activeSectionIndex = -1; // Theo dõi mục đang được chọn
-    let originalAllBooks = []; // Lưu toàn bộ sách gốc từ API
-    let allBooks = []; // Dùng để hiển thị sau khi filter/sort
+    let activeSectionIndex = -1;
+    let originalAllBooks = [];
+    let allBooks = [];
     const itemsPerPage = 10;
     let currentPage = 1;
 
-    // Ẩn tất cả section khi trang tải, chỉ hiển thị Overview và fetch sách ngay
     document.addEventListener('DOMContentLoaded', () => {
         sections.forEach(section => section.style.display = 'none');
-        document.getElementById('overview-section').style.display = 'grid'; // Hiển thị Overview mặc định
-        fetchBooks(); // Gọi API để lấy số lượng sách ngay khi tải trang
+        document.getElementById('overview-section').style.display = 'grid';
+        fetchBooks();
     });
 
-    // Điều hướng giữa các section
     sidebarItems.forEach((item, index) => {
         item.addEventListener('click', () => {
-            // Lấy sectionId từ data-section
             const sectionId = item.getAttribute('data-section');
             const currentSection = document.getElementById(sectionId);
 
-            // Nếu section hiện tại đã hiển thị, giữ nguyên (không làm gì)
             if (activeSectionIndex === index && currentSection.style.display === 'block') {
                 return;
             }
 
-            // Xóa class active khỏi tất cả các li
             sidebarItems.forEach(li => li.classList.remove('active'));
 
-            // Ẩn tất cả section
             sections.forEach(section => section.style.display = 'none');
 
-            // Hiển thị section tương ứng và thêm class active
             if (currentSection) {
                 currentSection.style.display = 'block';
-                item.classList.add('active'); // Làm đậm mục đang chọn
+                item.classList.add('active');
 
-                // Thực hiện các hành động cụ thể cho từng section
                 if (sectionId === 'manage-books-section') {
-                    fetchBooks(); // Gọi API và render sách khi chuyển đến Manage Books
+                    fetchBooks();
                 } else if (sectionId === 'upload-book-section') {
-                    initializeUploadForm(); // Khởi tạo form upload khi hiển thị
+                    initializeUploadForm();
                 }
             }
 
-            activeSectionIndex = index; // Cập nhật mục đang được chọn
+            activeSectionIndex = index;
         });
     });
 
-    // Hàm khởi tạo form upload
     function initializeUploadForm() {
         const select = $('#tags');
         if (select.data('select2')) {
-            select.select2('destroy'); // Hủy nếu đã khởi tạo trước đó
+            select.select2('destroy');
         }
         fetch('http://localhost:8080/api/Tag/')
             .then(response => {
@@ -638,7 +627,6 @@
             });
     }
 
-    // Render danh sách sách đã upload
     function renderBooks() {
         const bookList = document.getElementById('bookList');
         bookList.innerHTML = '';
@@ -661,7 +649,6 @@
         });
     }
 
-    // Xử lý form upload
     document.getElementById('uploadBookForm').addEventListener('submit', function (e) {
         e.preventDefault();
 
@@ -716,7 +703,7 @@
                 .then(data => {
                     books.push({...newBook, img: imgDataUrl, tag: tagIds.map(id => id).join(', ')});
                     renderBooks();
-                    fetchBooks(); // Cập nhật số lượng sách sau khi upload
+                    fetchBooks();
                     document.getElementById('uploadBookForm').reset();
                     $('#tags').val(null).trigger('change');
                     alert('Book uploaded successfully!');
@@ -729,7 +716,6 @@
         reader.readAsDataURL(file);
     });
 
-    // Hàm gọi API và render sách vào bảng Manage Books với phân trang
     function fetchBooks() {
         fetch('http://localhost:8080/api/products')
             .then(response => {
@@ -739,11 +725,11 @@
                 return response.json();
             })
             .then(data => {
-                originalAllBooks = data.filter(book => book.status === 1); // Lưu toàn bộ sách gốc
-                allBooks = [...originalAllBooks]; // Ban đầu hiển thị toàn bộ
-                applyFiltersAndSort(); // Áp dụng search và sort
+                originalAllBooks = data.filter(book => book.status === 1);
+                allBooks = [...originalAllBooks];
+                applyFiltersAndSort();
                 renderPagination();
-                document.getElementById('books-added').textContent = allBooks.length; // Cập nhật số lượng sách
+                document.getElementById('books-added').textContent = allBooks.length;
             })
             .catch(error => {
                 console.error('There was a problem with the fetch operation:', error);
@@ -778,7 +764,6 @@
             tableBody.innerHTML += row;
         });
 
-        // Thêm sự kiện click cho các nút Delete sau khi render
         document.querySelectorAll('.delete-btn').forEach(button => {
             button.addEventListener('click', function () {
                 const productId = this.getAttribute('data-product-id');
@@ -791,7 +776,6 @@
         document.getElementById('books-added').textContent = allBooks.length;
     }
 
-    // Hàm soft delete sách (cập nhật status thành 0)
     function softDeleteBook(productId) {
         fetch(`http://localhost:8080/api/products/${productId}/soft-delete`, {
             method: 'PATCH',
@@ -802,7 +786,7 @@
         })
             .then(response => {
                 if (!response.ok) throw new Error('Failed to soft delete book');
-                return fetchBooks(); // Lấy lại danh sách sách sau khi soft delete
+                return fetchBooks();
             })
             .then(() => {
                 alert('Book soft deleted successfully!');
@@ -813,15 +797,12 @@
             });
     }
 
-    // Hàm áp dụng filter và sort
     function applyFiltersAndSort() {
         const searchTerm = document.getElementById('searchInput').value.toLowerCase();
         const sortOption = document.getElementById('sortSelect').value;
 
-        // Reset về danh sách gốc nếu input rỗng
         allBooks = [...originalAllBooks];
 
-        // Áp dụng search nếu có từ khóa (tìm cả productName và author)
         if (searchTerm) {
             allBooks = allBooks.filter(book =>
                 book.productName.toLowerCase().includes(searchTerm) ||
@@ -829,7 +810,6 @@
             );
         }
 
-        // Áp dụng sort
         allBooks.sort((a, b) => {
             switch (sortOption) {
                 case 'name-asc':
@@ -846,20 +826,18 @@
         });
     }
 
-    // Thêm event listener cho search và sort
     document.getElementById('searchInput').addEventListener('input', () => {
         applyFiltersAndSort();
-        currentPage = 1; // Reset về trang 1 khi search
+        currentPage = 1;
         renderPagination();
     });
 
     document.getElementById('sortSelect').addEventListener('change', () => {
         applyFiltersAndSort();
-        currentPage = 1; // Reset về trang 1 khi sort
+        currentPage = 1;
         renderPagination();
     });
 
-    // Render phân trang
     function renderPagination() {
         const totalPages = Math.ceil(allBooks.length / itemsPerPage);
         const pagination = document.getElementById('pagination');

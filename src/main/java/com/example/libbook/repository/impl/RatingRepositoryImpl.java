@@ -59,7 +59,6 @@ public class RatingRepositoryImpl implements RatingRepository {
             connection = db.openConnection();
             connection.setAutoCommit(false); // Start transaction
 
-            // Insert into Rating table
             ratingStmt = connection.prepareStatement(ratingSql);
             ratingStmt.setInt(1, rating.getUserId());
             ratingStmt.setInt(2, rating.getProductId());
@@ -68,14 +67,12 @@ public class RatingRepositoryImpl implements RatingRepository {
             ratingStmt.setObject(5, rating.getCreatedAt());
             int ratingRowsAffected = ratingStmt.executeUpdate();
 
-            // Insert into CheckBuy table
             checkBuyStmt = connection.prepareStatement(checkBuySql);
             checkBuyStmt.setInt(1, rating.getUserId());
             checkBuyStmt.setInt(2, rating.getProductId());
             checkBuyStmt.setInt(3, 1); // Status = 1
             int checkBuyRowsAffected = checkBuyStmt.executeUpdate();
 
-            // Commit transaction if both inserts succeed
             if (ratingRowsAffected > 0 && checkBuyRowsAffected > 0) {
                 connection.commit();
                 return true;
@@ -86,7 +83,7 @@ public class RatingRepositoryImpl implements RatingRepository {
         } catch (SQLException e) {
             try {
                 if (connection != null) {
-                    connection.rollback(); // Rollback on error
+                    connection.rollback();
                 }
             } catch (SQLException rollbackEx) {
                 throw new RuntimeException("Lỗi khi rollback giao dịch", rollbackEx);
@@ -96,7 +93,7 @@ public class RatingRepositoryImpl implements RatingRepository {
         } catch (Exception e) {
             try {
                 if (connection != null) {
-                    connection.rollback(); // Rollback on error
+                    connection.rollback();
                 }
             } catch (SQLException rollbackEx) {
                 throw new RuntimeException("Lỗi khi rollback giao dịch", rollbackEx);
@@ -107,7 +104,7 @@ public class RatingRepositoryImpl implements RatingRepository {
                 if (ratingStmt != null) ratingStmt.close();
                 if (checkBuyStmt != null) checkBuyStmt.close();
                 if (connection != null) {
-                    connection.setAutoCommit(true); // Reset auto-commit
+                    connection.setAutoCommit(true);
                     connection.close();
                 }
             } catch (SQLException e) {

@@ -48,10 +48,8 @@ public class CheckBuyRepositoryImpl implements CheckBuyRepository {
             if (rs.next()) {
                 boolean currentStatus = rs.getBoolean("Status");
                 if (currentStatus) {
-                    // Nếu Status đã là true, trả về false để báo đã đánh giá
                     return false;
                 } else {
-                    // Nếu Status là false, cập nhật thành true
                     String updateSql = "UPDATE [CheckBuy] SET [Status] = ? WHERE [UserId] = ? AND [ProductId] = ?";
                     try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
                         updateStmt.setBoolean(1, true);
@@ -62,7 +60,6 @@ public class CheckBuyRepositoryImpl implements CheckBuyRepository {
                     }
                 }
             } else {
-                // Nếu không tồn tại, ném ngoại lệ với thông báo
                 throw new IllegalStateException("You have not purchased this product, so you cannot rate it.");
             }
         } catch (SQLException e) {

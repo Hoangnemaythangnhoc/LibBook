@@ -81,8 +81,8 @@ public class RouterSetting {
     @GetMapping("/home")
     public String dashboard(Model model, HttpSession session) {
         if (session.getAttribute("USER") != null) {
-            UserDTO user = (UserDTO) session.getAttribute("USER"); // Ép kiểu về UserDTO
-            model.addAttribute("USER", user); // Thêm user vào model
+            UserDTO user = (UserDTO) session.getAttribute("USER");
+            model.addAttribute("USER", user);
             System.out.println("User in session - UserId: " + user.getUserId() +
                     ", UserName: " + user.getUserName() +
                     ", Email: " + user.getEmail());
@@ -91,7 +91,7 @@ public class RouterSetting {
         }
         List<Product> products = productService.getAllProduct();
         List<Tag> tags = tagService.getAllTags();
-        System.out.println("User in session: " + session.getAttribute("USER")); // Vẫn giữ để so sánh
+        System.out.println("User in session: " + session.getAttribute("USER"));
         model.addAttribute("products", products);
         model.addAttribute("tags", tags);
         return "Mainpage/home";
@@ -217,7 +217,7 @@ public class RouterSetting {
         List<Tag> tags = tagService.getAllTags();
         model.addAttribute("products", products);
         model.addAttribute("tags", tags);
-        return "profile/shipper"; // Trả về shipper.html
+        return "profile/shipper";
     }
 
     @GetMapping("/admin/edit-book/{id}")

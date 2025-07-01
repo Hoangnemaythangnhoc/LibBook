@@ -548,7 +548,6 @@
             </table>
         </section>
 
-        <!-- Manage Orders Section -->
         <section class="manage-orders" id="manage-orders-section">
             <h2>Order Management & Delivery Status</h2>
             <div class="search-sort-container">
@@ -575,11 +574,9 @@
                 </tr>
                 </thead>
                 <tbody id="order-table-body-admin">
-                <!-- Dữ liệu sẽ được thêm động bởi JavaScript -->
                 </tbody>
             </table>
             <div class="pagination" id="order-pagination"></div>
-            <!-- Modal for Order Details -->
             <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel"
                  aria-hidden="true">
                 <div class="modal-dialog modal-xl">
@@ -604,7 +601,6 @@
                                 </tr>
                                 </thead>
                                 <tbody id="orderDetailsBody">
-                                <!-- Dynamically populated by JavaScript -->
                                 </tbody>
                             </table>
                             <div class="order-summary mt-3">
@@ -633,13 +629,11 @@
     const itemsPerPage = 10;
     let currentOrderPage = 1;
 
-    // Ẩn tất cả section khi trang tải, hiển thị Profile mặc định
     document.addEventListener('DOMContentLoaded', () => {
         sections.forEach(section => section.style.display = 'none');
         document.getElementById('profile-section').style.display = 'block';
     });
 
-    // Điều hướng giữa các section
     sidebarItems.forEach((item, index) => {
         item.addEventListener('click', () => {
             const sectionId = item.getAttribute('data-section');
@@ -664,7 +658,6 @@
         });
     });
 
-    // Preview avatar
     function previewAvatar(event) {
         const file = event.target.files[0];
         const preview = document.getElementById('avatar-preview');
@@ -677,7 +670,6 @@
         }
     }
 
-    // Handle profile update (hardcoded alert)
     document.getElementById('profileForm').addEventListener('submit', (e) => {
         e.preventDefault();
         alert('Profile updated successfully! (Hardcoded)');
@@ -687,7 +679,6 @@
         }
     });
 
-    // Update order status (hardcoded alert)
     function updateStatus(select, orderId) {
         const newStatus = select.value;
         alert(`Order ${orderId} status updated to: ${newStatus} (Hardcoded)`);

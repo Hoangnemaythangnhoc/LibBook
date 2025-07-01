@@ -230,7 +230,6 @@
             background-color: #fff;
         }
 
-        /* Additional styles for Manage Orders section */
         .status-select {
             padding: 0.375rem 0.75rem;
             border-radius: 0.375rem;
@@ -332,23 +331,23 @@
         }
 
         .status-pending {
-            background-color: #e2e3e5; /* Xám nhạt */
-            color: #41464b; /* Xám đậm */
+            background-color: #e2e3e5;
+            color: #41464b;
         }
 
         .status-processing {
-            background-color: #fff3cd; /* Vàng nhạt */
-            color: #856404; /* Vàng đậm */
+            background-color: #fff3cd;
+            color: #856404;
         }
 
         .status-delivered {
-            background-color: #d4edda; /* Xanh lá nhạt */
-            color: #155724; /* Xanh lá đậm */
+            background-color: #d4edda;
+            color: #155724;
         }
 
         .status-cancelled {
-            background-color: #f8d7da; /* Đỏ nhạt */
-            color: #721c24; /* Đỏ đậm */
+            background-color: #f8d7da;
+            color: #721c24;
         }
 
         .status-select {
@@ -391,7 +390,6 @@
                 <img src="https://i.pravatar.cc/40" alt="Avatar"/>
             </div>
         </header>
-        <!-- Overview Section -->
         <section class="overview" id="overview-section">
             <div class="charts">
                 <h2>Statistics Charts</h2>
@@ -459,7 +457,6 @@
                 </div>
             </div>
         </section>
-        <!-- Manage Books Section -->
         <section class="recent-books" id="manage-books-section">
             <h2>Manage Books</h2>
             <div class="search-sort-container">
@@ -484,12 +481,10 @@
                 </tr>
                 </thead>
                 <tbody id="book-table-body">
-                <!-- Dữ liệu sẽ được thêm động bởi JavaScript -->
                 </tbody>
             </table>
             <div class="pagination" id="pagination"></div>
         </section>
-        <!-- Manage Orders Section -->
         <section class="manage-orders" id="manage-orders-section">
             <h2>Order Management & Delivery Status</h2>
             <div class="search-sort-container">
@@ -516,11 +511,9 @@
                 </tr>
                 </thead>
                 <tbody id="order-table-body">
-                <!-- Dữ liệu sẽ được thêm động bởi JavaScript -->
                 </tbody>
             </table>
             <div class="pagination" id="order-pagination"></div>
-            <!-- Modal for Order Details -->
             <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel"
                  aria-hidden="true">
                 <div class="modal-dialog modal-xl">
@@ -545,10 +538,8 @@
                                 </tr>
                                 </thead>
                                 <tbody id="orderDetailsBody">
-                                <!-- Dynamically populated by JavaScript -->
                                 </tbody>
                             </table>
-                            <!-- Thêm phần hiển thị Total và Tổng số lượng -->
                             <div class="order-summary mt-3">
                                 <p><strong>Total Amount:</strong> <span id="orderTotal">$0.00</span></p>
                                 <p><strong>Total Quantity:</strong> <span id="orderQuantity">0</span></p>
@@ -561,7 +552,6 @@
                 </div>
             </div>
         </section>
-        <!-- Manage Users Section -->
         <section class="manage-users" id="manage-users-section">
             <h2>Manage Users</h2>
             <div class="user-sections">
@@ -641,7 +631,6 @@
                 </table>
             </div>
         </section>
-        <!-- Manage Categories Section -->
         <section class="manage-categories" id="manage-categories-section">
             <h2>Manage Categories</h2>
             <table>
@@ -675,7 +664,6 @@
                 </tbody>
             </table>
         </section>
-        <!-- Manage Discounts & Promotions Section -->
         <section class="manage-discounts" id="manage-discounts-section">
             <h2>Manage Discounts & Promotions</h2>
             <form>
@@ -696,7 +684,6 @@
                 <button type="submit" class="btn">Add Discount</button>
             </form>
         </section>
-        <!-- Manage Comments Section -->
         <section class="manage-comments" id="manage-comments-section">
             <h2>Manage Comments</h2>
             <table>
@@ -736,7 +723,6 @@
                 </tbody>
             </table>
         </section>
-        <!-- Settings Section -->
         <section class="settings" id="settings-section">
             <h2>Settings</h2>
             <form>
@@ -768,7 +754,7 @@
     let allBooks = [];
     let originalAllOrders = [];
     let allOrders = [];
-    let orderStatuses = []; // Khởi tạo mảng rỗng cho orderStatuses
+    let orderStatuses = [];
     const itemsPerPage = 10;
     let currentBookPage = 1;
     let currentOrderPage = 1;
@@ -1106,7 +1092,6 @@
             const tbody = document.getElementById('orderDetailsBody');
             tbody.innerHTML = '';
 
-            // Tính Total và Tổng số lượng
             let totalAmount = 0;
             let totalQuantity = 0;
             for (const detail of details) {
@@ -1154,7 +1139,6 @@
                 }
             }
 
-            // Cập nhật Total và Tổng số lượng
             document.getElementById('orderTotal').textContent = `$${totalAmount.toFixed(2)}`;
             document.getElementById('orderQuantity').textContent = totalQuantity;
 

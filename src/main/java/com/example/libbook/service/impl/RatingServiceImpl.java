@@ -44,7 +44,6 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public boolean saveRating(RatingDTO ratingDTO) {
-        // Kiểm tra và cập nhật CheckBuy
         CheckBuy checkBuy = new CheckBuy();
         checkBuy.setUserId(ratingDTO.getUserId());
         checkBuy.setProductId(ratingDTO.getProductId());
@@ -56,7 +55,6 @@ public class RatingServiceImpl implements RatingService {
                 throw new IllegalStateException("You have already rated this product.");
             }
 
-            // Lưu Rating
             Rating rating = new Rating();
             rating.setUserId(ratingDTO.getUserId());
             rating.setProductId(ratingDTO.getProductId());
@@ -65,7 +63,7 @@ public class RatingServiceImpl implements RatingService {
             rating.setCreatedAt(LocalDateTime.now());
             return ratingRepository.saveRating(rating);
         } catch (IllegalStateException e) {
-            throw e; // Truyền lại ngoại lệ để controller xử lý
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException("You have not purchased this product, so you cannot rate it.");
         }

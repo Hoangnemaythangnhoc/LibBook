@@ -124,7 +124,7 @@ public class ProductApiController {
             HttpSession session) {
         UserDTO currentUser = (UserDTO) session.getAttribute("USER");
         if (currentUser == null) {
-            return ResponseEntity.ok(false); // Người dùng chưa đăng nhập, không thể đã đánh giá
+            return ResponseEntity.ok(false);
         }
         System.out.println("API: Checking CheckBuy status for UserId=" + currentUser.getUserId() + ", ProductId=" + productId);
         boolean hasReviewed = checkBuyService.hasUserReviewed(currentUser.getUserId(), productId);

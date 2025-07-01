@@ -4,16 +4,11 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title th:text="${product.productName} + ' - LibBook'">Product - LibBook</title>
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-    <!-- Remix Icons -->
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet"/>
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="/css/product.css"/>
-    <!-- Favicon -->
     <link rel="shortcut icon" href="https://rails-assets-us.bookshop.org/assets/favicon-63cb20989e2516343feeab429626798a43afdaa28eeaba777b7e0acde8a25dd2.png"/>
     <style>
-        /* AI Help Button Styles */
         .ai-help-btn {
             position: fixed;
             bottom: 30px;
@@ -91,7 +86,6 @@
             50% { transform: scale(1.1); opacity: 1; }
             100% { transform: scale(0.9); opacity: 0.5; }
         }
-        /* Style cho ngôi sao rating */
         .star-rating {
             display: inline-flex;
             cursor: pointer;
@@ -106,7 +100,6 @@
         }
         .star-rating i.selected { color: #ffc107; }
         .star-rating i.hover { color: #ffca28; }
-        /* Pagination Styles */
         .pagination {
             display: flex;
             justify-content: center;
@@ -123,7 +116,6 @@
             background: #007bff;
             color: #fff;
         }
-        /* Toast Container */
         .toast-container {
             position: fixed;
             top: 20px;
@@ -133,9 +125,7 @@
     </style>
 </head>
 <body>
-<!-- Navbar Placeholder -->
 <div th:insert="~{fragments/navbar :: navbar}"></div>
-<!-- Product Details -->
 <section class="product-details py-5 mt-5">
     <div class="container">
         <nav aria-label="breadcrumb">
@@ -146,7 +136,6 @@
             </ol>
         </nav>
         <div class="row g-4">
-            <!-- Product Gallery -->
             <div class="col-lg-5">
                 <div class="product-gallery">
                     <img th:src="${product.imageFile}" alt="Book cover" class="img-fluid rounded shadow"/>
@@ -157,7 +146,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Product Info -->
             <div class="col-lg-7">
                 <div class="product-info">
                     <span class="badge bg-primary mb-2">Book</span>
@@ -232,7 +220,6 @@
                     </div>
                 </div>
             </div>
-            <!-- AI Help Button -->
             <div class="ai-help-btn" title="AI Help">
                 <i class="ri-robot-line"></i>
                 <span class="star-1"></span>
@@ -244,7 +231,6 @@
         </div>
     </div>
 </section>
-<!-- Reviews and Comments -->
 <section class="reviews-comments py-5">
     <div class="container">
         <h3 class="mb-4">Reviews</h3>
@@ -279,7 +265,6 @@
         </div>
     </div>
 </section>
-<!-- Related Books -->
 <section class="related-books py-5 bg-light">
     <div class="container">
         <h3 class="mb-4">You May Also Like</h3>
@@ -301,9 +286,7 @@
         </div>
     </div>
 </section>
-<!-- Footer Placeholder -->
 <div th:insert="~{fragments/footer :: footer}"></div>
-<!-- Toast Container -->
 <div class="toast-container">
     <div class="toast" id="notificationToast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
@@ -313,12 +296,9 @@
         <div class="toast-body" id="toastMessage"></div>
     </div>
 </div>
-<!-- Bootstrap Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<!-- Custom JS -->
 <script src="/js/components.js"></script>
 <script>
-    // Quantity Selector
     let quantity = 1;
     const quantityDisplay = document.getElementById("quantity");
     function increaseQuantity() {
@@ -331,7 +311,6 @@
             quantityDisplay.textContent = quantity;
         }
     }
-    // Initialize Toast
     const toastEl = document.getElementById('notificationToast');
     const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
     function showToast(title, message, type = 'success') {
@@ -345,7 +324,6 @@
         toastEl.querySelector('.toast-header').classList.add(type === 'success' ? 'bg-success' : 'bg-danger');
         toast.show();
     }
-    // Star Rating Selector
     document.addEventListener('DOMContentLoaded', () => {
         const stars = document.querySelectorAll('#starRating i');
         const ratingInput = document.getElementById('ratingValue');
@@ -383,7 +361,6 @@
                 stars.forEach(s => s.classList.remove('hover'));
             });
         });
-        // Submit Review
         reviewForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             const stars = document.getElementById('ratingValue').value;
@@ -411,7 +388,6 @@
                 showToast('Error', errorMessage || 'Failed to submit rating.', 'error');
             }
         });
-        // Fetch and display reviews with pagination
         function fetchReviews() {
             console.log('Fetching reviews for productId:', productId); // Debug
             fetch(`/ratings/${productId}`)
@@ -470,7 +446,7 @@
                 })
                 .catch(error => console.error('Error fetching reviews:', error));
         }
-        fetchReviews(); // Load reviews khi trang tải
+        fetchReviews();
     });
 </script>
 </body>

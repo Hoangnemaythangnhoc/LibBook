@@ -44,7 +44,6 @@ public class RatingController {
             if (result) {
                 return ResponseEntity.ok("Rating submitted successfully!");
             }
-            // Không cần kiểm tra false vì ngoại lệ đã xử lý
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {

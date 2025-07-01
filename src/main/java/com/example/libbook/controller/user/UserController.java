@@ -28,7 +28,7 @@ public class UserController {
     @Autowired
     private EmailTokenService emailTokenService;
     @Autowired
-    private RatingService ratingService; // Thêm khai báo và tiêm dependency này
+    private RatingService ratingService;
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @GetMapping("/register")
