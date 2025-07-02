@@ -15,4 +15,3 @@ public class Rating {
     private LocalDateTime createdAt;
     public String content;
 }
-

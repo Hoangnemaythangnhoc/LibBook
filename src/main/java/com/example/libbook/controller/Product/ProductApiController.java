@@ -12,7 +12,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -97,8 +99,10 @@ public class ProductApiController {
         existingProduct.setAuthor(author);
         existingProduct.setDiscount(discount);
 
+        // Xử lý file ảnh nếu có
         if (imageFile != null && !imageFile.isEmpty()) {
             existingProduct.setImageFile(imageFile.getOriginalFilename());
+            // Có thể thêm logic lưu file vào server tại đây
         }
 
         productService.updateProduct(existingProduct, tagIds == null ? new ArrayList<>() : tagIds);
@@ -117,6 +121,27 @@ public class ProductApiController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/product/new-arrivals")
+    public ResponseEntity<List<Product>> getNewArrivals(@RequestParam(defaultValue = "10") int limit) {
+        List<Product> products = productService.getNewArrivals(limit);
+        return products.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(products);
+    }
+
+    @GetMapping("/product/top-sale")
+    public ResponseEntity<List<Product>> getTopSellingProducts(@RequestParam(defaultValue = "10") int limit) {
+        List<Product> products = productService.getTopSellingProducts(limit);
+        return products.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(products);
+    }
+
+    @GetMapping("/product/combo-by-tag")
+    public ResponseEntity<Map<String, List<Product>>> getProductCombos(
+            @RequestParam(defaultValue = "3") int combos,
+            @RequestParam(defaultValue = "3") int booksPerCombo) {
+        Map<String, List<Product>> result = productService.getProductCombosByRandomTags(combos, booksPerCombo);
+        return result.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(result);
+    }
+
 
     @GetMapping("/products/checkbuy/status")
     public ResponseEntity<Boolean> checkBuyStatus(

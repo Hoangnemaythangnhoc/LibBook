@@ -192,6 +192,17 @@ public class RouterSetting {
         return "Mainpage/upload-product";
     }
 
+    @GetMapping("/verify-token")
+    public String showVerifyTokenPage() {
+        return "Login/verify-token"; // Trả về template Thymeleaf verify-token.html
+    }
+
+    @GetMapping("/reset-password")
+    public String showResetPasswordPage(@RequestParam String email, Model model) {
+        model.addAttribute("email", email);
+        return "Login/reset-password";
+    }
+
     @GetMapping("/staff")
     public String staffPanel(Model model, HttpSession session) {
         if (session.getAttribute("staff") != null) {

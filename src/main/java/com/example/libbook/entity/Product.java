@@ -21,6 +21,7 @@ public class Product {
     private double rating;
     private Timestamp createAt;
     private String author;
+    private int discount;
 
     // Constructors
     public Product() {}
@@ -61,6 +62,14 @@ public class Product {
     public void setRating(double rating) { this.rating = rating; }
     public Timestamp getCreateAt() { return createAt; }
     public void setCreateAt(Timestamp createAt) { this.createAt = createAt; }
+    public int getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(int discount) {
+        this.discount = discount;
+    }
+
     public String getAuthor() {
         return author;
     }
@@ -68,4 +77,5 @@ public class Product {
     public void setAuthor(String author) {
         this.author = author;
     }
+
 }

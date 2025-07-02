@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -37,8 +38,9 @@ public class UserServiceImpl implements UserService {
     public boolean isEmailExist(String email) {
         return userRepository.isEmailExist(email);
     }
+
     @Override
-    public boolean uploadAvatar(String base64,int ID) throws IOException {
+    public boolean uploadAvatar(byte[] base64,int ID) throws IOException {
         return userRepository.updateAvatar(base64, 1,ID);
     }
 
@@ -46,4 +48,38 @@ public class UserServiceImpl implements UserService {
     public User getUserByUserId(int id) {
         return userRepository.getUserByUserId(id);
     }
+
+    @Override
+    public boolean updatePassword(String email, String password) {
+        return userRepository.updatePassword(email,password);
+    }
+
+    @Override
+    public List<UserDTO> getCustomers() {
+        return userRepository.getCustomers();
+    }
+
+    @Override
+    public List<UserDTO> getStaffWithRoleName() {
+        return userRepository.getStaffWithRoleName();
+    }
+
+    @Override
+    public boolean banUser(int userId) {
+        return userRepository.banUser(userId);
+    }
+
+    @Override
+    public boolean unbanUser(int userId) {
+        return userRepository.unbanUser(userId);
+    }
+
+    @Override
+    public boolean createStaffAccount(UserDTO userDTO) {
+        if (userRepository.isEmailExist(userDTO.getEmail())) {
+            throw new IllegalArgumentException("Email already exists!");
+        }
+        return userRepository.createStaffAccount(userDTO);
+    }
+
 }

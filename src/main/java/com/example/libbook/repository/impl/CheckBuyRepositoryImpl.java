@@ -69,4 +69,3 @@ public class CheckBuyRepositoryImpl implements CheckBuyRepository {
         }
     }
 }
-
