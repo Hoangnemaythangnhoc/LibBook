@@ -18,11 +18,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean createAccount(UserDTO userDTO) {
-        // Kiểm tra email đã tồn tại
         if (isEmailExist(userDTO.getEmail())) {
             throw new IllegalArgumentException("Email already exists!");
         }
-        // Lưu tài khoản
         return userRepository.createAccount(userDTO);
     }
 
@@ -42,13 +40,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean uploadAvatar(String base64,int ID) throws IOException {
+    public boolean uploadAvatar(byte[] base64,int ID) throws IOException {
         return userRepository.updateAvatar(base64, 1,ID);
     }
 
     @Override
     public User getUserByUserId(int id) {
         return userRepository.getUserByUserId(id);
+    }
+
+    @Override
+    public boolean updatePassword(String email, String password) {
+        return userRepository.updatePassword(email,password);
     }
 
     @Override

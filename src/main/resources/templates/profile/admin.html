@@ -12,6 +12,8 @@
     <script defer src="/js/admin.js"></script>
 
     <!-- Inline CSS with updated layout -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -41,10 +43,10 @@
 
         .sidebar ul {
             list-style: none;
-            padding: 0;
+            padding: 20px;
         }
 
-        .sidebar ul li {
+        .sidebar li {
             padding: 15px;
             cursor: pointer;
             font-size: 1.1rem;
@@ -52,6 +54,11 @@
         }
 
         .sidebar ul li:hover {
+            background-color: #34495e;
+        }
+
+        .sidebar ul li.active {
+            font-weight: bold;
             background-color: #34495e;
         }
 
@@ -73,7 +80,7 @@
 
         .topbar h1 {
             font-size: 1.8rem;
-            margin: 0;
+            margin: 0px;
         }
 
         .admin-info {
@@ -89,16 +96,18 @@
         }
 
         .overview {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 20px;
-            flex-wrap: wrap;
+            margin-bottom: 20px;
         }
 
         .card {
-            width: 200px;
-            flex-shrink: 0;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
         }
 
         .card h3 {
@@ -117,6 +126,7 @@
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: none;
         }
 
         .chart-grid {
@@ -131,7 +141,7 @@
             border-radius: 5px;
         }
 
-        .recent-books table, .manage-orders table, .manage-users table, .manage-categories table, .manage-comments table {
+        .recent-books table, .recent-books table, .manage-orders table, .manage-users table, .manage-categories table, .manage-comments table {
             width: 100%;
             border-collapse: collapse;
             background-color: #fff;
@@ -153,6 +163,25 @@
             width: 50px;
             height: auto;
             border-radius: 5px;
+        }
+
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .pagination button {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            cursor: pointer;
+        }
+
+        .pagination button:disabled {
+            background-color: #f4f4f9;
+            cursor: not-allowed;
         }
 
         .manage-discounts form, .settings form {
@@ -185,6 +214,160 @@
 
         .manage-discounts button:hover, .settings button:hover {
             background-color: #34495e;
+        }
+
+        .search-sort-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .search-sort-container input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .search-sort-container select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+
+        .status-select {
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid #ced4da;
+            background-color: #ffffff;
+            font-size: 0.875rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .status-select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+
+        .btn-update {
+            background-color: #0d6efd;
+            color: #ffffff;
+            border: none;
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+            margin-left: 0.5rem;
+        }
+
+        .btn-update:hover {
+            background-color: #0b5ed7;
+        }
+
+        .btn-details {
+            background-color: #198754;
+            color: #ffffff;
+            border: none;
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-details:hover {
+            background-color: #157347;
+        }
+
+        .product-image {
+            max-width: 60px;
+            max-height: 60px;
+            object-fit: cover;
+            border-radius: 0.25rem;
+        }
+
+        .modal-dialog {
+            max-width: 70%;
+        }
+
+        .modal-content {
+            border-radius: 0.5rem;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #e9ecef;
+        }
+
+        .order-summary {
+            font-size: 1rem;
+            color: #2c3e50;
+        }
+
+        .order-summary p {
+            margin: 0.5rem 0;
+        }
+
+        .order-summary strong {
+            color: #1a1a1a;
+        }
+
+        #orderTotal {
+            color: #198754;
+            font-weight: 600;
+        }
+
+        #orderQuantity {
+            color: #0d6efd;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background-color: #e2e3e5;
+            color: #41464b;
+        }
+
+        .status-processing {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-delivered {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-select {
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid #ced4da;
+            font-size: 0.875rem;
+            transition: border-color 0.2s ease;
+            width: 120px;
+        }
+
+        .status-select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
         }
 
         .modal-overlay {
@@ -233,14 +416,14 @@
         <h2>📚 Admin Panel</h2>
         <nav>
             <ul>
-                <li>📊 Overview</li>
-                <li>📦 Manage Books</li>
-                <li>🛒 Manage Orders</li>
-                <li>👥 Manage Users</li>
-                <li>🏷️ Manage Categories</li>
-                <li>💸 Manage Discounts & Promotions</li>
-                <li>💬 Manage Comments</li>
-                <li>⚙️ Settings</li>
+                <li data-section="overview-section">📊 Overview</li>
+                <li data-section="manage-books-section">📦 Manage Books</li>
+                <li data-section="manage-orders-section">🛒 Manage Orders</li>
+                <li data-section="manage-users-section">👥 Manage Users</li>
+                <li data-section="manage-categories-section">🏷️ Manage Categories</li>
+                <li data-section="manage-discounts-section">💸 Manage Discounts & Promotions</li>
+                <li data-section="manage-comments-section">💬 Manage Comments</li>
+                <li data-section="settings-section">⚙️ Settings</li>
             </ul>
         </nav>
     </aside>
@@ -249,12 +432,10 @@
         <header class="topbar">
             <h1>Admin Dashboard</h1>
             <div class="admin-info">
-                <span>Hello, Admin</span>
+                <span th:text="'Hello, ' + ${adminName ?: 'Admin'}">Hello, Admin</span>
                 <img src="https://i.pravatar.cc/40" alt="Avatar"/>
             </div>
         </header>
-
-        <!-- Overview Section -->
         <section class="overview" id="overview-section">
             <div class="charts">
                 <h2>Statistics Charts</h2>
@@ -303,7 +484,7 @@
                     </div>
                 </div>
             </div>
-            <div style="display: flex !important; justify-content: space-around !important;">
+            <div style="display: flex; justify-content: space-around;">
                 <div class="card">
                     <h3>Today's Revenue</h3>
                     <p id="revenue">$30,000</p>
@@ -322,10 +503,17 @@
                 </div>
             </div>
         </section>
-
-        <!-- Manage Books Section -->
-        <section class="recent-books" style="display: none;" id="manage-books-section">
+        <section class="recent-books" id="manage-books-section">
             <h2>Manage Books</h2>
+            <div class="search-sort-container">
+                <input type="text" id="searchInput" placeholder="Search by book name or author..."/>
+                <select id="sortSelect">
+                    <option value="name-asc">Name (A-Z)</option>
+                    <option value="name-desc">Name (Z-A)</option>
+                    <option value="price-asc">Price (Low to High)</option>
+                    <option value="price-desc">Price (High to Low)</option>
+                </select>
+            </div>
             <table>
                 <thead>
                 <tr>
@@ -333,91 +521,82 @@
                     <th>Book Name</th>
                     <th>Author</th>
                     <th>Price</th>
+                    <th>Discount</th>
                     <th>Updated Date</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody id="book-table-body">
-                <tr>
-                    <td><img src="https://www.malenybookshop.com.au/assets/full/9781864581331.jpg" alt="Book Cover"/>
-                    </td>
-                    <td>The Universe Explained</td>
-                    <td>No Author</td>
-                    <td>$25.99</td>
-                    <td>2025-06-01</td>
-                    <td>
-                        <button class="btn btn-sm btn-primary">Edit</button>
-                        <button class="btn btn-sm btn-danger">Delete</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td><img src="https://worldscientific.com/cms/10.1142/13161/asset/18ee2b12-9818-e2b1-f981-ee2b12f9818e/13161.cover.jpg" alt="Book Cover"/></td>
-                    <td>The Mystery of Time</td>
-                    <td>No Author</td>
-                    <td>$15.99</td>
-                    <td>2025-06-01</td>
-                    <td>
-                        <button class="btn btn-sm btn-primary">Edit</button>
-                        <button class="btn btn-sm btn-danger">Delete</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td><img src="https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1449063143i/28076351.jpg" alt="Book Cover"/></td>
-                    <td>Love in the Stars</td>
-                    <td>No Author</td>
-                    <td>$19.99</td>
-                    <td>2025-06-02</td>
-                    <td>
-                        <button class="btn btn-sm btn-primary">Edit</button>
-                        <button class="btn btn-sm btn-danger">Delete</button>
-                    </td>
-                </tr>
                 </tbody>
             </table>
+            <div class="pagination" id="pagination"></div>
         </section>
-
-        <!-- Manage Orders Section -->
-        <section class="manage-orders" style="display: none;" id="manage-orders-section">
-            <h2>Manage Orders</h2>
+        <section class="manage-orders" id="manage-orders-section">
+            <h2>Order Management & Delivery Status</h2>
+            <div class="search-sort-container">
+                <input type="text" id="orderSearchInput" placeholder="Search by order ID, user ID or Status"/>
+                <select id="orderSortSelect">
+                    <option value="id-asc">Order ID (Asc)</option>
+                    <option value="id-desc">Order ID (Desc)</option>
+                    <option value="date-asc">Create Date (Oldest First)</option>
+                    <option value="date-desc">Create Date (Newest First)</option>
+                    <option value="status-asc">Status (A-Z)</option>
+                    <option value="status-desc">Status (Z-A)</option>
+                </select>
+            </div>
             <table>
                 <thead>
                 <tr>
                     <th>Order ID</th>
-                    <th>Customer Name</th>
-                    <th>Book Name</th>
-                    <th>Price</th>
-                    <th>Order Date</th>
+                    <th>User ID</th>
+                    <th>Create Date</th>
+                    <th>Complete</th>
+                    <th>Coupon ID</th>
                     <th>Status</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
-                <tbody>
-                <tr>
-                    <td>#001</td>
-                    <td>John Doe</td>
-                    <td>The Universe Explained</td>
-                    <td>$25.99</td>
-                    <td>2025-06-01</td>
-                    <td><span class="badge bg-success">Delivered</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-primary">View</button>
-                        <button class="btn btn-sm btn-warning">Update</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>#002</td>
-                    <td>Jane Smith</td>
-                    <td>The Mystery of Time</td>
-                    <td>$15.99</td>
-                    <td>2025-06-02</td>
-                    <td><span class="badge bg-warning">Pending</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-primary">View</button>
-                        <button class="btn btn-sm btn-warning">Update</button>
-                    </td>
-                </tr>
+                <tbody id="order-table-body">
                 </tbody>
             </table>
+            <div class="pagination" id="order-pagination"></div>
+            <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <table class="details-table">
+                                <thead>
+                                <tr>
+                                    <th>Order Detail ID</th>
+                                    <th>Product Image</th>
+                                    <th>Product Name</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>User ID</th>
+                                    <th>Rating</th>
+                                    <th>Author</th>
+                                    <th>Discount</th>
+                                </tr>
+                                </thead>
+                                <tbody id="orderDetailsBody">
+                                </tbody>
+                            </table>
+                            <div class="order-summary mt-3">
+                                <p><strong>Total Amount:</strong> <span id="orderTotal">$0.00</span></p>
+                                <p><strong>Total Quantity:</strong> <span id="orderQuantity">0</span></p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- Manage Users Section -->
@@ -530,9 +709,7 @@
                 </tbody>
             </table>
         </section>
-
-        <!-- Manage Discounts & Promotions Section -->
-        <section class="manage-discounts" style="display: none;" id="manage-discounts-section">
+        <section class="manage-discounts" id="manage-discounts-section">
             <h2>Manage Discounts & Promotions</h2>
             <form>
                 <div class="mb-3">
@@ -615,11 +792,441 @@
         </section>
     </main>
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     const sidebarItems = document.querySelectorAll('.sidebar ul li');
     const sections = document.querySelectorAll('.main-content section');
-    let activeSectionIndex = -1; // Theo dõi mục đang được chọn
+    let activeSectionIndex = -1;
+    let originalAllBooks = [];
+    let allBooks = [];
+    let originalAllOrders = [];
+    let allOrders = [];
+    let orderStatuses = [];
+    const itemsPerPage = 10;
+    let currentBookPage = 1;
+    let currentOrderPage = 1;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        sections.forEach(section => section.style.display = 'none');
+        document.getElementById('overview-section').style.display = 'grid';
+        fetchBooks();
+    });
+
+    sidebarItems.forEach((item, index) => {
+        item.addEventListener('click', () => {
+            const sectionId = item.getAttribute('data-section');
+            const currentSection = document.getElementById(sectionId);
+            if (activeSectionIndex === index && currentSection.style.display === 'block') {
+                return;
+            }
+            sidebarItems.forEach(li => li.classList.remove('active'));
+            sections.forEach(section => section.style.display = 'none');
+            if (currentSection) {
+                currentSection.style.display = 'block';
+                item.classList.add('active');
+                if (sectionId === 'manage-books-section') {
+                    fetchBooks();
+                } else if (sectionId === 'manage-orders-section') {
+                    fetchOrders();
+                }
+            }
+            activeSectionIndex = index;
+        });
+    });
+
+    function fetchBooks() {
+        fetch('http://localhost:8080/api/products')
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok ' + response.statusText);
+                return response.json();
+            })
+            .then(data => {
+                originalAllBooks = data.filter(book => book.status === 1);
+                allBooks = [...originalAllBooks];
+                applyBookFiltersAndSort();
+                renderBookPagination();
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+                alert('Failed to load books. Check the console for details.');
+            });
+    }
+
+    function renderBookTable() {
+        const tableBody = document.getElementById('book-table-body');
+        tableBody.innerHTML = '';
+        const startIndex = (currentBookPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedBooks = allBooks.slice(startIndex, endIndex);
+        paginatedBooks.forEach(book => {
+            const discountedPrice = book.price * ((100 - book.discount) / 100);
+            const row = `
+               <tr>
+                   <td><img src="${book.imageFile}" alt="${book.productName} Cover"/></td>
+                   <td>${book.productName}</td>
+                   <td>${book.author}</td>
+                   <td>$${discountedPrice.toFixed(2)}</td>
+                   <td>${book.discount}%</td>
+                   <td>${new Date().toISOString().split('T')[0]}</td>
+                   <td>
+                       <a href="/admin/edit-book/${book.productId}" class="btn btn-sm btn-primary">Edit</a>
+                       <button class="btn btn-sm btn-danger delete-btn" data-product-id="${book.productId}">Delete</button>
+                   </td>
+               </tr>
+           `;
+            tableBody.innerHTML += row;
+        });
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const productId = this.getAttribute('data-product-id');
+                if (confirm('Are you sure you want to delete this book?')) {
+                    softDeleteBook(productId);
+                }
+            });
+        });
+    }
+
+    function softDeleteBook(productId) {
+        fetch(`http://localhost:8080/api/products/${productId}/soft-delete`, {
+            method: 'PATCH',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({status: 0})
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to soft delete book');
+                return fetchBooks();
+            })
+            .then(() => alert('Book soft deleted successfully!'))
+            .catch(error => {
+                console.error('Error soft deleting book:', error);
+                alert('Failed to soft delete book. Check console for details.');
+            });
+    }
+
+    function applyBookFiltersAndSort() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const sortOption = document.getElementById('sortSelect').value;
+        allBooks = [...originalAllBooks];
+        if (searchTerm) {
+            allBooks = allBooks.filter(book =>
+                book.productName.toLowerCase().includes(searchTerm) ||
+                book.author.toLowerCase().includes(searchTerm)
+            );
+        }
+        allBooks.sort((a, b) => {
+            switch (sortOption) {
+                case 'name-asc':
+                    return a.productName.localeCompare(b.productName);
+                case 'name-desc':
+                    return b.productName.localeCompare(a.productName);
+                case 'price-asc':
+                    return a.price - b.price;
+                case 'price-desc':
+                    return b.price - a.price;
+                default:
+                    return 0;
+            }
+        });
+    }
+
+    function renderBookPagination() {
+        const totalPages = Math.ceil(allBooks.length / itemsPerPage);
+        const pagination = document.getElementById('pagination');
+        pagination.innerHTML = '';
+        const prevButton = document.createElement('button');
+        prevButton.textContent = 'Previous';
+        prevButton.disabled = currentBookPage === 1;
+        prevButton.addEventListener('click', () => {
+            if (currentBookPage > 1) {
+                currentBookPage--;
+                renderBookTable();
+                renderBookPagination();
+            }
+        });
+        pagination.appendChild(prevButton);
+        for (let i = 1; i <= totalPages; i++) {
+            const pageButton = document.createElement('button');
+            pageButton.textContent = i;
+            pageButton.disabled = i === currentBookPage;
+            pageButton.addEventListener('click', () => {
+                currentBookPage = i;
+                renderBookTable();
+                renderBookPagination();
+            });
+            pagination.appendChild(pageButton);
+        }
+        const nextButton = document.createElement('button');
+        nextButton.textContent = 'Next';
+        nextButton.disabled = currentBookPage === totalPages;
+        nextButton.addEventListener('click', () => {
+            if (currentBookPage < totalPages) {
+                currentBookPage++;
+                renderBookTable();
+                renderBookPagination();
+            }
+        });
+        pagination.appendChild(nextButton);
+        renderBookTable();
+    }
+
+    async function fetchOrders() {
+        try {
+            const [ordersResponse, statusesResponse] = await Promise.all([
+                fetch('http://localhost:8080/api/orders'),
+                fetch('http://localhost:8080/api/order-statuses')
+            ]);
+            if (!ordersResponse.ok) throw new Error('Failed to load orders: ' + ordersResponse.statusText);
+            if (!statusesResponse.ok) throw new Error('Failed to load statuses: ' + statusesResponse.statusText);
+            originalAllOrders = await ordersResponse.json();
+            orderStatuses = await statusesResponse.json();
+            allOrders = [...originalAllOrders];
+            applyOrderFiltersAndSort();
+            renderOrderPagination();
+        } catch (error) {
+            console.error('Error fetching orders or statuses:', error);
+            alert('Failed to load orders. Check the console for details.');
+        }
+    }
+
+    function renderOrderTable() {
+        const tableBody = document.getElementById('order-table-body');
+        tableBody.innerHTML = '';
+        const startIndex = (currentOrderPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedOrders = allOrders.slice(startIndex, endIndex);
+        paginatedOrders.forEach(order => {
+            const status = orderStatuses.find(s => s.orderStatusId === order.orderStatusId)?.statusName || 'Unknown';
+            const statusClass = `status-${status.toLowerCase().replace(/\s+/g, '-')}`;
+            const row = `
+                    <tr>
+                        <td>${order.orderId}</td>
+                        <td>${order.userId}</td>
+                        <td>${(() => {
+                const date = new Date(order.createDate);
+                return date.toLocaleString('sv-SE', {timeZone: 'Asia/Ho_Chi_Minh'}).slice(0, 19).replace('T', ' ');
+            })()}</td>
+                        <td>${order.complete ? 'Yes' : 'No'}</td>
+                        <td>${order.couponId || 'N/A'}</td>
+                        <td>
+                            <select class="status-select ${statusClass}" id="status-${order.orderId}" onchange="updateStatusColor(this, ${order.orderId})">
+                                ${orderStatuses.map(s => `
+                                    <option value="${s.orderStatusId}" ${s.orderStatusId === order.orderStatusId ? 'selected' : ''}>
+                                        ${s.statusName}
+                                    </option>
+                                `).join('')}
+                            </select>
+                        </td>
+                        <td>
+                            <button class="btn-update" onclick="updateStatus(${order.orderId})">Update</button>
+                            <button class="btn-details" onclick="showDetails(${order.orderId})">View Details</button>
+                        </td>
+                    </tr>
+                `;
+            tableBody.innerHTML += row;
+        });
+    }
+
+    function updateStatusColor(selectElement, orderId) {
+        const selectedStatusId = parseInt(selectElement.value);
+        const status = orderStatuses.find(s => s.orderStatusId === selectedStatusId)?.statusName || 'Unknown';
+        const statusClass = `status-${status.toLowerCase().replace(/\s+/g, '-')}`;
+        selectElement.classList.remove('status-pending', 'status-processing', 'status-delivered', 'status-cancelled');
+        selectElement.classList.add(statusClass);
+    }
+
+    function applyOrderFiltersAndSort() {
+        const searchTerm = document.getElementById('orderSearchInput').value.toLowerCase();
+        const sortOption = document.getElementById('orderSortSelect').value;
+        allOrders = [...originalAllOrders];
+        if (searchTerm) {
+            allOrders = allOrders.filter(order => {
+                const status = orderStatuses.find(s => s.orderStatusId === order.orderStatusId)?.statusName || '';
+                return (
+                    order.orderId.toString().includes(searchTerm) ||
+                    order.userId.toString().includes(searchTerm) ||
+                    status.toLowerCase().includes(searchTerm)
+                );
+            });
+        }
+        allOrders.sort((a, b) => {
+            switch (sortOption) {
+                case 'id-asc':
+                    return a.orderId - b.orderId;
+                case 'id-desc':
+                    return b.orderId - a.orderId;
+                case 'date-asc':
+                    return new Date(a.createDate) - new Date(b.createDate);
+                case 'date-desc':
+                    return new Date(b.createDate) - new Date(a.createDate);
+                case 'status-asc':
+                    const statusA = orderStatuses.find(s => s.orderStatusId === a.orderStatusId)?.statusName || '';
+                    const statusB = orderStatuses.find(s => s.orderStatusId === b.orderStatusId)?.statusName || '';
+                    return statusA.localeCompare(statusB);
+                case 'status-desc':
+                    const statusB2 = orderStatuses.find(s => s.orderStatusId === b.orderStatusId)?.statusName || '';
+                    const statusA2 = orderStatuses.find(s => s.orderStatusId === a.orderStatusId)?.statusName || '';
+                    return statusB2.localeCompare(statusA2);
+                default:
+                    return 0;
+            }
+        });
+    }
+
+    function renderOrderPagination() {
+        const totalPages = Math.ceil(allOrders.length / itemsPerPage);
+        const pagination = document.getElementById('order-pagination');
+        pagination.innerHTML = '';
+        const prevButton = document.createElement('button');
+        prevButton.textContent = 'Previous';
+        prevButton.disabled = currentOrderPage === 1;
+        prevButton.addEventListener('click', () => {
+            if (currentOrderPage > 1) {
+                currentOrderPage--;
+                renderOrderTable();
+                renderOrderPagination();
+            }
+        });
+        pagination.appendChild(prevButton);
+        for (let i = 1; i <= totalPages; i++) {
+            const pageButton = document.createElement('button');
+            pageButton.textContent = i;
+            pageButton.disabled = i === currentOrderPage;
+            pageButton.addEventListener('click', () => {
+                currentOrderPage = i;
+                renderOrderTable();
+                renderOrderPagination();
+            });
+            pagination.appendChild(pageButton);
+        }
+        const nextButton = document.createElement('button');
+        nextButton.textContent = 'Next';
+        nextButton.disabled = currentOrderPage === totalPages;
+        nextButton.addEventListener('click', () => {
+            if (currentOrderPage < totalPages) {
+                currentOrderPage++;
+                renderOrderTable();
+                renderOrderPagination();
+            }
+        });
+        pagination.appendChild(nextButton);
+        renderOrderTable();
+    }
+
+    function updateStatus(orderId) {
+        const newStatusId = document.getElementById(`status-${orderId}`).value;
+        fetch(`http://localhost:8080/api/orders/${orderId}/status`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({orderStatusId: parseInt(newStatusId)})
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to update status: ' + response.statusText);
+                alert('Status updated successfully!');
+                fetchOrders();
+            })
+            .catch(error => {
+                console.error('Error updating status:', error);
+                alert('Failed to update status. Check console for details.');
+            });
+    }
+
+    async function showDetails(orderId) {
+        try {
+            const response = await fetch(`http://localhost:8080/api/orders/${orderId}`);
+            if (!response.ok) throw new Error(`Failed to fetch order details: ${response.statusText}`);
+            const order = await response.json();
+            const details = order.orderDetails || [];
+            const tbody = document.getElementById('orderDetailsBody');
+            tbody.innerHTML = '';
+
+            let totalAmount = 0;
+            let totalQuantity = 0;
+            for (const detail of details) {
+                if (detail.price !== undefined && detail.quantity !== undefined) {
+                    totalAmount += detail.price * detail.quantity;
+                    totalQuantity += detail.quantity;
+                }
+            }
+
+            if (details.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9">No details available</td></tr>';
+            } else {
+                for (const detail of details) {
+                    let product = {
+                        productName: 'N/A',
+                        imageFile: '',
+                        userId: 'N/A',
+                        rating: 'N/A',
+                        author: 'N/A',
+                        discount: 'N/A'
+                    };
+                    try {
+                        const productResponse = await fetch(`http://localhost:8080/api/products/${detail.productId}`);
+                        if (productResponse.ok) {
+                            product = await productResponse.json();
+                        } else {
+                            console.warn(`Product with id ${detail.productId} not found, status: ${productResponse.status}`);
+                        }
+                    } catch (productError) {
+                        console.error(`Error fetching product with id ${detail.productId}:`, productError);
+                    }
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                    <td>${detail.orderDetailId !== undefined ? detail.orderDetailId : 'N/A'}</td>
+                    <td><img src="${product.imageFile || ''}" alt="Product Image" class="product-image"></td>
+                    <td>${product.productName}</td>
+                    <td>${detail.price !== undefined ? '$' + (detail.price*((100-product.discount)/100)).toFixed(2) : 'N/A'}</td>
+                    <td>${detail.quantity !== undefined ? detail.quantity : 'N/A'}</td>
+                    <td>${product.userId}</td>
+                    <td>${product.rating}</td>
+                    <td>${product.author}</td>
+                    <td>${product.discount !== undefined ? product.discount + '%' : 'N/A'}</td>
+                `;
+                    tbody.appendChild(row);
+                }
+            }
+
+            document.getElementById('orderTotal').textContent = `$${totalAmount.toFixed(2)}`;
+            document.getElementById('orderQuantity').textContent = totalQuantity;
+
+            const modalElement = document.getElementById('orderDetailsModal');
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        } catch (error) {
+            console.error('Error fetching order details:', error);
+            const tbody = document.getElementById('orderDetailsBody');
+            tbody.innerHTML = '<tr><td colspan="9">Error loading details: ' + error.message + '</td></tr>';
+            document.getElementById('orderTotal').textContent = '$0.00';
+            document.getElementById('orderQuantity').textContent = '0';
+            new bootstrap.Modal(document.getElementById('orderDetailsModal')).show();
+        }
+    }
+
+    document.getElementById('searchInput').addEventListener('input', () => {
+        applyBookFiltersAndSort();
+        currentBookPage = 1;
+        renderBookPagination();
+    });
+
+    document.getElementById('sortSelect').addEventListener('change', () => {
+        applyBookFiltersAndSort();
+        currentBookPage = 1;
+        renderBookPagination();
+    });
+
+    document.getElementById('orderSearchInput').addEventListener('input', () => {
+        applyOrderFiltersAndSort();
+        currentOrderPage = 1;
+        renderOrderPagination();
+    });
+
+    document.getElementById('orderSortSelect').addEventListener('change', () => {
+        applyOrderFiltersAndSort();
+        currentOrderPage = 1;
+        renderOrderPagination();
+    });
 
     // Điều hướng giữa các section
     sidebarItems.forEach((item, index) => {

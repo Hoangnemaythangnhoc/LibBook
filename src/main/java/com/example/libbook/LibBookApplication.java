@@ -1,24 +1,43 @@
 package com.example.libbook;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.example.libbook.entity.Role;
 import com.example.libbook.repository.RoleRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.List;
 
 import static org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties.UiService.LOGGER;
 
 @SpringBootApplication
+@EnableScheduling
+@ComponentScan(basePackages = {"com.example.libbook", "com.example.libbook.service.impl"})
 public class LibBookApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(LibBookApplication.class, args);
 
+    }
+
+    @Bean
+    public Cloudinary cloudinary(
+            @Value("${cloudinary.cloud-name}") String cloudName,
+            @Value("${cloudinary.api-key}") String apiKey,
+            @Value("${cloudinary.api-secret}") String apiSecret) {
+        return new Cloudinary(ObjectUtils.asMap(
+                "cloud_name", cloudName,
+                "api_key", apiKey,
+                "api_secret", apiSecret
+        ));
     }
     @Bean
     CommandLineRunner queryAdminRole(JdbcTemplate jdbcTemplate) {
@@ -59,5 +78,6 @@ public class LibBookApplication {
 //                LOGGER.error("Error querying for role '{}': {}", roleToQuery, e.getMessage(), e);
             }
         };
+
     }
 }

@@ -12,9 +12,9 @@ public interface UserRepository {
     boolean createAccount(UserDTO userDTO);
     UserDTO checkLogin(String email, String pass);
     UserDTO getUserByEmail(String email);
-    boolean updateAvatar(String base64, int type, int ID) throws IOException;
+    boolean updateAvatar(byte[] base64, int type, int ID) throws IOException;
     User getUserByUserId(int id);
-    boolean changePassword(User user);
+    boolean updatePassword(String email,String password);
     List<UserDTO> getCustomers();
     List<UserDTO> getStaffWithRoleName();
     boolean banUser(int userId);

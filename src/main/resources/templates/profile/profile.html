@@ -14,9 +14,7 @@
 
 </head>
 <body>
-<!-- Include Navbar -->
 <div class="container">
-    <!-- Main Content -->
     <main class="main">
         <a href="/" >
             <button class="btn btn-primary position-absolute top-0 start-0 m-3">
@@ -24,8 +22,6 @@
             </button>
         </a>
 
-
-        <!-- Profile Header -->
         <section class="profile-header">
             <div class="profile-avatar">
                 <img
@@ -60,7 +56,6 @@
             </div>
         </section>
 
-        <!-- Navigation Tabs -->
         <nav class="profile-nav">
             <button class="tab-btn active" data-tab="personal">Thông tin cá nhân</button>
             <button class="tab-btn" data-tab="orders">Đơn hàng</button>
@@ -69,9 +64,7 @@
             <button class="tab-btn" data-tab="settings">Cài đặt</button>
         </nav>
 
-        <!-- Tab Content -->
         <div class="tab-content">
-            <!-- Personal Information Tab -->
             <div class="tab-pane active" id="personal">
                 <div class="card">
                     <div class="card-header">
@@ -113,7 +106,6 @@
                 </div>
             </div>
 
-            <!-- Orders Tab -->
             <div class="tab-pane" id="orders">
                 <div class="card">
                     <div class="card-header">
@@ -130,7 +122,6 @@
                         </div>
                     </div>
                     <div class="orders-list" id="ordersList">
-                        <!-- Orders will be loaded via AJAX -->
                         <div class="order-item" data-order-id="${order.id}">
                             <div class="order-header">
                                 <div class="order-info">
@@ -140,7 +131,6 @@
                                 <span class="order-status status-${order.status}">${order.statusText}</span>
                             </div>
                             <div class="order-items">
-                                <!-- Loop through order items -->
                                 <div class="order-book">
                                     <img src="${book.imageUrl}" alt="${book.title}" class="book-thumb" />
                                     <div class="book-info">
@@ -163,7 +153,6 @@
                 </div>
             </div>
 
-            <!-- Wishlist Tab -->
             <div class="tab-pane" id="wishlist">
                 <div class="card">
                     <div class="card-header">
@@ -171,7 +160,6 @@
                         <span class="item-count" id="wishlistCount">${wishlistCount} sách</span>
                     </div>
                     <div class="wishlist-grid" id="wishlistGrid">
-                        <!-- Wishlist items will be loaded via AJAX -->
                         <div class="book-card" data-book-id="${book.id}">
                             <div class="book-image">
                                 <img src="${book.imageUrl}" alt="${book.title}" />
@@ -184,7 +172,6 @@
                                 <p class="book-author">${book.author}</p>
                                 <div class="book-rating">
                                     <div class="stars">
-                                        <!-- Generate stars based on rating -->
                                         <i class="fas fa-star"></i>
                                         <i class="fas fa-star"></i>
                                         <i class="fas fa-star"></i>
@@ -207,7 +194,6 @@
                 </div>
             </div>
 
-            <!-- Reviews Tab -->
             <div class="tab-pane" id="reviews">
                 <div class="card">
                     <div class="card-header">
@@ -215,7 +201,6 @@
                         <span class="item-count" id="reviewCount">${reviewCount} đánh giá</span>
                     </div>
                     <div class="reviews-list" id="reviewsList">
-                        <!-- Reviews will be loaded via AJAX -->
                         <div class="review-item" data-review-id="${review.id}">
                             <div class="review-book">
                                 <img src="${review.book.imageUrl}" alt="${review.book.title}" class="book-thumb" />
@@ -227,7 +212,6 @@
                             <div class="review-content">
                                 <div class="review-header">
                                     <div class="review-rating">
-                                        <!-- Generate stars -->
                                         <i class="fas fa-star"></i>
                                         <i class="fas fa-star"></i>
                                         <i class="fas fa-star"></i>
@@ -253,10 +237,8 @@
                 </div>
             </div>
 
-            <!-- Settings Tab -->
             <div class="tab-pane" id="settings">
                 <div class="settings-grid">
-                    <!-- Password Change -->
                     <div class="card">
                         <div class="card-header">
                             <h2>Đổi mật khẩu</h2>
@@ -279,7 +261,6 @@
                         </form>
                     </div>
 
-                    <!-- Notification Settings -->
                     <div class="card">
                         <div class="card-header">
                             <h2>Cài đặt thông báo</h2>
@@ -321,7 +302,6 @@
                         </form>
                     </div>
 
-                    <!-- Privacy Settings -->
                     <div class="card">
                         <div class="card-header">
                             <h2>Quyền riêng tư</h2>
@@ -352,7 +332,6 @@
                         </form>
                     </div>
 
-                    <!-- Account Actions -->
                     <div class="card">
                         <div class="card-header">
                             <h2>Tài khoản</h2>
@@ -374,12 +353,10 @@
     </main>
 </div>
 
-<!-- Loading Overlay -->
 <div class="loading-overlay" id="loadingOverlay">
     <div class="loading-spinner"></div>
 </div>
 
-<!-- Toast Notifications -->
 <div class="toast-container" id="toastContainer"></div>
 
 <script src="/js/profile.js"></script>

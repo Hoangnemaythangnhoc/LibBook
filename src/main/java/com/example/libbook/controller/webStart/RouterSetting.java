@@ -1,5 +1,6 @@
 package com.example.libbook.controller.webStart;
 
+import com.example.libbook.dto.UserDTO;
 import com.example.libbook.entity.Order;
 import com.example.libbook.entity.OrderStatus;
 import com.example.libbook.entity.Product;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping
@@ -36,10 +38,17 @@ public class RouterSetting {
 
     @GetMapping("/")
     public String home(Model model) {
-        List<Product> products = productService.getAllProduct();
+        List<Product> products = productService.getAllProduct().stream()
+                .map(product -> {
+                    if (product.getImageFile() == null) {
+                        product.setImageFile("https://static.vecteezy.com/system/resources/previews/017/222/245/non_2x/3d-stack-of-books-3d-rendering-illustration-free-png.png");
+                    } else if (!(product.getImageFile() instanceof String)) {
+                        product.setImageFile("default.jpg");
+                    }
+                    return product;
+                })
+                .collect(Collectors.toList());
         List<Tag> tags = tagService.getAllTags();
-        System.out.println("Products for home: " + (products != null ? products.size() : "0"));
-        System.out.println("Tags for home: " + (tags != null ? tags : "No tags fetched"));
         model.addAttribute("products", products);
         model.addAttribute("tags", tags);
         return "Mainpage/home";
@@ -71,14 +80,18 @@ public class RouterSetting {
 
     @GetMapping("/home")
     public String dashboard(Model model, HttpSession session) {
-        if (session.getAttribute("user") != null) {
-            model.addAttribute("user", session.getAttribute("user"));
-            System.out.println("User in session: " + session.getAttribute("user"));
+        if (session.getAttribute("USER") != null) {
+            UserDTO user = (UserDTO) session.getAttribute("USER");
+            model.addAttribute("USER", user);
+            System.out.println("User in session - UserId: " + user.getUserId() +
+                    ", UserName: " + user.getUserName() +
+                    ", Email: " + user.getEmail());
+        } else {
+            System.out.println("User in session is null");
         }
         List<Product> products = productService.getAllProduct();
         List<Tag> tags = tagService.getAllTags();
-        System.out.println("Products for dashboard: " + (products != null ? products.size() : "0"));
-        System.out.println("Tags for dashboard: " + (tags != null ? tags : "No tags fetched"));
+        System.out.println("User in session: " + session.getAttribute("USER"));
         model.addAttribute("products", products);
         model.addAttribute("tags", tags);
         return "Mainpage/home";
@@ -179,6 +192,17 @@ public class RouterSetting {
         return "Mainpage/upload-product";
     }
 
+    @GetMapping("/verify-token")
+    public String showVerifyTokenPage() {
+        return "Login/verify-token"; // Trả về template Thymeleaf verify-token.html
+    }
+
+    @GetMapping("/reset-password")
+    public String showResetPasswordPage(@RequestParam String email, Model model) {
+        model.addAttribute("email", email);
+        return "Login/reset-password";
+    }
+
     @GetMapping("/staff")
     public String staffPanel(Model model, HttpSession session) {
         if (session.getAttribute("staff") != null) {
@@ -193,18 +217,19 @@ public class RouterSetting {
         return "profile/staff";
     }
 
-//    @GetMapping("/edit-book/{id}")
-//    public String editBook(@PathVariable("id") Long id, Model model) {
-//        Product product = productService.getProductById(id);
-//        List<Tag> tags = tagService.getAllTags();
-//        if (product != null) {
-//            model.addAttribute("product", product);
-//            model.addAttribute("tags", tags);
-//            return "Mainpage/edit-book";
-//        } else {
-//            return "redirect:/staff";
-//        }
-//    }
+    @GetMapping("/shipper")
+    public String shipperPanel(Model model, HttpSession session) {
+        if (session.getAttribute("shipper") != null) {
+            model.addAttribute("shipperName", session.getAttribute("shipper"));
+            model.addAttribute("shipperEmail", "shipper@example.com");
+            model.addAttribute("shipperPhone", "0901234567");
+        }
+        List<Product> products = productService.getAllProduct();
+        List<Tag> tags = tagService.getAllTags();
+        model.addAttribute("products", products);
+        model.addAttribute("tags", tags);
+        return "profile/shipper";
+    }
 
     @GetMapping("/admin/edit-book/{id}")
     public String editBookForAdmin(@PathVariable("id") Long id, Model model) {
@@ -233,14 +258,4 @@ public class RouterSetting {
             return "redirect:/staff";
         }
     }
-
-    @GetMapping("/admin/manage-orders")
-    public String manageOrders(Model model) {
-        List<Order> orders = orderService.getAllOrders();
-        List<OrderStatus> orderStatuses = orderStatusService.getAllOrderStatuses();
-        model.addAttribute("orders", orders);
-        model.addAttribute("orderStatuses", orderStatuses);
-        return "Mainpage/manage-orders";
-    }
-
 }

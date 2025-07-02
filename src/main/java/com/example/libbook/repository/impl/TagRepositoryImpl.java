@@ -19,7 +19,7 @@ public class TagRepositoryImpl implements TagRepository {
         ArrayList<Tag> tags = new ArrayList<>();
         ConnectUtils db = ConnectUtils.getInstance();
 
-        try (Connection connection = db.openConection();
+        try (Connection connection = db.openConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
 
@@ -40,7 +40,7 @@ public class TagRepositoryImpl implements TagRepository {
         String sql = "SELECT * FROM [dbo].[Tag] WHERE TagID = ? ";
         ConnectUtils db = ConnectUtils.getInstance();
 
-        try (Connection connection = db.openConection();
+        try (Connection connection = db.openConnection();
              PreparedStatement statement = connection.prepareStatement(sql)){
             statement.setInt(1,id);
             try (ResultSet resultSet = statement.executeQuery()){

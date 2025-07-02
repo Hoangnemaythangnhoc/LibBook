@@ -138,7 +138,7 @@
                             <h5 class="card-title">${book.name}</h5>
                             <p class="card-text">${book.description}</p>
                             <p class="book-author">by ${book.author}</p>
-                            <p class="card-text">Available: ${book.available}</p> <!-- Hiển thị Available -->
+                            <p class="card-text">Available: ${book.available}</p>
                             <p class="card-text fw-bold">$${book.price.toFixed(2)}</p>
                         </div>
                     </div>
@@ -156,7 +156,7 @@
         const price = parseFloat(document.getElementById('price').value);
         const available = parseInt(document.getElementById('available').value);
         const author = document.getElementById('author').value;
-        const discount = parseInt(document.getElementById('discount').value) || 0; // Mặc định 0 nếu không nhập
+        const discount = parseInt(document.getElementById('discount').value) || 0;
         const tagIds = $('#tags').val();
         const imgInput = document.getElementById('img');
         const file = imgInput.files[0];
@@ -191,7 +191,7 @@
                 price: price,
                 available: available,
                 author: author,
-                discount: discount, // Thêm discount
+                discount: discount,
                 imageFile: imgDataUrl
             };
 

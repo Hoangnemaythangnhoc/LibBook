@@ -15,7 +15,7 @@ public class ConnectUtils {
 
     }
 
-    public Connection openConection() throws Exception{
+    public Connection openConnection() throws Exception{
         Class.forName(driverName);
         Connection con = DriverManager.getConnection(url,user,password);
         return con;

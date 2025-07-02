@@ -1,24 +1,32 @@
 package com.example.libbook.entity;
 
+import jakarta.persistence.*;
 import java.sql.Timestamp;
 
+@Entity
+@Table(name = "products")
 public class Product {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long productId;
     private String productName;
     private String description;
-    private int buys;
-    private int available;
     private double price;
     private String imageFile;
+    private int buys;
+    private int available;
     private Long userId;
     private int status;
     private double rating;
     private Timestamp createAt;
+    private String author;
+    private int discount;
 
     // Constructors
     public Product() {}
 
-    public Product(Long productId, String productName, String description, int buys, int available, double price, String imageFile, Long userId, int status, double rating, Timestamp createAt) {
+    public Product(Long productId, String productName, String description, int buys, int available, double price, String imageFile, Long userId, int status, double rating) {
         this.productId = productId;
         this.productName = productName;
         this.description = description;
@@ -29,7 +37,6 @@ public class Product {
         this.userId = userId;
         this.status = status;
         this.rating = rating;
-        this.createAt = createAt;
     }
 
     // Getters and Setters
@@ -55,4 +62,20 @@ public class Product {
     public void setRating(double rating) { this.rating = rating; }
     public Timestamp getCreateAt() { return createAt; }
     public void setCreateAt(Timestamp createAt) { this.createAt = createAt; }
+    public int getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(int discount) {
+        this.discount = discount;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
 }

@@ -41,7 +41,7 @@ public class UserDTO {
         this.password = password;
     }
 
-    public UserDTO(){
+    public UserDTO() {
 
     }
 
@@ -112,4 +112,14 @@ public class UserDTO {
     public String getRoleName() { return roleName; }
 
     public void setRoleName(String roleName) { this.roleName = roleName; }
+
+    @Override
+    public String toString() {
+        return "UserDTO{" +
+                "userId=" + userId +
+                ", userName='" + userName + '\'' +
+                ", email='" + email + '\'' +
+                ", roleID=" + roleID +
+                '}';
+    }
 }
