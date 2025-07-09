@@ -1,14 +1,8 @@
 package com.example.libbook.controller.webStart;
 
 import com.example.libbook.dto.UserDTO;
-import com.example.libbook.entity.Order;
-import com.example.libbook.entity.OrderStatus;
-import com.example.libbook.entity.Product;
-import com.example.libbook.entity.Tag;
-import com.example.libbook.service.OrderService;
-import com.example.libbook.service.OrderStatusService;
-import com.example.libbook.service.ProductService;
-import com.example.libbook.service.TagService;
+import com.example.libbook.entity.*;
+import com.example.libbook.service.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -35,6 +29,8 @@ public class RouterSetting {
 
     @Autowired
     private OrderStatusService orderStatusService;
+    @Autowired
+    private UserService userService;
 
     @GetMapping("/")
     public String home(Model model) {
@@ -81,7 +77,7 @@ public class RouterSetting {
     @GetMapping("/home")
     public String dashboard(Model model, HttpSession session) {
         if (session.getAttribute("USER") != null) {
-            UserDTO user = (UserDTO) session.getAttribute("USER");
+            User user = (User) session.getAttribute("USER");
             model.addAttribute("USER", user);
             System.out.println("User in session - UserId: " + user.getUserId() +
                     ", UserName: " + user.getUserName() +
@@ -162,14 +158,15 @@ public class RouterSetting {
         return "CartAndPay/cart";
     }
 
-    @GetMapping("/profile")
-    public String profile(Model model, HttpSession session) {
+    @GetMapping("/profile/{id}")
+    public String profile(@PathVariable int id,  Model model, HttpSession session) {
         if (session.getAttribute("USER") == null) {
             return "redirect:/login";
         }
+        User user = userService.getUserByUserId(id);
         List<Tag> tags = tagService.getAllTags();
-        System.out.println("Tags for profile: " + (tags != null ? tags : "No tags fetched"));
         model.addAttribute("tags", tags);
+        model.addAttribute("userProfile", user);
         return "profile/profile";
     }
 
@@ -190,6 +187,17 @@ public class RouterSetting {
         model.addAttribute("products", products);
         model.addAttribute("tags", tags);
         return "Mainpage/upload-product";
+    }
+
+    @GetMapping("/verify-token")
+    public String showVerifyTokenPage() {
+        return "Login/verify-token"; // Trả về template Thymeleaf verify-token.html
+    }
+
+    @GetMapping("/reset-password")
+    public String showResetPasswordPage(@RequestParam String email, Model model) {
+        model.addAttribute("email", email);
+        return "Login/reset-password";
     }
 
     @GetMapping("/staff")
