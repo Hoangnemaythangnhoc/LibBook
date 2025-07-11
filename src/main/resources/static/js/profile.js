@@ -181,7 +181,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function initializeProfilePage() {
     // Update profile header with mock data
-    updateProfileHeader(mockUser);
+    // updateProfileHeader(mockUser);
 
     // Tab functionality
     initializeTabs();
@@ -193,15 +193,15 @@ function initializeProfilePage() {
     initializeAvatarUpload();
 
     // Load dynamic content
-    loadOrders();
-    renderWishlist(mockBooks);
-    renderReviews(mockReviews);
+    // loadOrders();
+    // renderWishlist(mockBooks);
+    // renderReviews(mockReviews);
 
     // Initialize filters
     initializeFilters();
 
     // Update profile stats
-    updateProfileStats();
+    // updateProfileStats();
 }
 
 function updateProfileStats() {
@@ -382,34 +382,38 @@ function initializeAvatarUpload() {
 }
 
 function uploadAvatar(file) {
-    const formData = new FormData();
-    formData.append("avatar", file);
+    const reader = new FileReader();
+    reader.onloadend = function () {
+        const base64Image = reader.result.split(',')[1];
 
-    showLoading(true);
-
-    fetch("/profile/upload-avatar", {
-        method: "POST",
-        body: formData,
-        headers: {
-            "X-Requested-With": "XMLHttpRequest",
-        },
-    })
-        .then((response) => response.json())
-        .then((data) => {
-            showLoading(false);
-
-            if (data.success) {
-                showToast("Cập nhật avatar thành công!", "success");
-            } else {
-                showToast(data.message || "Có lỗi xảy ra khi upload avatar!", "error");
-            }
+        const userId = document.getElementById("userId").value;
+        fetch(`/profile/${userId}/avatar/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                imageFile: base64Image
+            }),
         })
-        .catch((error) => {
-            showLoading(false);
-            showToast("Có lỗi xảy ra khi upload avatar!", "error");
-            console.error("Error:", error);
-        });
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Upload failed");
+                }
+                return response.text();
+            })
+            .then((message) => {
+                showToast("Cập nhật avatar thành công!", "success");
+            })
+            .catch((error) => {
+                showToast("Có lỗi xảy ra khi upload avatar!", "error");
+                console.error("Error:", error);
+            });
+    };
+
+    reader.readAsDataURL(file);
 }
+
 
 // Load Orders
 function loadOrders() {
@@ -530,7 +534,10 @@ function renderOrders(orders) {
         });
     });
 }
+// UPDATE PROFILE
+const updateProfile = () => {
 
+}
 // Load Wishlist
 function loadWishlist() {
     const wishlistGrid = document.getElementById("wishlistGrid");
@@ -985,3 +992,18 @@ function deleteAccount() {
             console.error("Error:", error);
         });
 }
+
+
+
+//Handle CHANGE PASSWORD
+const form = document.getElementById("passwordForm");
+const newPassword = document.getElementById("newPassword");
+const confirmPassword = document.getElementById("confirmPassword");
+
+form.addEventListener("submit", function (e) {
+    if (newPassword.value !== confirmPassword.value) {
+        e.preventDefault();
+        alert("Mật khẩu mới và xác nhận mật khẩu không khớp!");
+        confirmPassword.focus();
+    }
+});

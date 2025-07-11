@@ -13,6 +13,7 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService {
 
+
     @Autowired
     private UserRepository userRepository;
 
@@ -25,12 +26,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO checkLogin(String email, String pass) {
+    public User checkLogin(String email, String pass) {
         return userRepository.checkLogin(email, pass);
     }
 
+
     @Override
-    public UserDTO getUserByEmail(String email) {
+    public User getUserByEmail(String email) {
         return userRepository.getUserByEmail(email);
     }
 
@@ -40,8 +42,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean uploadAvatar(byte[] base64,int ID) throws IOException {
-        return userRepository.updateAvatar(base64, 1,ID);
+    public boolean uploadAvatar(byte[] base64, int ID) throws IOException {
+        return userRepository.updateAvatar(base64, 1, ID);
     }
 
     @Override
@@ -51,7 +53,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean updatePassword(String email, String password) {
-        return userRepository.updatePassword(email,password);
+        return userRepository.updatePassword(email, password);
     }
 
     @Override
@@ -80,6 +82,11 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Email already exists!");
         }
         return userRepository.createStaffAccount(userDTO);
+    }
+
+    @Override
+    public void updateUser(User user) {
+        userRepository.updateUser(user);
     }
 
 }

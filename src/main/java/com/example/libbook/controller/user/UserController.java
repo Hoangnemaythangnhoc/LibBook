@@ -1,6 +1,7 @@
 package com.example.libbook.controller.user;
 
 
+import com.example.libbook.dto.ChangePasswordDTO;
 import com.example.libbook.dto.FileUploadDTO;
 import com.example.libbook.dto.RatingDTO;
 import com.example.libbook.dto.UserDTO;
@@ -93,14 +94,48 @@ public class UserController {
 
     @PostMapping("/login")
     public String Login(@RequestParam("email") String email,
-                        @RequestParam("password") String pass, HttpSession session, Model model){
-        UserDTO user = userService.checkLogin(email,pass);
-        session.setAttribute("USER",user);
-        model.addAttribute("user", user);
+                        @RequestParam("password") String pass,
+                        HttpSession session,
+                        RedirectAttributes redirectAttributes) {
+
+        User user = userService.checkLogin(email, pass);
+        if (user == null) {
+            redirectAttributes.addFlashAttribute("error", "Username hoặc Password sai!");
+            return "redirect:/login";
+        }
+
+        session.setAttribute("USER", user);
         return "redirect:/home";
     }
 
-    @PostMapping("/{UserID}/avatar/")
+
+    @PostMapping("/change-password")
+    public String changePassword(@ModelAttribute ChangePasswordDTO changePasswordDTO, Model model , RedirectAttributes redirectAttributes) {
+
+        User u = userService.checkLogin(changePasswordDTO.getEmail(), changePasswordDTO.getCurrentPassword());
+        if (u == null) {
+            redirectAttributes.addFlashAttribute("error", "Old Password sai!");
+            return "redirect:/profile/"+changePasswordDTO.getUserId();
+        }
+        userService.updatePassword(changePasswordDTO.getEmail(), changePasswordDTO.getNewPassword());
+        redirectAttributes.addFlashAttribute("error", "Change password successful!");
+
+        return "redirect:/profile/"+changePasswordDTO.getUserId();
+    }
+
+    @PostMapping("/profile/update")
+    public String updateProfile(@ModelAttribute User user, RedirectAttributes redirectAttributes) {
+        try {
+            userService.updateUser(user);
+            redirectAttributes.addFlashAttribute("error", "Profile updated successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to update profile.");
+        }
+        return "redirect:/profile/" + user.getUserId();
+
+    }
+
+    @PostMapping("profile/{UserID}/avatar/")
     public ResponseEntity<String> uploadAvatar(@PathVariable("UserID") int UserID, @RequestBody FileUploadDTO base64) throws IOException {
         byte[] image = imageUtils.decodeBase64(base64.getImageFile());
         boolean check = userService.uploadAvatar(image, UserID);
@@ -151,6 +186,8 @@ public class UserController {
         response.put("redirect", "/Login/signup");
         return ResponseEntity.badRequest().body(response);
     }
+
+
 
     @PostMapping("/verify-token")
     public ResponseEntity<Map<String, Object>> verifyToken(@RequestParam String token, @RequestParam String email) {
