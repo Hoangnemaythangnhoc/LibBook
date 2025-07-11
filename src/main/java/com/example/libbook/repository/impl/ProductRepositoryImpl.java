@@ -3,13 +3,10 @@ package com.example.libbook.repository.impl;
 import com.example.libbook.entity.Product;
 import com.example.libbook.entity.Tag;
 import com.example.libbook.repository.ProductRepository;
-import com.example.libbook.utils.ImageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,12 +19,8 @@ public class ProductRepositoryImpl implements ProductRepository {
     private final DataSource dataSource;
 
     @Autowired
-    private final ImageUtils imageUtils;
-
-    @Autowired
-    public ProductRepositoryImpl(DataSource dataSource, ImageUtils imageUtils) {
+    public ProductRepositoryImpl(DataSource dataSource) {
         this.dataSource = dataSource;
-        this.imageUtils = imageUtils;
         System.out.println("ProductRepositoryImpl initialized with DataSource: " + (dataSource != null ? "Yes" : "No"));
     }
 
@@ -97,17 +90,10 @@ public class ProductRepositoryImpl implements ProductRepository {
     @Override
     public List<Product> getProductsByTag(String tag) {
         List<Product> products = new ArrayList<>();
-
-        String sql = "SELECT p.* FROM Product p " +
-                "JOIN ProductTag pt ON p.ProductId = pt.ProductId " +
-                "JOIN Tag t ON pt.TagId = t.TagId " +
-                "WHERE t.TagName = ?";
-
         String sql = "SELECT p.* FROM product p " +
                 "JOIN ProductTag pt ON p.productId = pt.productId " +
                 "JOIN Tag t ON pt.tagId = t.tagId " +
                 "WHERE t.tagName = ?";
-
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, tag);
@@ -139,13 +125,7 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-
-    public void addProduct(Product product, List<Long> tagIds) throws IOException {
-        byte[] baseImage = imageUtils.decodeBase64(product.getImageFile());
-        String image = imageUtils.uploadAvatar(baseImage,2);
-
     public void addProduct(Product product, List<Long> tagIds) {
-
         String sql = "INSERT INTO product (productName, description, price, imageFile, buys, available, userId, status, rating, author, discount) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection connection = dataSource.getConnection();
@@ -153,7 +133,7 @@ public class ProductRepositoryImpl implements ProductRepository {
             statement.setString(1, product.getProductName());
             statement.setString(2, product.getDescription());
             statement.setDouble(3, product.getPrice());
-            statement.setString(4, image);
+            statement.setString(4, product.getImageFile());
             statement.setInt(5, product.getBuys());
             statement.setInt(6, product.getAvailable());
             statement.setLong(7, product.getUserId());
