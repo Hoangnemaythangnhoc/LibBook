@@ -1,13 +1,18 @@
 package com.example.libbook.controller.user;
 
 
+import com.example.libbook.dto.ChangePasswordDTO;
 import com.example.libbook.dto.FileUploadDTO;
+import com.example.libbook.dto.RatingDTO;
 import com.example.libbook.dto.UserDTO;
 import com.example.libbook.entity.User;
 import com.example.libbook.service.EmailTokenService;
+import com.example.libbook.service.RatingService;
 import com.example.libbook.service.UserService;
 import com.example.libbook.utils.ImageUtils;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,28 +43,30 @@ public class UserController {
         this.imageUtils = imageUtils;
     }
 
+    @Autowired
+    private RatingService ratingService;
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
         model.addAttribute("userDTO", new UserDTO());
-        return "/Login/signup"; // Trả về template signup.html
+        return "/Login/signup";
     }
 
     @PostMapping("/register")
     public String register(
-                           @RequestParam("email") String email,
-                           @RequestParam("password") String pass,
-                           @RequestParam("newpass") String newpass,
-                           Model model) {
+            @RequestParam("email") String email,
+            @RequestParam("password") String pass,
+            @RequestParam("newpass") String newpass,
+            Model model) {
         try {
-            System.out.println(email+pass+" : "+newpass);
-            // Kiểm tra email và lưu tài khoản
+            System.out.println(email + pass + " : " + newpass);
             if (!pass.equals(newpass)) {
                 model.addAttribute("message", "Password not match!");
                 model.addAttribute("messageType", "error");
                 return "Login/signup";
             }
-            UserDTO userDTO = new UserDTO(email,pass);
+            UserDTO userDTO = new UserDTO(email, pass);
 
             boolean result = userService.createAccount(userDTO);
             if (result) {
@@ -72,12 +79,12 @@ public class UserController {
                 return "Login/signup";
             }
         } catch (IllegalArgumentException e) {
-            System.out.println( e.getMessage());
+            System.out.println(e.getMessage());
             model.addAttribute("message", e.getMessage());
             model.addAttribute("messageType", "error");
             return "Login/signup";
         } catch (Exception e) {
-            System.out.println( e.getMessage());
+            System.out.println(e.getMessage());
 
             model.addAttribute("message", "Error: " + e.getMessage());
             model.addAttribute("messageType", "error");
@@ -87,14 +94,48 @@ public class UserController {
 
     @PostMapping("/login")
     public String Login(@RequestParam("email") String email,
-                        @RequestParam("password") String pass, HttpSession session, Model model){
-        UserDTO user = userService.checkLogin(email,pass);
-        session.setAttribute("USER",user);
-        model.addAttribute("user", user);
+                        @RequestParam("password") String pass,
+                        HttpSession session,
+                        RedirectAttributes redirectAttributes) {
+
+        User user = userService.checkLogin(email, pass);
+        if (user == null) {
+            redirectAttributes.addFlashAttribute("error", "Username hoặc Password sai!");
+            return "redirect:/login";
+        }
+
+        session.setAttribute("USER", user);
         return "redirect:/home";
     }
 
-    @PostMapping("/{UserID}/avatar/")
+
+    @PostMapping("/change-password")
+    public String changePassword(@ModelAttribute ChangePasswordDTO changePasswordDTO, Model model , RedirectAttributes redirectAttributes) {
+
+        User u = userService.checkLogin(changePasswordDTO.getEmail(), changePasswordDTO.getCurrentPassword());
+        if (u == null) {
+            redirectAttributes.addFlashAttribute("error", "Old Password sai!");
+            return "redirect:/profile/"+changePasswordDTO.getUserId();
+        }
+        userService.updatePassword(changePasswordDTO.getEmail(), changePasswordDTO.getNewPassword());
+        redirectAttributes.addFlashAttribute("error", "Change password successful!");
+
+        return "redirect:/profile/"+changePasswordDTO.getUserId();
+    }
+
+    @PostMapping("/profile/update")
+    public String updateProfile(@ModelAttribute User user, RedirectAttributes redirectAttributes) {
+        try {
+            userService.updateUser(user);
+            redirectAttributes.addFlashAttribute("error", "Profile updated successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to update profile.");
+        }
+        return "redirect:/profile/" + user.getUserId();
+
+    }
+
+    @PostMapping("profile/{UserID}/avatar/")
     public ResponseEntity<String> uploadAvatar(@PathVariable("UserID") int UserID, @RequestBody FileUploadDTO base64) throws IOException {
         byte[] image = imageUtils.decodeBase64(base64.getImageFile());
         boolean check = userService.uploadAvatar(image, UserID);
@@ -106,11 +147,13 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ModelAndView getUserById(@PathVariable("id") int ID) {
-        User user = userService.getUserByUserId(ID);
-        ModelAndView mav = new ModelAndView("userDetail"); // userDetail.jsp hoặc userDetail.html
-        mav.addObject("user", user);
-        return mav;
+    @ResponseBody
+    public ResponseEntity<User> getUserById(@PathVariable("id") int id) {
+        User user = userService.getUserByUserId(id);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        return ResponseEntity.ok(user);
     }
 
     @PostMapping("/forgot-password")
@@ -144,6 +187,8 @@ public class UserController {
         return ResponseEntity.badRequest().body(response);
     }
 
+
+
     @PostMapping("/verify-token")
     public ResponseEntity<Map<String, Object>> verifyToken(@RequestParam String token, @RequestParam String email) {
         Map<String, Object> response = new HashMap<>();
@@ -176,31 +221,31 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-        @PostMapping("/reset-password")
-        public ResponseEntity<Map<String, Object>> resetPassword(@RequestParam String email,
-                                                                 @RequestParam String password,
-                                                                 @RequestParam("confirm-password") String confirmPassword) {
-            Map<String, Object> response = new HashMap<>();
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, Object>> resetPassword(@RequestParam String email,
+                                                             @RequestParam String password,
+                                                             @RequestParam("confirm-password") String confirmPassword) {
+        Map<String, Object> response = new HashMap<>();
 
-            // Xử lý logic reset password
-            if (!password.equals(confirmPassword)) {
-                response.put("status", "error");
-                response.put("message", "Passwords do not match");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-            // Thực hiện reset password
-            try {
-                userService.updatePassword(email,password);
-                response.put("status", "success");
-                response.put("redirect", "/login");
-                return ResponseEntity.ok(response);
-            } catch (Exception e) {
-                response.put("status", "error");
-                response.put("message", "Failed to reset password: " + e.getMessage());
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-            }
+        // Xử lý logic reset password
+        if (!password.equals(confirmPassword)) {
+            response.put("status", "error");
+            response.put("message", "Passwords do not match");
+            return ResponseEntity.badRequest().body(response);
         }
+
+        // Thực hiện reset password
+        try {
+            userService.updatePassword(email,password);
+            response.put("status", "success");
+            response.put("redirect", "/login");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("status", "error");
+            response.put("message", "Failed to reset password: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 
     @PostMapping("/send-message")
     public ResponseEntity<Map<String, String>> sendMessage(@RequestBody Map<String, String> request) {
@@ -210,4 +255,27 @@ public class UserController {
     }
 
 
+    @PostMapping("/ratings/submit")
+    public ResponseEntity<String> submitRating(
+            @RequestBody RatingDTO ratingDTO,
+            HttpSession session,
+            Model model) {
+        try {
+            UserDTO currentUser = (UserDTO) session.getAttribute("USER");
+            if (currentUser == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Please log in to submit a rating.");
+            }
+            ratingDTO.setUserId(currentUser.getUserId());
+            boolean result = ratingService.saveRating(ratingDTO);
+            if (result) {
+                return ResponseEntity.ok("Rating submitted successfully!");
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to submit rating.");
+            }
+        } catch (Exception e) {
+            model.addAttribute("message", "Error: " + e.getMessage());
+            model.addAttribute("messageType", "error");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
+    }
 }

@@ -208,7 +208,6 @@
         </tbody>
     </table>
 
-    <!-- Modal for Order Details -->
     <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
@@ -232,7 +231,6 @@
                         </tr>
                         </thead>
                         <tbody id="orderDetailsBody">
-                        <!-- Dynamically populated by JavaScript -->
                         </tbody>
                     </table>
                 </div>
@@ -272,7 +270,12 @@
     }
 
     async function showDetails(orderId) {
-        console.log('Fetching details for orderId:', orderId);
+        console.log('Starting showDetails for orderId:', orderId);
+        const modalElement = document.getElementById('orderDetailsModal');
+        const modal = new bootstrap.Modal(modalElement, { backdrop: 'static', keyboard: false });
+        modal.show();
+        console.log('Modal shown initially for orderId:', orderId);
+
         try {
             const response = await fetch(`http://localhost:8080/api/orders/${orderId}`);
             console.log('API response status:', response.status);
@@ -282,10 +285,10 @@
             const details = order.orderDetails || [];
             console.log('Order details array:', details);
             const tbody = document.getElementById('orderDetailsBody');
-            tbody.innerHTML = '';
+            tbody.innerHTML = ''; // Xóa nội dung cũ
             if (details.length === 0) {
                 console.log('No order details found for orderId:', orderId);
-                tbody.innerHTML = '<tr><td colspan="9">No details available</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10">No details available</td></tr>';
             } else {
                 for (const detail of details) {
                     console.log('Fetching product for productId:', detail.productId);
@@ -293,32 +296,34 @@
                     if (!productResponse.ok) throw new Error(`Failed to fetch product with id ${detail.productId}`);
                     const product = await productResponse.json();
                     console.log('Fetched product data:', product);
+
+                    const originalPrice = parseFloat(detail.price) || 0;
+                    const discount = parseFloat(product.discount) || 0;
+                    const discountedPrice = originalPrice * ((100 - discount) / 100);
+                    console.log('Original Price:', originalPrice, 'Discount:', discount, 'Discounted Price:', discountedPrice);
+
                     const row = document.createElement('tr');
                     row.innerHTML = `
-            <td>${detail.orderDetailId !== undefined ? detail.orderDetailId : 'N/A'}</td>
-            <td><img src="${product.imageFile !== undefined ? product.imageFile : ''}" alt="Product Image" class="product-image"></td>
-            <td>${product.productName !== undefined ? product.productName : 'N/A'}</td>
-            <td>${detail.price !== undefined ? '$' + detail.price.toFixed(2) : 'N/A'}</td>
-            <td>${detail.quantity !== undefined ? detail.quantity : 'N/A'}</td>
-            <td>${product.userId !== undefined ? product.userId : 'N/A'}</td>
-            <td>${product.rating !== undefined ? product.rating : 'N/A'}</td>
-            <td>${product.author !== undefined ? product.author : 'N/A'}</td>
-            <td>${product.discount !== undefined ? product.discount + '%' : 'N/A'}</td>
-          `;
+                        <td>${detail.orderDetailId !== undefined ? detail.orderDetailId : 'N/A'}</td>
+                        <td><img src="${product.imageFile !== undefined ? product.imageFile : ''}" alt="Product Image" class="product-image"></td>
+                        <td>${product.productName !== undefined ? product.productName : 'N/A'}</td>
+                        <td>${isNaN(discountedPrice) ? 'N/A' : '$' + discountedPrice.toFixed(2)}</td>
+                        <td>${detail.quantity !== undefined ? detail.quantity : 'N/A'}</td>
+                        <td>${product.userId !== undefined ? product.userId : 'N/A'}</td>
+                        <td>${product.status !== undefined ? product.status : 'N/A'}</td>
+                        <td>${product.rating !== undefined ? product.rating : 'N/A'}</td>
+                        <td>${product.author !== undefined ? product.author : 'N/A'}</td>
+                        <td>${product.discount !== undefined ? product.discount + '%' : 'N/A'}</td>
+                    `;
                     tbody.appendChild(row);
                 }
                 console.log('Table body HTML after population:', tbody.innerHTML);
             }
-            const modalElement = document.getElementById('orderDetailsModal');
-            const modal = new bootstrap.Modal(modalElement);
-            console.log('Modal body HTML before show:', modalElement.querySelector('.modal-body').innerHTML);
-            modal.show();
-            console.log('Modal shown, body HTML after show:', modalElement.querySelector('.modal-body').innerHTML);
+            console.log('Modal content updated for orderId:', orderId);
         } catch (error) {
             console.error('Error fetching order details for orderId:', orderId, error);
             const tbody = document.getElementById('orderDetailsBody');
-            tbody.innerHTML = '<tr><td colspan="9">Error loading details</td></tr>';
-            new bootstrap.Modal(document.getElementById('orderDetailsModal')).show();
+            tbody.innerHTML = '<tr><td colspan="10">Error loading details</td></tr>';
         }
     }
 </script>

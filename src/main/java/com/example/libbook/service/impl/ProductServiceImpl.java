@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -32,6 +31,7 @@ public class ProductServiceImpl implements ProductService {
     public List<Product> getProductsByTag(String tag) {
         System.out.println("ProductServiceImpl: Calling getProductsByTag with tag: " + tag);
         return productRepository.getProductsByTag(tag);
+
     }
 
     @Override
@@ -50,31 +50,26 @@ public class ProductServiceImpl implements ProductService {
     public void softDeleteProduct(Long productId) {
         System.out.println("ProductServiceImpl: Calling softDeleteProduct with id: " + productId);
         productRepository.softDeleteProduct(productId);
+
+
     }
 
     @Override
-    public List<Product> getNewArrivals(int limit) {
-        return productRepository.getNewArrivals(limit);
+    public void addProduct(Product product, List<Long> tagIds) {
+        System.out.println("ProductServiceImpl: Calling addProduct with name: " + product.getProductName());
+        productRepository.addProduct(product, tagIds);
     }
 
     @Override
-    public List<Product> getTopSellingProducts(int limit) {
-        return productRepository.getTopSellingProducts(limit);
+    public void updateProduct(Product product, List<Long> tagIds) {
+        System.out.println("ProductServiceImpl: Calling updateProduct with id: " + product.getProductId());
+        productRepository.updateProduct(product, tagIds);
     }
 
     @Override
-    public Map<String, List<Product>> getProductCombosByRandomTags(int comboCount, int booksPerCombo) {
-        List<String> tags = productRepository.getRandomTags(comboCount);
-        Map<String, List<Product>> combos = new HashMap<>();
-
-        for (String tag : tags) {
-            List<Product> taggedProducts = productRepository.getProductsByTag(tag);
-            if (!taggedProducts.isEmpty()) {
-                Collections.shuffle(taggedProducts);
-                combos.put(tag, taggedProducts.subList(0, Math.min(booksPerCombo, taggedProducts.size())));
-            }
-        }
-        return combos;
+    public void softDeleteProduct(Long productId) {
+        System.out.println("ProductServiceImpl: Calling softDeleteProduct with id: " + productId);
+        productRepository.softDeleteProduct(productId);
     }
-
 }
+

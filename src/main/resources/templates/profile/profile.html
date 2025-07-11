@@ -29,11 +29,11 @@
         <section class="profile-header">
             <div class="profile-avatar">
                 <img
-                        src="/api/user/avatar"
+                        th:src="${userProfile.getProfilePicture()}"
                         alt="Avatar"
                         id="avatarImage"
                         onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNDAiIHI9IjE1IiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik0yMCA4MEM0MCA2MCA2MCA2MCA4MCA4MEgyMFoiIGZpbGw9IiM5Q0EzQUYiLz4KPC9zdmc+'" />
-                <div class="avatar-upload">
+                <div class="avatar-upload"  th:if="${userProfile.userId} == ${session.USER.userId}">
                     <input type="file" id="avatarInput" accept="image/*" style="display: none" />
                     <button type="button" class="upload-btn" onclick="document.getElementById('avatarInput').click()">
                         <i class="fas fa-camera"></i>
@@ -69,7 +69,7 @@
             <button class="tab-btn active" data-tab="personal">Profile details</button>
             <button class="tab-btn" data-tab="orders">Orders</button>
             <button class="tab-btn" data-tab="reviews">Rates</button>
-            <button class="tab-btn" data-tab="settings">Setting</button>
+            <button  class="tab-btn" data-tab="settings" th:if="${userProfile.userId} == ${session.USER.userId}" >Setting</button>
         </nav>
 
         <!-- Tab Content -->
@@ -85,7 +85,7 @@
                         </button>
                     </div>
                     <form class="profile-form" action="/profile/update" method="POST" id="personalForm">
-                        <input type="hidden" name="userId" th:value="${userProfile.userId}" />
+                        <input type="hidden" name="userId" id="userId" th:value="${userProfile.userId}" />
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="firstname">First Name</label>
@@ -268,18 +268,20 @@
                         <div class="card-header">
                             <h2>Đổi mật khẩu</h2>
                         </div>
-                        <form class="settings-form" action="/profile/change-password" method="POST" id="passwordForm">
-                            <input type="hidden" name="userId" value="${user.id}" />
+                        <form class="settings-form" action="/change-password" method="POST" id="passwordForm">
+                            <input type="hidden" name="email" th:value="${userProfile.getEmail()}" />
+                            <input type="hidden" name="userId" th:value="${userProfile.getUserId()}" />
+
                             <div class="form-group">
-                                <label for="currentPassword">Mật khẩu hiện tại</label>
+                                <label for="currentPassword">Current Password</label>
                                 <input type="password" id="currentPassword" name="currentPassword" required />
                             </div>
                             <div class="form-group">
-                                <label for="newPassword">Mật khẩu mới</label>
+                                <label for="newPassword">New Password</label>
                                 <input type="password" id="newPassword" name="newPassword" required />
                             </div>
                             <div class="form-group">
-                                <label for="confirmPassword">Xác nhận mật khẩu mới</label>
+                                <label for="confirmPassword">Confirm New Password</label>
                                 <input type="password" id="confirmPassword" name="confirmPassword" required />
                             </div>
                             <button type="submit" class="btn btn-primary">Đổi mật khẩu</button>
@@ -390,5 +392,20 @@
 <div class="toast-container" id="toastContainer"></div>
 
 <script src="/js/profile.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script th:if="${error}" th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        console.log("Hello")
+        setTimeout(function () {
+            Swal.fire({
+                icon: 'info',
+                title: [[${error}]],
+                confirmButtonText: 'OK'
+            });
+        }, 500);
+    });
+</script>
+
 </body>
 </html>

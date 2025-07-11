@@ -10,8 +10,8 @@ import java.util.List;
 public interface UserService {
     boolean isEmailExist(String email);
     boolean createAccount(UserDTO userDTO);
-    UserDTO checkLogin (String email,String pass);
-    UserDTO getUserByEmail(String email);
+    User checkLogin (String email,String pass);
+    User getUserByEmail(String email);
     boolean uploadAvatar(byte[] base64, int ID) throws IOException;
     User getUserByUserId(int id);
     boolean updatePassword(String email, String password);
@@ -20,5 +20,6 @@ public interface UserService {
     boolean banUser(int userId);
     boolean unbanUser(int userId);
     boolean createStaffAccount(UserDTO userDTO);
+    void updateUser(User user);
 
 }

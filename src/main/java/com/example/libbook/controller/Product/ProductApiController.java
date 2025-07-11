@@ -13,10 +13,10 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -53,7 +53,11 @@ public class ProductApiController {
     public ResponseEntity<Product> addProduct(
             @RequestBody Product product,
             @RequestParam("tagIds") List<Long> tagIds,
+
             @RequestParam(value = "discount", required = false, defaultValue = "0") int discount) throws IOException {
+
+            @RequestParam(value = "discount", required = false, defaultValue = "0") int discount) {
+
         System.out.println("API: Adding product with name: " + product.getProductName());
         product.setBuys(0);
         product.setUserId(2L);
@@ -101,10 +105,8 @@ public class ProductApiController {
         existingProduct.setAuthor(author);
         existingProduct.setDiscount(discount);
 
-        // Xử lý file ảnh nếu có
         if (imageFile != null && !imageFile.isEmpty()) {
             existingProduct.setImageFile(imageFile.getOriginalFilename());
-            // Có thể thêm logic lưu file vào server tại đây
         }
 
         productService.updateProduct(existingProduct, tagIds == null ? new ArrayList<>() : tagIds);
@@ -124,25 +126,19 @@ public class ProductApiController {
         }
     }
 
-    @GetMapping("/product/new-arrivals")
-    public ResponseEntity<List<Product>> getNewArrivals(@RequestParam(defaultValue = "10") int limit) {
-        List<Product> products = productService.getNewArrivals(limit);
-        return products.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(products);
+    @GetMapping("/products/checkbuy/status")
+    public ResponseEntity<Boolean> checkBuyStatus(
+            @RequestParam("productId") int productId,
+            HttpSession session) {
+        UserDTO currentUser = (UserDTO) session.getAttribute("USER");
+        if (currentUser == null) {
+            return ResponseEntity.ok(false);
+        }
+        System.out.println("API: Checking CheckBuy status for UserId=" + currentUser.getUserId() + ", ProductId=" + productId);
+        boolean hasReviewed = checkBuyService.hasUserReviewed(currentUser.getUserId(), productId);
+        return ResponseEntity.ok(hasReviewed);
     }
 
-    @GetMapping("/product/top-sale")
-    public ResponseEntity<List<Product>> getTopSellingProducts(@RequestParam(defaultValue = "10") int limit) {
-        List<Product> products = productService.getTopSellingProducts(limit);
-        return products.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(products);
-    }
-
-    @GetMapping("/product/combo-by-tag")
-    public ResponseEntity<Map<String, List<Product>>> getProductCombos(
-            @RequestParam(defaultValue = "3") int combos,
-            @RequestParam(defaultValue = "3") int booksPerCombo) {
-        Map<String, List<Product>> result = productService.getProductCombosByRandomTags(combos, booksPerCombo);
-        return result.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(result);
-    }
 
 
     @GetMapping("/products/checkbuy/status")
@@ -157,4 +153,5 @@ public class ProductApiController {
         boolean hasReviewed = checkBuyService.hasUserReviewed(currentUser.getUserId(), productId);
         return ResponseEntity.ok(hasReviewed);
     }
+
 }
