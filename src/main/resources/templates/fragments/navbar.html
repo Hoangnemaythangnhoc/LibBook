@@ -72,9 +72,11 @@
                     </a>
 
                     <th:block th:if="${session.USER != null}">
-                        <form action="/profile" method="GET">
+                        <form th:action="@{/profile/{id}(id=${session.USER.getUserId()})}" method="get">
                             <button class="btn btn-primary">Profile</button>
                         </form>
+
+
                         <form action="/logout" method="POST">
                             <button class="btn btn-warning" type="submit">Logout</button>
                         </form>

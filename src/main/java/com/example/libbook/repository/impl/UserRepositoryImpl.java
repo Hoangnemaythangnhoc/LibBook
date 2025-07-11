@@ -150,7 +150,7 @@ public class UserRepositoryImpl implements UserRepository {
         ConnectUtils db = ConnectUtils.getInstance();
         if (pathImage != null && !pathImage.isEmpty()) {
             String sql = "UPDATE [User] SET [ProfilePicture] = ? WHERE [UserId] = ?";
-            try (Connection connection = db.openConnection();
+            try (Connection connection = db.openConection();
                  PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setString(1, pathImage);
                 statement.setInt(2, ID);

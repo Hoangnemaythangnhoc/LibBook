@@ -63,7 +63,5 @@ public class OpenAiService {
         } catch (Exception e) {
             return "Lỗi hệ thống: " + e.getMessage();
         }
-        
     }
-
 }

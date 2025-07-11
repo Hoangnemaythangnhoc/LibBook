@@ -205,7 +205,7 @@
                             <span class="mx-3" id="quantity">1</span>
                             <button class="btn btn-outline-secondary" onclick="increaseQuantity()">+</button>
                         </div>
-                        <button class="btn btn-primary btn-lg">
+                        <button class="btn btn-primary btn-lg" onclick="addToCart()">
                             <i class="ri-shopping-cart-line me-2"></i>
                             Add to Cart
                         </button>
@@ -382,14 +382,18 @@
 </script>
 
 <script src="/js/components.js"></script>
-<script>
+<script th:inline="javascript">
     // Quantity Selector
     let quantity = 1;
+    var productAvailable = [[${product.available}]];
+    var productId = [[${product.productId}]]
     const quantityDisplay = document.getElementById("quantity");
 
     function increaseQuantity() {
-        quantity++;
-        quantityDisplay.textContent = quantity;
+        if ( quantity < productAvailable) {
+            quantity++;
+            quantityDisplay.textContent = quantity;
+        }
     }
 
     function decreaseQuantity() {
@@ -535,6 +539,27 @@
         }
         fetchReviews();
     });
+
+
+
+    const addToCart = () => {
+
+        const cartItemData = {
+            productId: productId,
+            quantity: quantity
+        };
+        fetch('/cart/api/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(cartItemData)
+        }).then(response => {
+            if (response.status == 401) {
+                window.location.href = "/login"
+            }
+        })
+    }
 
 
 </script>

@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpSession;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,7 +51,7 @@ public class ProductApiController {
     public ResponseEntity<Product> addProduct(
             @RequestBody Product product,
             @RequestParam("tagIds") List<Long> tagIds,
-            @RequestParam(value = "discount", required = false, defaultValue = "0") int discount) throws IOException {
+            @RequestParam(value = "discount", required = false, defaultValue = "0") int discount) {
         System.out.println("API: Adding product with name: " + product.getProductName());
         product.setBuys(0);
         product.setUserId(2L);
