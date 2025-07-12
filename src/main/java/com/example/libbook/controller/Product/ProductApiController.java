@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpSession;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,7 +51,7 @@ public class ProductApiController {
     public ResponseEntity<Product> addProduct(
             @RequestBody Product product,
             @RequestParam("tagIds") List<Long> tagIds,
-            @RequestParam(value = "discount", required = false, defaultValue = "0") int discount) throws IOException {
+            @RequestParam(value = "discount", required = false, defaultValue = "0") int discount) {
         System.out.println("API: Adding product with name: " + product.getProductName());
         product.setBuys(0);
         product.setUserId(2L);
@@ -124,6 +122,19 @@ public class ProductApiController {
         }
     }
 
+    @GetMapping("/products/checkbuy/status")
+    public ResponseEntity<Boolean> checkBuyStatus(
+            @RequestParam("productId") int productId,
+            HttpSession session) {
+        UserDTO currentUser = (UserDTO) session.getAttribute("USER");
+        if (currentUser == null) {
+            return ResponseEntity.ok(false);
+        }
+        System.out.println("API: Checking CheckBuy status for UserId=" + currentUser.getUserId() + ", ProductId=" + productId);
+        boolean hasReviewed = checkBuyService.hasUserReviewed(currentUser.getUserId(), productId);
+        return ResponseEntity.ok(hasReviewed);
+    }
+
     @GetMapping("/product/new-arrivals")
     public ResponseEntity<List<Product>> getNewArrivals(@RequestParam(defaultValue = "10") int limit) {
         List<Product> products = productService.getNewArrivals(limit);
@@ -144,17 +155,4 @@ public class ProductApiController {
         return result.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(result);
     }
 
-
-    @GetMapping("/products/checkbuy/status")
-    public ResponseEntity<Boolean> checkBuyStatus(
-            @RequestParam("productId") int productId,
-            HttpSession session) {
-        UserDTO currentUser = (UserDTO) session.getAttribute("USER");
-        if (currentUser == null) {
-            return ResponseEntity.ok(false);
-        }
-        System.out.println("API: Checking CheckBuy status for UserId=" + currentUser.getUserId() + ", ProductId=" + productId);
-        boolean hasReviewed = checkBuyService.hasUserReviewed(currentUser.getUserId(), productId);
-        return ResponseEntity.ok(hasReviewed);
-    }
 }
