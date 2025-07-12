@@ -5,12 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Admin Dashboard - LibBook</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script defer src="/js/admin.js"></script>
 
     <link rel="stylesheet" href="/css/admin.css"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <script defer src="/js/admin.js"></script>
-
     <!-- Inline CSS with updated layout -->
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
@@ -98,6 +96,8 @@
         .overview {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
+            justify-content: space-between;
+            align-items: center;
             gap: 20px;
             margin-bottom: 20px;
         }
@@ -108,6 +108,8 @@
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             text-align: center;
+            width: 200px;
+            flex-shrink: 0;
         }
 
         .card h3 {
@@ -141,7 +143,7 @@
             border-radius: 5px;
         }
 
-        .recent-books table, .recent-books table, .manage-orders table, .manage-users table, .manage-categories table, .manage-comments table {
+        .recent-books table, .manage-orders table, .manage-users table, .manage-categories table, .manage-comments table {
             width: 100%;
             border-collapse: collapse;
             background-color: #fff;
@@ -484,7 +486,7 @@
                     </div>
                 </div>
             </div>
-            <div style="display: flex; justify-content: space-around;">
+            <div style="display: flex !important; justify-content: space-around !important;">
                 <div class="card">
                     <h3>Today's Revenue</h3>
                     <p id="revenue">$30,000</p>
@@ -601,6 +603,7 @@
 
         <!-- Manage Users Section -->
         <section class="manage-users" style="display: none;" id="manage-users-section">
+            <h2>Manage Users</h2>
             <div class="user-sections">
 
                 <!-- CUSTOMER -->
@@ -709,7 +712,9 @@
                 </tbody>
             </table>
         </section>
-        <section class="manage-discounts" id="manage-discounts-section">
+
+        <!-- Manage Discounts & Promotions Section -->
+        <section class="manage-discounts" style="display: none;" id="manage-discounts-section">
             <h2>Manage Discounts & Promotions</h2>
             <form>
                 <div class="mb-3">
@@ -1227,45 +1232,6 @@
         currentOrderPage = 1;
         renderOrderPagination();
     });
-
-    // Điều hướng giữa các section
-    sidebarItems.forEach((item, index) => {
-        item.addEventListener('click', () => {
-            // Nếu nhấn lại vào mục đang được chọn, quay lại Overview
-            if (activeSectionIndex === index) {
-                sections.forEach(section => section.style.display = 'none');
-                document.getElementById('overview-section').style.display = 'block';
-                activeSectionIndex = -1; // Reset trạng thái
-            } else {
-                // Ẩn tất cả section
-                sections.forEach(section => section.style.display = 'none');
-
-                // Hiển thị section tương ứng
-                if (index === 0) { // Overview
-                    document.getElementById('overview-section').style.display = 'block';
-                } else if (index === 1) { // Manage Books
-                    document.getElementById('manage-books-section').style.display = 'block';
-                } else if (index === 2) { // Manage Orders
-                    document.getElementById('manage-orders-section').style.display = 'block';
-                } else if (index === 3) { // Manage Users
-                    document.getElementById('manage-users-section').style.display = 'block';
-                } else if (index === 4) { // Manage Categories
-                    document.getElementById('manage-categories-section').style.display = 'block';
-                } else if (index === 5) { // Manage Discounts & Promotions
-                    document.getElementById('manage-discounts-section').style.display = 'block';
-                } else if (index === 6) { // Manage Comments
-                    document.getElementById('manage-comments-section').style.display = 'block';
-                } else if (index === 7) { // Settings
-                    document.getElementById('settings-section').style.display = 'block';
-                }
-
-                activeSectionIndex = index; // Cập nhật mục đang được chọn
-            }
-        });
-    });
-
-    // Mặc định hiển thị Overview khi load trang
-    document.getElementById('overview-section').style.display = 'block';
 </script>
 <script src="/js/admin-user.js"></script>
 </body>

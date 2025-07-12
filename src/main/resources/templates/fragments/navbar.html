@@ -72,11 +72,9 @@
                     </a>
 
                     <th:block th:if="${session.USER != null}">
-                        <form th:action="@{/profile/{id}(id=${session.USER.getUserId()})}" method="get">
+                        <form action="/profile" method="GET">
                             <button class="btn btn-primary">Profile</button>
                         </form>
-
-
                         <form action="/logout" method="POST">
                             <button class="btn btn-warning" type="submit">Logout</button>
                         </form>
@@ -87,9 +85,9 @@
                         <a href="/register" class="btn btn-primary">Sign Up</a>
                     </th:block>
                 </div>
-                <!--                <div th:if="${#httpSession.getAttribute('USER') != null}">-->
-                <!--                    <p>Welcome, <span th:text="${#httpSession.getAttribute('USER').userName}"></span>!</p>-->
-                <!--                </div>-->
+<!--                <div th:if="${#httpSession.getAttribute('USER') != null}">-->
+<!--                    <p>Welcome, <span th:text="${#httpSession.getAttribute('USER').userName}"></span>!</p>-->
+<!--                </div>-->
             </div>
         </div>
     </nav>
