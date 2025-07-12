@@ -1,188 +1,145 @@
-/* Hero Section */
-.hero {
-    background-color: var(--light-bg);
-    padding-top: 7rem;
-}
+document.addEventListener('DOMContentLoaded', () => {
+    const chatIconBtn = document.getElementById('chatIconBtn');
+    const navbarChatBtn = document.getElementById('navbarChatBtn');
+    const chatWidgetModal = document.getElementById('chatWidgetModal');
+    const minimizeChatBtn = document.getElementById('minimizeChatBtn');
+    const closeChatBtn = document.getElementById('closeChatBtn');
+    const sendBtn = document.getElementById('sendBtn');
+    const messageInput = document.getElementById('messageInput');
+    const chatMessages = document.getElementById('chatMessages');
+    const typingIndicator = document.getElementById('typingIndicator');
+    const chatNotificationBadge = document.getElementById('chatNotificationBadge');
 
-.hero h1 span {
-    color: var(--primary-color);
-}
+    const toggleChatModal = () => {
+        if (chatWidgetModal) {
+            chatWidgetModal.classList.toggle('show');
+            if (chatWidgetModal.classList.contains('show')) {
+                chatWidgetModal.classList.add('fade-in');
+                if (chatNotificationBadge) {
+                    chatNotificationBadge.style.display = 'none';
+                }
+            } else {
+                chatWidgetModal.classList.remove('fade-in');
+                if (chatNotificationBadge) {
+                    chatNotificationBadge.style.display = 'flex';
+                }
+            }
+        }
+    };
 
-/* Search Form */
-.search-form {
-    background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 10px;
-}
-
-/* Category Cards */
-.category-card {
-    transition: transform 0.3s ease;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.category-card:hover {
-    transform: translateY(-5px);
-}
-
-.category-card i {
-    color: var(--primary-color);
-}
-
-/* Book Cards */
-.book-card {
-    transition: transform 0.3s ease;
-    border: none;
-}
-
-.book-card:hover {
-    transform: translateY(-5px);
-}
-
-.book-card img {
-    height: 300px;
-    object-fit: cover;
-}
-
-.book-card .card-body {
-    padding: 1.5rem;
-}
-
-/* Review Cards */
-.review-card {
-    transition: transform 0.3s ease;
-}
-
-.review-card:hover {
-    transform: translateY(-5px);
-}
-
-/* Featured Categories */
-.featured-categories {
-    padding: 5rem 0;
-}
-
-.category-icon {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    color: var(--primary-color);
-}
-
-/* New Arrivals */
-.new-arrivals {
-    background-color: var(--light-bg);
-}
-
-/* About Section */
-.about-section img {
-    border-radius: 10px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-}
-
-/* Reviews Section */
-.reviews-section {
-    background-color: var(--light-bg);
-}
-
-.review-author-img {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-/* Responsive Adjustments */
-@media (max-width: 991.98px) {
-    .hero {
-        padding-top: 5rem;
+    if (navbarChatBtn) {
+        navbarChatBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleChatModal();
+        });
     }
 
-    .book-card img {
-        height: 250px;
-    }
-}
-
-@media (max-width: 767.98px) {
-    .hero h1 {
-        font-size: 2.5rem;
+    if (chatIconBtn) {
+        chatIconBtn.addEventListener('click', toggleChatModal);
     }
 
-    .search-form {
-        padding: 1rem;
+    if (minimizeChatBtn) {
+        minimizeChatBtn.addEventListener('click', () => {
+            chatWidgetModal.classList.remove('show', 'fade-in');
+            if (chatNotificationBadge) {
+                chatNotificationBadge.style.display = 'flex';
+            }
+        });
     }
 
-    .featured-categories {
-        padding: 3rem 0;
+    if (closeChatBtn) {
+        closeChatBtn.addEventListener('click', () => {
+            chatWidgetModal.classList.remove('show', 'fade-in');
+            if (chatNotificationBadge) {
+                chatNotificationBadge.style.display = 'flex';
+            }
+        });
     }
-}
 
-/* Animations */
-.fade-in {
-    animation: fadeIn 0.5s ease-in;
-}
+    if (sendBtn) {
+        sendBtn.addEventListener('click', async () => {
+            const message = messageInput.value.trim();
+            if (!message) return;
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
+            const userMessage = `
+                <div class="message-wrapper mb-2 flex-row-reverse">
+                    <div class="flex-grow-1">
+                        <div class="message-sender text-muted small mb-1 text-end">You</div>
+                        <div class="message-bubble bg-primary text-white border rounded-3 p-2 shadow-sm">
+                            <p class="mb-0 small">${message}</p>
+                        </div>
+                        <div class="message-time text-muted small mt-1 text-end">Just now</div>
+                    </div>
+                </div>
+            `;
+            chatMessages.insertAdjacentHTML('beforeend', userMessage);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            messageInput.value = '';
+            typingIndicator.classList.remove('d-none');
+
+            try {
+                const response = await fetch('/send-message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.getElementById('csrfToken')?.value
+                    },
+                    body: JSON.stringify({ message }),
+                });
+
+                const contentType = response.headers.get('Content-Type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    console.error('Expected JSON, got:', text);
+                    throw new Error('Server returned non-JSON response');
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                typingIndicator.classList.add('d-none');
+
+                const botMessage = `
+                    <div class="message-wrapper mb-2">
+                        <div class="d-flex align-items-start">
+                            <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face"
+                                 alt="Support" class="rounded-circle me-2" width="28" height="28">
+                            <div class="flex-grow-1">
+                                <div class="message-sender text-muted small mb-1">Sarah - Book Consultant</div>
+                                <div class="message-bubble bg-light border rounded-3 p-2 shadow-sm">
+                                    <p class="mb-0 small">${data.reply}</p>
+                                </div>
+                                <div class="message-time text-muted small mt-1">Just now</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                chatMessages.insertAdjacentHTML('beforeend', botMessage);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            } catch (error) {
+                typingIndicator.classList.add('d-none');
+                const errorMessage = `
+                    <div class="message-wrapper mb-2">
+                        <div class="flex-grow-1">
+                            <div class="message-bubble bg-danger text-white border rounded-3 p-2 shadow-sm">
+                                <p class="mb-0 small">Error: ${error.message}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                chatMessages.insertAdjacentHTML('beforeend', errorMessage);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        });
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
+
+    if (messageInput) {
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendBtn.click();
+            }
+        });
     }
-}
-
-
-/* CSS cho chatBtn */
-.chatBtn {
-    width: 55px;
-    height: 55px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    border: none;
-    background-color: #FFE53B;
-    background-image: linear-gradient(147deg, #FFE53B, #FF2525, #FFE53B);
-    cursor: pointer;
-    padding-top: 3px;
-    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.164);
-    position: fixed !important; /* Đảm bảo cố định */
-    bottom: 20px !important; /* Cách mép dưới 20px */
-    right: 20px !important; /* Cách mép phải 20px */
-    left: auto !important; /* Xóa bất kỳ left nào có thể ghi đè */
-    z-index: 1000 !important; /* Luôn hiển thị trên các phần tử khác */
-    background-size: 300%;
-    background-position: left; /* Sửa từ right sang left */
-    transition: background-position 1s ease;
-    overflow: hidden;
-    position: relative;
-}
-
-.chatBtn:hover {
-    background-position: right; /* Chuyển gradient khi hover */
-}
-
-.chatBtn:hover .tooltip {
-    opacity: 1;
-    transition-duration: 0.5s;
-}
-
-.chatBtn:hover .star {
-    animation: starMove 0.7s ease-in-out infinite; /* Hiệu ứng sao băng */
-}
-
-.tooltip {
-    position: absolute;
-    top: -40px;
-    opacity: 0;
-    background-color: rgb(255, 180, 82);
-    color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition-duration: 0.5s;
-    pointer-events: none;
-    letter-spacing: 0.5px;
-}
+});

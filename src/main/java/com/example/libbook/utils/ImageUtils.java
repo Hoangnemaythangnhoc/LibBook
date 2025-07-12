@@ -40,7 +40,7 @@ public class ImageUtils {
         if (folderName == null) {
             throw new IllegalArgumentException("Invalid type: " + type);
         }
-            String uniqueFileName = UUID.randomUUID().toString();
+        String uniqueFileName = UUID.randomUUID().toString();
         Map<?, ?> uploadResult = cloudinary.uploader().upload(imgByte, ObjectUtils.asMap(
                 "folder", folderName,
                 "public_id", uniqueFileName,

@@ -26,9 +26,15 @@ public class UserRepositoryImpl implements UserRepository {
     @Autowired
     private final ImageUtils imageUtils;
 
+
+    @Autowired
     JdbcTemplate jdbcTemplate;
 
+
     private static final Logger logger = LoggerFactory.getLogger(UserRepositoryImpl.class);
+
+
+
 
     public UserRepositoryImpl(ImageUtils imageUtils) {
         this.imageUtils = imageUtils;
@@ -95,22 +101,27 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
 
-    public UserDTO checkLogin(String email, String pass) {
+    public User checkLogin(String email, String pass) {
         String sql = "Select Top 1 *  from [User] where Email = ?";
         ConnectUtils db = ConnectUtils.getInstance();
-        UserDTO userDTO = null ;
+        User userDTO = null ;
         String password = null;
         try (Connection connection = db.openConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, email);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                userDTO = new UserDTO();
+                userDTO = new User();
                 userDTO.setEmail(resultSet.getString("Email"));
+
                  userDTO.setUserName(resultSet.getString("UserName"));
                  userDTO.setUserId(resultSet.getInt("UserId"));
                  userDTO.setRoleID(resultSet.getInt("RoleId"));
                  password = resultSet.getString("Password");
+                userDTO.setUserName(resultSet.getString("UserName"));
+                userDTO.setUserId(resultSet.getInt("UserId"));
+                userDTO.setRoleId(resultSet.getInt("RoleId"));
+                password = resultSet.getString("Password");
             }
             if (password.equals(hashPassword(pass)))
                 return userDTO;
@@ -122,20 +133,20 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public UserDTO getUserByEmail(String email) {
+    public User getUserByEmail(String email) {
         String sql = "Select Top 1 *  from [User] where Email = ?";
         ConnectUtils db = ConnectUtils.getInstance();
-        UserDTO userDTO = null ;
+        User userDTO = null ;
         try (Connection connection = db.openConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, email);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                userDTO = new UserDTO();
+                userDTO = new User();
                 userDTO.setEmail(resultSet.getString("Email"));
                 userDTO.setUserName(resultSet.getString("UserName"));
                 userDTO.setUserId(resultSet.getInt("UserId"));
-                userDTO.setRoleID(resultSet.getInt("RoleId"));
+                userDTO.setRoleId(resultSet.getInt("RoleId"));
             }
             return userDTO;
         } catch (Exception e) {
@@ -322,6 +333,28 @@ public class UserRepositoryImpl implements UserRepository {
             return stmt.executeUpdate() > 0;
         } catch (Exception e) { e.printStackTrace(); }
         return false;
+    }
+
+    @Override
+    public void updateUser(User user) {
+        String sql = "UPDATE [User] SET " +
+                "FirstName = ?, " +
+                "LastName = ?, " +
+                "Email = ?, " +
+                "PhoneNumber = ?, " +
+                "DateOfBirth = ?, " +
+                "Address = ? " +
+                "WHERE UserId = ?";
+
+        jdbcTemplate.update(sql,
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getPhoneNumber(),
+                user.getDateOfBirth(),
+                user.getAddress(),
+                user.getUserId()
+        );
     }
 
 
