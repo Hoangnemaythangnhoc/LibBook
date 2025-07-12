@@ -10,7 +10,7 @@ public interface ProductRepository {
     Product getProductById(Long productId);
     List<Product> getProductsByTag(String tag);
     void addProduct(Product product, List<Long> tagIds) throws IOException;
-    void updateProduct(Product product, List<Long> tagIds);
+    void updateProduct(Product product, List<Long> tagIds) throws IOException;
     void softDeleteProduct(Long productId); // Thêm phương thức soft delete
     List<Product> getNewArrivals(int limit);
     List<Product> getTopSellingProducts(int limit);
