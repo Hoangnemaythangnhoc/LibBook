@@ -130,10 +130,7 @@
     </style>
 </head>
 <body>
-<!-- Navbar Placeholder -->
 <div th:insert="~{fragments/navbar :: navbar}"></div>
-
-<!-- Product Details -->
 <section class="product-details py-5 mt-5">
     <div class="container">
         <nav aria-label="breadcrumb">
@@ -144,28 +141,17 @@
                 </li>
             </ol>
         </nav>
-
         <div class="row g-4">
-            <!-- Product Gallery -->
             <div class="col-lg-5">
                 <div class="product-gallery">
-                    <img
-                            th:src="${product.imageFile}"
-                            alt="Book cover"
-                            class="img-fluid rounded shadow"/>
-
+                    <img th:src="${product.imageFile}" alt="Book cover" class="img-fluid rounded shadow"/>
                     <div class="row g-2 mt-2">
                         <div class="col-3">
-                            <img
-                                    th:src="${product.imageFile}"
-                                    alt="Thumbnail 1"
-                                    class="img-fluid rounded cursor-pointer border"/>
+                            <img th:src="${product.imageFile}" alt="Thumbnail 1" class="img-fluid rounded cursor-pointer border"/>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Product Info -->
             <div class="col-lg-7">
                 <div class="product-info">
                     <span class="badge bg-primary mb-2">Book</span>
@@ -179,26 +165,39 @@
                         </div>
                         <div class="badge bg-success" style="margin-top: 20px" th:text="'In Stock: ' + ${product.available}">In Stock</div>
                     </div>
+
                     <div class="mb-4">
                         <h4>Description</h4>
                         <p th:text="${product.description}">Description Not Available</p>
                     </div>
+
                     <div class="mb-4">
                         <div class="row">
                             <div class="col-md-6">
                                 <h5>Book Details</h5>
                                 <table class="table">
                                     <tbody>
-                                    <tr><td>Buys:</td><td th:text="${product.buys}">0</td></tr>
-                                    <tr><td>Available:</td><td th:text="${product.available}">0</td></tr>
-                                    <tr><td>Price:</td><td th:with="discountedPrice=${product.discount > 0 ? product.price * (100 - product.discount) / 100 : product.price}" th:text="'$' + ${#numbers.formatDecimal(discountedPrice, 2, 2)}"></td></tr>
-                                    <tr><td>Rating:</td><td th:text="${product.rating}">0.0</td></tr>
+                                    <tr>
+                                        <td>Buys:</td>
+                                        <td th:text="${product.buys}">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Available:</td>
+                                        <td th:text="${product.available}">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Price:</td>
+                                        <td th:text="'$' + ${#numbers.formatDecimal(product.price, 2, 2)}">$0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Rating:</td>
+                                        <td th:text="${product.rating}">0.0</td>
+                                    </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
-
                     <div class="d-flex align-items-center mb-4">
                         <div class="quantity-selector me-3">
                             <button class="btn btn-outline-secondary" onclick="decreaseQuantity()">-</button>
@@ -210,8 +209,6 @@
                             Add to Cart
                         </button>
                     </div>
-
-                    <!-- Additional Features -->
                     <div class="row g-3">
                         <div class="col-md-4">
                             <div class="d-flex align-items-center">
@@ -246,7 +243,7 @@
         </div>
 
         <!-- AI Help Button -->
-        <div class="ai-help-btn" title="AI Help">
+        <div id="chatbot-icon" class="ai-help-btn" title="AI Help">
             <i class="ri-robot-line"></i>
             <span class="star-1"></span>
             <span class="star-2"></span>
@@ -307,14 +304,17 @@
         <div class="row g-4">
             <div class="col-lg-3 col-md-6" th:each="relatedProduct : ${relatedProjects}">
                 <div class="book-card bg-white rounded shadow-sm h-100">
-                    <img th:src="${relatedProduct.imageFile}" class="card-img-top" alt="Related Book"/>
+                    <img th:src="${relatedProduct.imageFile}"
+                         class="card-img-top"
+                         alt="Related Book"/>
                     <div class="card-body">
                         <p class="text-primary mb-1">Book</p>
                         <h5 class="card-title" th:text="${relatedProduct.productName}">Related Product</h5>
                         <p class="card-text text-muted">Author Not Available</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="h5 mb-0" th:text="'$' + ${#numbers.formatDecimal(relatedProduct.price, 2, 2)}">$0.00</span>
-                            <a th:href="@{/product/{id}(id=${relatedProduct.productId})}" class="btn btn-outline-primary">View Details</a>
+                            <a th:href="@{/product/{id}(id=${relatedProduct.productId})}"
+                               class="btn btn-outline-primary">View Details</a>
                         </div>
                     </div>
                 </div>
@@ -322,7 +322,6 @@
         </div>
     </div>
 </section>
-
 
 <!-- Footer Placeholder -->
 <div th:insert="~{fragments/footer :: footer}"></div>
@@ -383,15 +382,12 @@
 
 <script src="/js/components.js"></script>
 <script>
-    // Quantity Selector
     let quantity = 1;
     const quantityDisplay = document.getElementById("quantity");
-
     function increaseQuantity() {
         quantity++;
         quantityDisplay.textContent = quantity;
     }
-
     function decreaseQuantity() {
         if (quantity > 1) {
             quantity--;
@@ -535,8 +531,6 @@
         }
         fetchReviews();
     });
-
-
 </script>
 </body>
 </html>
