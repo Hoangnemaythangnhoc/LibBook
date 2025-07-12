@@ -198,7 +198,9 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public void updateProduct(Product product, List<Long> tagIds) {
+    public void updateProduct(Product product, List<Long> tagIds) throws IOException {
+        byte[] baseImage = imageUtils.decodeBase64(product.getImageFile());
+        String image = imageUtils.uploadAvatar(baseImage,2);
         String sql = "UPDATE product SET productName = ?, description = ?, price = ?, imageFile = ?, buys = ?, available = ?, " +
                 "userId = ?, status = ?, rating = ?, author = ?, discount = ? WHERE productId = ?";
         try (Connection connection = dataSource.getConnection();
@@ -206,7 +208,7 @@ public class ProductRepositoryImpl implements ProductRepository {
             statement.setString(1, product.getProductName());
             statement.setString(2, product.getDescription());
             statement.setDouble(3, product.getPrice());
-            statement.setString(4, product.getImageFile());
+            statement.setString(4, image);
             statement.setInt(5, product.getBuys());
             statement.setInt(6, product.getAvailable());
             statement.setLong(7, product.getUserId());
