@@ -51,6 +51,21 @@ public class RouterSetting {
         List<Tag> tags = tagService.getAllTags();
         System.out.println("User in session: " + session.getAttribute("USER"));
 
+    public String home(Model model, HttpServletRequest request, HttpSession session) {
+        List<Product> products = productService.getAllProduct().stream()
+                .map(product -> {
+                    if (product.getImageFile() == null) {
+                        product.setImageFile("https://static.vecteezy.com/system/resources/previews/017/222/245/non_2x/3d-stack-of-books-3d-rendering-illustration-free-png.png");
+                    } else if (!(product.getImageFile() instanceof String)) {
+                        product.setImageFile("default.jpg");
+                    }
+                    return product;
+                })
+                .collect(Collectors.toList());
+
+        List<Tag> tags = tagService.getAllTags();
+
+        // Auto login via cookie (if not already logged in)
         if (session.getAttribute("USER") == null) {
             Cookie[] cookies = request.getCookies();
             String email = null;
@@ -75,6 +90,7 @@ public class RouterSetting {
                 }
             }
         }
+
         model.addAttribute("products", products);
         model.addAttribute("tags", tags);
         return "Mainpage/home";

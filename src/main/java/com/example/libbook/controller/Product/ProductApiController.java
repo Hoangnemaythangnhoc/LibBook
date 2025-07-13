@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpSession;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +53,7 @@ public class ProductApiController {
     public ResponseEntity<Product> addProduct(
             @RequestBody Product product,
             @RequestParam("tagIds") List<Long> tagIds,
-            @RequestParam(value = "discount", required = false, defaultValue = "0") int discount) {
+            @RequestParam(value = "discount", required = false, defaultValue = "0") int discount) throws IOException {
         System.out.println("API: Adding product with name: " + product.getProductName());
         product.setBuys(0);
         product.setUserId(2L);
@@ -77,6 +79,7 @@ public class ProductApiController {
             @RequestParam("status") int status,
             @RequestParam("author") String author,
             @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+            @RequestParam("base64") String baseImage,
             @RequestParam(value = "tagIds", required = false) List<Long> tagIds,
             @RequestParam(value = "discount", required = false, defaultValue = "0") int discount) {
         System.out.println("API: Received update for product with id: " + id + ", status: " + status);
@@ -98,12 +101,7 @@ public class ProductApiController {
         existingProduct.setStatus(status);
         existingProduct.setAuthor(author);
         existingProduct.setDiscount(discount);
-
-        // Xử lý file ảnh nếu có
-        if (imageFile != null && !imageFile.isEmpty()) {
-            existingProduct.setImageFile(imageFile.getOriginalFilename());
-            // Có thể thêm logic lưu file vào server tại đây
-        }
+        existingProduct.setImageFile(baseImage);
 
         productService.updateProduct(existingProduct, tagIds == null ? new ArrayList<>() : tagIds);
         System.out.println("API: Product updated successfully with ID: " + id + ", new status: " + existingProduct.getStatus());

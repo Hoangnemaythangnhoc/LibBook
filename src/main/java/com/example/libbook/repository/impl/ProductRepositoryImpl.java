@@ -3,10 +3,13 @@ package com.example.libbook.repository.impl;
 import com.example.libbook.entity.Product;
 import com.example.libbook.entity.Tag;
 import com.example.libbook.repository.ProductRepository;
+import com.example.libbook.utils.ImageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,8 +23,12 @@ public class ProductRepositoryImpl implements ProductRepository {
     private final DataSource dataSource;
 
     @Autowired
-    public ProductRepositoryImpl(DataSource dataSource) {
+    private final ImageUtils imageUtils;
+
+    @Autowired
+    public ProductRepositoryImpl(DataSource dataSource, ImageUtils imageUtils, ImageUtils imageUtils1) {
         this.dataSource = dataSource;
+        this.imageUtils = imageUtils1;
         System.out.println("ProductRepositoryImpl initialized with DataSource: " + (dataSource != null ? "Yes" : "No"));
     }
 
@@ -76,7 +83,7 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     @Override
     public Product getProductById(Long productId) {
-        String sql = "SELECT * FROM Product WHERE ProductId = ?";
+        String sql = "SELECT * FROM product WHERE productId = ?";
         Product product = null;
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -143,7 +150,9 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public void addProduct(Product product, List<Long> tagIds) {
+    public void addProduct(Product product, List<Long> tagIds) throws IOException {
+        byte[] baseImage = imageUtils.decodeBase64(product.getImageFile());
+        String image = imageUtils.uploadAvatar(baseImage,2);
         String sql = "INSERT INTO product (productName, description, price, imageFile, buys, available, userId, status, rating, author, discount) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection connection = dataSource.getConnection();
@@ -151,7 +160,7 @@ public class ProductRepositoryImpl implements ProductRepository {
             statement.setString(1, product.getProductName());
             statement.setString(2, product.getDescription());
             statement.setDouble(3, product.getPrice());
-            statement.setString(4, product.getImageFile());
+            statement.setString(4, image);
             statement.setInt(5, product.getBuys());
             statement.setInt(6, product.getAvailable());
             statement.setLong(7, product.getUserId());
@@ -172,7 +181,7 @@ public class ProductRepositoryImpl implements ProductRepository {
 
             // Thêm mối quan hệ vào ProductTag
             if (tagIds != null && !tagIds.isEmpty()) {
-                String insertTagSql = "INSERT INTO ProductTag (productId, tagId) VALUES (?, ?)";
+                String insertTagSql = "INSERT INTO ProductTag (ProductId, TagId) VALUES (?, ?)";
                 try (PreparedStatement tagStatement = connection.prepareStatement(insertTagSql)) {
                     for (Long tagId : tagIds) {
                         tagStatement.setLong(1, product.getProductId());
@@ -189,30 +198,53 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public void updateProduct(Product product, List<Long> tagIds) {
-        String sql = "UPDATE product SET productName = ?, description = ?, price = ?, imageFile = ?, buys = ?, available = ?, " +
-                "userId = ?, status = ?, rating = ?, author = ?, discount = ? WHERE productId = ?";
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, product.getProductName());
-            statement.setString(2, product.getDescription());
-            statement.setDouble(3, product.getPrice());
-            statement.setString(4, product.getImageFile());
-            statement.setInt(5, product.getBuys());
-            statement.setInt(6, product.getAvailable());
-            statement.setLong(7, product.getUserId());
-            statement.setInt(8, product.getStatus());
-            statement.setDouble(9, product.getRating());
-            statement.setString(10, product.getAuthor());
-            statement.setInt(11, product.getDiscount());
-            statement.setLong(12, product.getProductId());
+    public void updateProduct(Product product, List<Long> tagIds) throws IOException, SQLException {
+        int affectedRows = 0;
+        try (Connection connection = dataSource.getConnection()) {
+            String image = null;
+            boolean hasNewImage = true;
+            if (product.getImageFile() == null || product.getImageFile().isEmpty()) {
+                hasNewImage = false;
+            }
 
-            int affectedRows = statement.executeUpdate();
+            if (hasNewImage) {
+                byte[] baseImage = imageUtils.decodeBase64(product.getImageFile());
+                image = imageUtils.uploadAvatar(baseImage, 2);
+            }
+
+            String sql = hasNewImage
+                    ? "UPDATE product SET productName = ?, description = ?, price = ?, imageFile = ?, buys = ?, available = ?, " +
+                    "userId = ?, status = ?, rating = ?, author = ?, discount = ? WHERE productId = ?"
+                    : "UPDATE product SET productName = ?, description = ?, price = ?, buys = ?, available = ?, " +
+                    "userId = ?, status = ?, rating = ?, author = ?, discount = ? WHERE productId = ?";
+
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setString(1, product.getProductName());
+                statement.setString(2, product.getDescription());
+                statement.setDouble(3, product.getPrice());
+
+                int index = 4;
+                if (hasNewImage) {
+                    statement.setString(index++, image);
+                }
+                statement.setInt(index++, product.getBuys());
+                statement.setInt(index++, product.getAvailable());
+                statement.setLong(index++, product.getUserId());
+                statement.setInt(index++, product.getStatus());
+                statement.setDouble(index++, product.getRating());
+                statement.setString(index++, product.getAuthor());
+                statement.setInt(index++, product.getDiscount());
+                statement.setLong(index, product.getProductId());
+
+                affectedRows = statement.executeUpdate();
+            }
+
             if (affectedRows == 0) {
                 throw new RuntimeException("Failed to update product, no rows affected.");
             }
 
-            String deleteTagSql = "DELETE FROM ProductTag WHERE productId = ?";
+            // Xóa các mối quan hệ cũ trong ProductTag
+            String deleteTagSql = "DELETE FROM ProductTag WHERE ProductId = ?";
             try (PreparedStatement deleteStatement = connection.prepareStatement(deleteTagSql)) {
                 deleteStatement.setLong(1, product.getProductId());
                 deleteStatement.executeUpdate();

@@ -900,13 +900,13 @@
             body: JSON.stringify({status: 0})
         })
             .then(response => {
-                if (!response.ok) throw new Error('Failed to soft delete book');
+                if (!response.ok) throw new Error('Failed to delete book');
                 return fetchBooks();
             })
-            .then(() => alert('Book soft deleted successfully!'))
+            .then(() => alert('Book deleted successfully!'))
             .catch(error => {
-                console.error('Error soft deleting book:', error);
-                alert('Failed to soft delete book. Check console for details.');
+                console.error('Error deleting book:', error);
+                alert('Failed to delete book. Check console for details.');
             });
     }
 

@@ -242,31 +242,31 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-        @PostMapping("/reset-password")
-        public ResponseEntity<Map<String, Object>> resetPassword(@RequestParam String email,
-                                                                 @RequestParam String password,
-                                                                 @RequestParam("confirm-password") String confirmPassword) {
-            Map<String, Object> response = new HashMap<>();
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, Object>> resetPassword(@RequestParam String email,
+                                                             @RequestParam String password,
+                                                             @RequestParam("confirm-password") String confirmPassword) {
+        Map<String, Object> response = new HashMap<>();
 
-            // Xử lý logic reset password
-            if (!password.equals(confirmPassword)) {
-                response.put("status", "error");
-                response.put("message", "Passwords do not match");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-            // Thực hiện reset password
-            try {
-                userService.updatePassword(email,password);
-                response.put("status", "success");
-                response.put("redirect", "/login");
-                return ResponseEntity.ok(response);
-            } catch (Exception e) {
-                response.put("status", "error");
-                response.put("message", "Failed to reset password: " + e.getMessage());
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-            }
+        // Xử lý logic reset password
+        if (!password.equals(confirmPassword)) {
+            response.put("status", "error");
+            response.put("message", "Passwords do not match");
+            return ResponseEntity.badRequest().body(response);
         }
+
+        // Thực hiện reset password
+        try {
+            userService.updatePassword(email,password);
+            response.put("status", "success");
+            response.put("redirect", "/login");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("status", "error");
+            response.put("message", "Failed to reset password: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 
     @PostMapping("/send-message")
     public ResponseEntity<Map<String, String>> sendMessage(@RequestBody Map<String, String> request) {

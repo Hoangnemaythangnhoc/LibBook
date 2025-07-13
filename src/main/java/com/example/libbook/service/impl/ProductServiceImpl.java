@@ -6,6 +6,8 @@ import com.example.libbook.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +36,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void addProduct(Product product, List<Long> tagIds) {
+    public void addProduct(Product product, List<Long> tagIds) throws IOException {
         System.out.println("ProductServiceImpl: Calling addProduct with name: " + product.getProductName());
         productRepository.addProduct(product, tagIds);
     }
@@ -42,7 +44,11 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void updateProduct(Product product, List<Long> tagIds) {
         System.out.println("ProductServiceImpl: Calling updateProduct with id: " + product.getProductId());
-        productRepository.updateProduct(product, tagIds);
+        try {
+            productRepository.updateProduct(product, tagIds);
+        } catch (IOException | SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

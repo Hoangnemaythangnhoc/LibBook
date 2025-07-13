@@ -18,8 +18,27 @@ public class User {
     private LocalDateTime createAt;
     private LocalDate dateOfBirth;
     private String profilePicture;
+    private Double totalSpent;
+    private Integer productPurchased;
 
     // Getters and Setters
+
+    public Double getTotalSpent() {
+        return totalSpent;
+    }
+
+    public void setTotalSpent(Double totalSpent) {
+        this.totalSpent = totalSpent;
+    }
+
+    public Integer getProductPurchased() {
+        return productPurchased;
+    }
+
+    public void setProductPurchased(Integer productPurchased) {
+        this.productPurchased = productPurchased;
+    }
+
     public int getUserId() {
         return userId;
     }

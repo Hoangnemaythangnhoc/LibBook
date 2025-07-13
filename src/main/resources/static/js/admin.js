@@ -1,3 +1,4 @@
+
 // Dữ liệu mô phỏng
 const dashboardData = {
   revenue: 1500000,
@@ -28,6 +29,8 @@ const dashboardData = {
     }
   ]
 };
+
+
 
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("revenue").textContent = `${dashboardData.revenue.toLocaleString()}₫`;
