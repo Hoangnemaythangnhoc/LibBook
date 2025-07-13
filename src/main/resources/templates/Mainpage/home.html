@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="../../static/css/chat-widget.css">
     <style>
         .new-arrivals .carousel-item {
-            padding: 0 15px;
             transition: transform 0.5s ease-in-out;
         }
 
@@ -21,6 +20,7 @@
             height: 400px;
             display: flex;
             flex-direction: column;
+
         }
 
         .new-arrivals .book-card img {
@@ -196,21 +196,21 @@
 <section id="new-arrivals" class="new-arrivals py-3 bg-light">
     <div class="container">
         <h2 class="text-center mb-5">New Arrivals</h2>
-        <div id="new-arrivals-content">
-            <!-- JavaScript sẽ render nội dung ở đây -->
-        </div>
+<!--        <div id="new-arrivals-content">-->
+<!--            &lt;!&ndash; JavaScript sẽ render nội dung ở đây &ndash;&gt;-->
+<!--        </div>-->
         <div th:if="${products == null or products.isEmpty()}">
             <p class="text-center text-muted">No products available at the moment.</p>
         </div>
         <div th:unless="${products == null or products.isEmpty()}" id="newArrivalsCarousel" class="carousel slide"
-             data-bs-ride="carousel" style="height: 950px">
-            <div class="carousel-inner" style="height: 900px">
+             data-bs-ride="carousel">
+            <div class="new-arrivals-content" style="height: 500px">
                 <div th:each="i : ${#numbers.sequence(0, products.size() - 1, 8)}"
                      th:with="pageProducts=${products.subList(i, i + 8 < products.size() ? i + 8 : products.size())}"
                      th:classappend="${i == 0} ? 'carousel-item active' : 'carousel-item'">
                     <div class="row g-4">
                         <div class="col-lg-3 col-md-6" th:each="product : ${pageProducts}">
-                            <div class="book-card bg-white rounded shadow-sm">
+                            <div class="book-card bg-white rounded shadow-sm p-1">
                                 <img th:src="${product.imageFile}"
                                      class="card-img-top" alt="Book Cover"/>
                                 <div class="card-body">

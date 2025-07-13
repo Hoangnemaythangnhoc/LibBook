@@ -66,6 +66,7 @@
                     <a href="/cart" class="btn btn-link position-relative ms-2">
                         <i class="ri-shopping-cart-2-line fs-5"></i>
                         <span class="position-absolute top-45 start-100 translate-middle badge rounded-pill bg-danger"
+                              id="NumberOfCart"
                               style="margin-right: 60px">
                             0
                         </span>
@@ -75,6 +76,8 @@
                         <form th:action="@{/profile/{id}(id=${session.USER.getUserId()})}" method="get">
                             <button class="btn btn-primary">Profile</button>
                         </form>
+                        <form action="/custom-logout" method="post">
+
 
 
                         <form action="/logout" method="POST">
@@ -94,4 +97,24 @@
         </div>
     </nav>
     <script src="../../static/js/chat-script.js" defer></script>
+    <script th:inline="javascript">
+        const user = [[${session.USER}]]
+        const fetchContCart = async () => {
+            try {
+                const response = await fetch(`/cart/api/${user.userId}`, {
+                    method: 'GET'
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch cart count");
+                }
+
+                document.getElementById("NumberOfCart").textContent = await response.json();
+            } catch (error) {
+                console.error("Error fetching cart count:", error);
+            }
+        };
+        fetchContCart();
+
+    </script>
 </th:block>

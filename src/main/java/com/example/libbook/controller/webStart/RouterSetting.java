@@ -5,12 +5,14 @@ import com.example.libbook.entity.*;
 import com.example.libbook.service.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.http.HttpRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,20 @@ public class RouterSetting {
     private UserService userService;
 
     @GetMapping("/")
+    public String home(Model model, HttpSession session ,HttpServletRequest request) {
+        if (session.getAttribute("USER") != null) {
+            User user = (User) session.getAttribute("USER");
+            model.addAttribute("USER", user);
+            System.out.println("User in session - UserId: " + user.getUserId() +
+                    ", UserName: " + user.getUserName() +
+                    ", Email: " + user.getEmail());
+        } else {
+            System.out.println("User in session is null");
+        }
+        List<Product> products = productService.getAllProduct();
+        List<Tag> tags = tagService.getAllTags();
+        System.out.println("User in session: " + session.getAttribute("USER"));
+
     public String home(Model model, HttpServletRequest request, HttpSession session) {
         List<Product> products = productService.getAllProduct().stream()
                 .map(product -> {
@@ -106,7 +122,7 @@ public class RouterSetting {
     }
 
     @GetMapping("/home")
-    public String dashboard(Model model, HttpSession session) {
+    public String dashboard(Model model ,  HttpServletRequest request, HttpSession session) {
         if (session.getAttribute("USER") != null) {
             User user = (User) session.getAttribute("USER");
             model.addAttribute("USER", user);
@@ -119,6 +135,31 @@ public class RouterSetting {
         List<Product> products = productService.getAllProduct();
         List<Tag> tags = tagService.getAllTags();
         System.out.println("User in session: " + session.getAttribute("USER"));
+
+        if (session.getAttribute("USER") == null) {
+            Cookie[] cookies = request.getCookies();
+            String email = null;
+            String password = null;
+
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if ("email".equals(cookie.getName())) {
+                        email = cookie.getValue();
+                    }
+                    if ("password".equals(cookie.getName())) {
+                        password = cookie.getValue();
+                    }
+                }
+            }
+
+            if (email != null && password != null) {
+                User user = userService.checkLogin(email, password);
+                if (user != null) {
+                    session.setAttribute("USER", user);
+                    return "redirect:/home";
+                }
+            }
+        }
         model.addAttribute("products", products);
         model.addAttribute("tags", tags);
         return "Mainpage/home";
@@ -286,4 +327,21 @@ public class RouterSetting {
             return "redirect:/staff";
         }
     }
+
+
+    @PostMapping("/custom-logout")
+    public String logout(HttpSession session, HttpServletResponse response) {
+        session.invalidate();
+        Cookie emailCookie = new Cookie("email", null);
+        emailCookie.setPath("/");
+        emailCookie.setMaxAge(0);
+        response.addCookie(emailCookie);
+        Cookie passwordCookie = new Cookie("password", null);
+        passwordCookie.setPath("/");
+        passwordCookie.setMaxAge(0);
+        response.addCookie(passwordCookie);
+
+        return "redirect:/login";
+    }
+
 }

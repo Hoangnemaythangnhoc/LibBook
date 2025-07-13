@@ -204,7 +204,7 @@
                             <span class="mx-3" id="quantity">1</span>
                             <button class="btn btn-outline-secondary" onclick="increaseQuantity()">+</button>
                         </div>
-                        <button class="btn btn-primary btn-lg">
+                        <button class="btn btn-primary btn-lg" onclick="addToCart(product)">
                             <i class="ri-shopping-cart-line me-2"></i>
                             Add to Cart
                         </button>
@@ -381,19 +381,8 @@
 </script>
 
 <script src="/js/components.js"></script>
-<script>
-    let quantity = 1;
-    const quantityDisplay = document.getElementById("quantity");
-    function increaseQuantity() {
-        quantity++;
-        quantityDisplay.textContent = quantity;
-    }
-    function decreaseQuantity() {
-        if (quantity > 1) {
-            quantity--;
-            quantityDisplay.textContent = quantity;
-        }
-    }
+<script th:inline="javascript">
+<!--    Message-->
     const toastEl = document.getElementById('notificationToast');
     const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
     function showToast(title, message, type = 'success') {
@@ -407,6 +396,54 @@
         toastEl.querySelector('.toast-header').classList.add(type === 'success' ? 'bg-success' : 'bg-danger');
         toast.show();
     }
+
+
+    let quantity = 1;
+    let product = [[${product}]];
+    console.log(product)
+    const quantityDisplay = document.getElementById("quantity");
+    function increaseQuantity() {
+        if (quantity >= product.available) {
+            return;
+        }
+        quantity++;
+        quantityDisplay.textContent = quantity;
+    }
+    function decreaseQuantity() {
+        if (quantity > 1) {
+            quantity--;
+            quantityDisplay.textContent = quantity;
+        }
+    }
+
+
+    const addToCart = async (product) => {
+        const cartItem = {
+            productId: product.productId,
+            quantity: quantity
+        };
+
+        await fetch('/cart/api/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(cartItem)
+        })
+            .then(response => {
+                if (response.status === 401) {
+                    showToast("Login required","You need to login",'danger');
+                } else if (response.ok) {
+                    showToast("Successfully","Add to cart successfully!");
+
+                }
+            })
+            .catch(error => console.error('Lỗi:', error));
+    };
+
+
+
+
     document.addEventListener('DOMContentLoaded', () => {
         const stars = document.querySelectorAll('#starRating i');
         const ratingInput = document.getElementById('ratingValue');

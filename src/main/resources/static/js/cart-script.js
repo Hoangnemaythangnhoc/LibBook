@@ -9,14 +9,12 @@ let cartData = {
   subtotal: 0,
   discount: 0,
   tax: 0,
-  shippingFee: 30000,
+  shippingFee: 10000,
   total: 0,
 };
 
 function initializeCartPage() {
   loadCartItems();
-  loadRecommendedProducts();
-  initializeFormValidation();
   calculateTotals();
 }
 
@@ -31,10 +29,9 @@ function loadCartItems() {
     .then((response) => response.json())
     .then((data) => {
       showLoading(false);
-      if (data.success) {
-        cartData.items = data.items;
-        renderCartItems(data.items);
-        updateCartCount(data.items.length);
+      if (data.length !== 0) {
+        cartData.items = data;
+        renderCartItems(data);
         calculateTotals();
       } else {
         showEmptyCart();
@@ -59,44 +56,36 @@ function renderCartItems(items) {
 
   cartItemsContainer.style.display = "block";
   emptyCart.style.display = "none";
-
   const itemsHTML = items
     .map(
       (item) => `
       <div class="cart-item" data-item-id="${item.id}">
           <div class="item-image">
-              <img src="${item.imageUrl}" alt="${item.title}" 
-                   onerror="this.src='/images/placeholder.png'">
+              <img src="${item.imageFile}" alt="${item.productName}" 
+                   onerror="this.src='/img/placeholder.svg'">
           </div>
           <div class="item-details">
-              <h3 class="item-title">${item.title}</h3>
+              <h3 class="item-title">${item.productName}</h3>
               <p class="item-author">Tác giả: ${item.author}</p>
-              <div class="item-price">
-                  <span class="current-price">${formatCurrency(item.price)}</span>
-                  ${
-                    item.originalPrice
-                      ? `<span class="original-price">${formatCurrency(item.originalPrice)}</span>`
-                      : ""
-                  }
-              </div>
+              
           </div>
           <div class="item-quantity">
               <div class="quantity-controls">
-                  <button class="qty-btn" onclick="updateQuantity(${item.id}, -1)">
+                  <button class="qty-btn" onclick="updateQuantity(${item.productId}, ${item.quantity}-1)">
                       <i class="ri-subtract-line"></i>
                   </button>
-                  <input type="number" class="qty-input" value="${item.quantity}" min="1" max="10" 
-                         onchange="updateQuantity(${item.id}, this.value, true)">
-                  <button class="qty-btn" onclick="updateQuantity(${item.id}, 1)">
+                  <input type="number" class="qty-input"  value="${item.quantity}" min="1" max="10" 
+                         onchange="updateQuantity(${item.productId}, this.value, true)">
+                  <button class="qty-btn" onclick="updateQuantity(${item.productId}, ${item.quantity}+1)">
                       <i class="ri-add-line"></i>
                   </button>
               </div>
           </div>
           <div class="item-total">
-              <span class="total-price">${formatCurrency(item.price * item.quantity)}</span>
+              <span class="total-price">${formatCurrency((item.price * (100-item.discount)/100) * item.quantity)}</span>
           </div>
           <div class="item-actions">
-              <button class="action-btn remove-btn" onclick="removeItem(${item.id})" 
+              <button class="action-btn remove-btn" onclick="removeItem(${item.productId})" 
                       title="Xóa khỏi giỏ">
                   <i class="ri-delete-bin-line"></i>
               </button>
@@ -109,56 +98,64 @@ function renderCartItems(items) {
   cartItemsContainer.innerHTML = itemsHTML;
 }
 
-function updateQuantity(itemId, change, isAbsolute = false) {
+async function updateQuantity(itemId, change, isAbsolute = false) {
   showLoading(true);
 
   const quantity = isAbsolute ? parseInt(change) : change;
-  fetch("/cart/api/update", {
+  const available = cartData.items.find((s) =>  s.productId === itemId)
+
+  const cartItem = {
+    productId: itemId,
+    quantity: quantity < 0 ? 0 : quantity
+  };
+
+  if (available.available >= quantity) {
+  await fetch("/cart/api/add", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "X-Requested-With": "XMLHttpRequest",
     },
-    body: JSON.stringify({
-      bookId: itemId,
-      quantity: quantity,
-    }),
+    body: JSON.stringify(cartItem),
   })
-    .then((response) => response.json())
     .then((data) => {
       showLoading(false);
-      if (data.success) {
-        loadCartItems(); // Reload cart to reflect changes
+        loadCartItems();
         showToast("Đã cập nhật số lượng", "success");
-      } else {
-        showToast(data.message || "Có lỗi xảy ra", "error");
-      }
     })
     .catch((error) => {
       showLoading(false);
       console.error("Error:", error);
       showToast("Có lỗi xảy ra khi cập nhật", "error");
     });
+  } else {
+    showToast("Vượt quá số lượng trong kho!", "error")
+    showLoading(false);
+
+  }
 }
 
 function removeItem(itemId) {
   showModal("Xác nhận xóa", "Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?", () => {
+
+    const cartItem = {
+      productId: itemId,
+      quantity: 0
+    };
+
     showLoading(true);
-    fetch(`/cart/api/remove/${itemId}`, {
-      method: "DELETE",
+    fetch(`/cart/api/delete`, {
+      method: "POST",
       headers: {
+        "Content-Type": "application/json",
         "X-Requested-With": "XMLHttpRequest",
       },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        showLoading(false);
-        if (data.success) {
+      body: JSON.stringify(cartItem)
+    }).then(() => {
+          showLoading(false);
           loadCartItems();
           showToast("Đã xóa sản phẩm khỏi giỏ hàng", "success");
-        } else {
-          showToast(data.message || "Có lỗi xảy ra", "error");
-        }
+
       })
       .catch((error) => {
         showLoading(false);
@@ -176,21 +173,18 @@ function clearCart() {
 
   showModal("Xác nhận xóa", "Bạn có chắc chắn muốn xóa tất cả sản phẩm trong giỏ hàng?", () => {
     showLoading(true);
-    fetch("/cart/api/clear", {
+    fetch("/cart/api/delete/allItems", {
       method: "POST",
       headers: {
+        "Content-Type": "application/json",
         "X-Requested-With": "XMLHttpRequest",
       },
     })
-      .then((response) => response.json())
-      .then((data) => {
+      .then(() => {
         showLoading(false);
-        if (data.success) {
           showEmptyCart();
           showToast("Đã xóa tất cả sản phẩm", "success");
-        } else {
-          showToast(data.message || "Có lỗi xảy ra", "error");
-        }
+
       })
       .catch((error) => {
         showLoading(false);
