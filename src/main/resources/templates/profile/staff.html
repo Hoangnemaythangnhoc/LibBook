@@ -443,7 +443,7 @@
                 <li data-section="manage-books-section">📦 Manage Books</li>
                 <li data-section="upload-book-section">📤 Upload Book</li>
                 <li data-section="manage-profile-section">👤 Manage Profile</li>
-<!--                <li data-section="view-orders-section">📑 View Orders</li>-->
+                <!--                <li data-section="view-orders-section">📑 View Orders</li>-->
             </ul>
         </nav>
     </aside>
@@ -679,7 +679,7 @@
         const reader = new FileReader();
         reader.onload = function (e) {
             const imgDataUrl = e.target.result;
-
+            console.log('base64: ' + imgDataUrl);
             const newBook = {
                 productName: name,
                 description: description,

@@ -3,6 +3,8 @@ package com.example.libbook.controller.webStart;
 import com.example.libbook.dto.UserDTO;
 import com.example.libbook.entity.*;
 import com.example.libbook.service.*;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -33,7 +35,7 @@ public class RouterSetting {
     private UserService userService;
 
     @GetMapping("/")
-    public String home(Model model) {
+    public String home(Model model, HttpServletRequest request, HttpSession session) {
         List<Product> products = productService.getAllProduct().stream()
                 .map(product -> {
                     if (product.getImageFile() == null) {
@@ -44,11 +46,40 @@ public class RouterSetting {
                     return product;
                 })
                 .collect(Collectors.toList());
+
         List<Tag> tags = tagService.getAllTags();
+
+        // Auto login via cookie (if not already logged in)
+        if (session.getAttribute("USER") == null) {
+            Cookie[] cookies = request.getCookies();
+            String email = null;
+            String password = null;
+
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if ("email".equals(cookie.getName())) {
+                        email = cookie.getValue();
+                    }
+                    if ("password".equals(cookie.getName())) {
+                        password = cookie.getValue();
+                    }
+                }
+            }
+
+            if (email != null && password != null) {
+                User user = userService.checkLogin(email, password);
+                if (user != null) {
+                    session.setAttribute("USER", user);
+                    return "redirect:/home";
+                }
+            }
+        }
+
         model.addAttribute("products", products);
         model.addAttribute("tags", tags);
         return "Mainpage/home";
     }
+
 
     @GetMapping("/login")
     public String login(Model model) {

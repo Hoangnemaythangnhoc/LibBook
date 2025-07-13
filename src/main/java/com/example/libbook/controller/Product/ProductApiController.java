@@ -79,6 +79,7 @@ public class ProductApiController {
             @RequestParam("status") int status,
             @RequestParam("author") String author,
             @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+            @RequestParam("base64") String baseImage,
             @RequestParam(value = "tagIds", required = false) List<Long> tagIds,
             @RequestParam(value = "discount", required = false, defaultValue = "0") int discount) {
         System.out.println("API: Received update for product with id: " + id + ", status: " + status);
@@ -100,12 +101,7 @@ public class ProductApiController {
         existingProduct.setStatus(status);
         existingProduct.setAuthor(author);
         existingProduct.setDiscount(discount);
-
-        // Xử lý file ảnh nếu có
-        if (imageFile != null && !imageFile.isEmpty()) {
-            existingProduct.setImageFile(imageFile.getOriginalFilename());
-            // Có thể thêm logic lưu file vào server tại đây
-        }
+        existingProduct.setImageFile(baseImage);
 
         productService.updateProduct(existingProduct, tagIds == null ? new ArrayList<>() : tagIds);
         System.out.println("API: Product updated successfully with ID: " + id + ", new status: " + existingProduct.getStatus());

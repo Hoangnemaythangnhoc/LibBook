@@ -113,8 +113,8 @@
 
         <div class="mb-3">
             <label for="imageFile">Image File</label>
-            <input type="file" id="imageFile" name="imageFile" class="form-control" accept="image/*"
-                   onchange="previewImage(event)"/>
+            <input  type="file" id="imageFile" name="imageFile" class="form-control" accept="image/*"/>
+            <input type="hidden" th:value="${product.imageFile}" name="imageFile-result">
             <img th:src="${product.imageFile}" alt="Book Cover" id="preview-img" class="preview-img"
                  style="display: ${product.imageFile ? 'block' : 'none'};"/>
         </div>
@@ -200,40 +200,72 @@
             console.log("Status updated to: " + statusValue.value);
         });
 
+        document.getElementById('imageFile').addEventListener('change', previewImage);
+
         document.getElementById('editBookForm').addEventListener('submit', function (e) {
             e.preventDefault();
+
             const formData = new FormData(this);
             const tagIds = $('#tags').val() || [];
             const url = this.action + '?tagIds=' + tagIds.join(',');
+            const old_Image = document.getElementById("imageFile-result")
+            console.log('check: ' + old_Image);
+            const fileInput = document.getElementById("imageFile");
+            const file = fileInput.files[0]; // lấy file đầu tiên được chọn
 
             const discount = document.getElementById('discount').value;
             if (discount < 0 || discount > 100) {
                 alert('Discount must be between 0 and 100!');
                 return;
             }
-            formData.append('discount', discount);
 
-            fetch(url, {
-                method: 'PUT',
-                body: formData
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to update book');
-                    }
-                    alert('Book updated successfully!');
-                    const currentPath = window.location.pathname;
-                    if (currentPath.startsWith('/admin')) {
-                        window.location.href = '/admin';
-                    } else if (currentPath.startsWith('/staff')) {
-                        window.location.href = '/staff';
-                    }
+            const handleResponse = (response) => {
+                if (!response.ok) {
+                    throw new Error('Failed to update book');
+                }
+                alert('Book updated successfully!');
+                const currentPath = window.location.pathname;
+                if (currentPath.startsWith('/admin')) {
+                    window.location.href = '/admin';
+                } else if (currentPath.startsWith('/staff')) {
+                    window.location.href = '/staff';
+                }
+            };
+
+            const handleError = (error) => {
+                console.error('Error:', error);
+                alert('Failed to update book. Check the console for details.');
+            };
+
+            const sendRequest = () => {
+                formData.append('discount', discount);
+                fetch(url, {
+                    method: 'PUT',
+                    body: formData
                 })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Failed to update book. Check the console for details.');
-                });
+                    .then(handleResponse)
+                    .catch(handleError);
+            };
+
+            if (file) {
+                const reader = new FileReader();
+
+                reader.onload = function (event) {
+                    const base64String = event.target.result;
+                    formData.append('base64', base64String);
+                    sendRequest();
+                };
+
+                reader.readAsDataURL(file); // Đọc file và chuyển thành Base64
+            } else {
+                // Nếu không có file mới, thêm base64 trống để tránh lỗi thiếu tham số
+                formData.append('base64', '');
+                sendRequest();
+            }
         });
+
+
+
     });
 </script>
 </body>

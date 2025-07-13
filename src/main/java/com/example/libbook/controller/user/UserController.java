@@ -10,6 +10,9 @@ import com.example.libbook.service.EmailTokenService;
 import com.example.libbook.service.RatingService;
 import com.example.libbook.service.UserService;
 import com.example.libbook.utils.ImageUtils;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,10 +95,13 @@ public class UserController {
         }
     }
 
+    // Controller class
     @PostMapping("/login")
-    public String Login(@RequestParam("email") String email,
+    public String login(@RequestParam("email") String email,
                         @RequestParam("password") String pass,
+                        @RequestParam(value = "remember", required = false) String remember,
                         HttpSession session,
+                        HttpServletResponse response,
                         RedirectAttributes redirectAttributes) {
 
         User user = userService.checkLogin(email, pass);
@@ -105,6 +111,23 @@ public class UserController {
         }
 
         session.setAttribute("USER", user);
+
+        // Chỉ lưu cookie nếu chọn "Remember me"
+        if (remember != null) {
+            Cookie emailCookie = new Cookie("email", email);
+            Cookie passwordCookie = new Cookie("password", pass); // Không an toàn, chỉ demo
+
+            int maxAge = 60 * 60 * 24 * 365 * 20; // 20 năm
+            emailCookie.setMaxAge(maxAge);
+            passwordCookie.setMaxAge(maxAge);
+
+            emailCookie.setPath("/");
+            passwordCookie.setPath("/");
+
+            response.addCookie(emailCookie);
+            response.addCookie(passwordCookie);
+        }
+
         return "redirect:/home";
     }
 

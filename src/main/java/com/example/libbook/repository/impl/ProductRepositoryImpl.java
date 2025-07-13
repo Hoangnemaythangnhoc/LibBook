@@ -198,27 +198,47 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public void updateProduct(Product product, List<Long> tagIds) throws IOException {
-        byte[] baseImage = imageUtils.decodeBase64(product.getImageFile());
-        String image = imageUtils.uploadAvatar(baseImage,2);
-        String sql = "UPDATE product SET productName = ?, description = ?, price = ?, imageFile = ?, buys = ?, available = ?, " +
-                "userId = ?, status = ?, rating = ?, author = ?, discount = ? WHERE productId = ?";
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, product.getProductName());
-            statement.setString(2, product.getDescription());
-            statement.setDouble(3, product.getPrice());
-            statement.setString(4, image);
-            statement.setInt(5, product.getBuys());
-            statement.setInt(6, product.getAvailable());
-            statement.setLong(7, product.getUserId());
-            statement.setInt(8, product.getStatus());
-            statement.setDouble(9, product.getRating());
-            statement.setString(10, product.getAuthor());
-            statement.setInt(11, product.getDiscount());
-            statement.setLong(12, product.getProductId());
+    public void updateProduct(Product product, List<Long> tagIds) throws IOException, SQLException {
+        int affectedRows = 0;
+        try (Connection connection = dataSource.getConnection()) {
+            String image = null;
+            boolean hasNewImage = true;
+            if (product.getImageFile() == null || product.getImageFile().isEmpty()) {
+                hasNewImage = false;
+            }
 
-            int affectedRows = statement.executeUpdate();
+            if (hasNewImage) {
+                byte[] baseImage = imageUtils.decodeBase64(product.getImageFile());
+                image = imageUtils.uploadAvatar(baseImage, 2);
+            }
+
+            String sql = hasNewImage
+                    ? "UPDATE product SET productName = ?, description = ?, price = ?, imageFile = ?, buys = ?, available = ?, " +
+                    "userId = ?, status = ?, rating = ?, author = ?, discount = ? WHERE productId = ?"
+                    : "UPDATE product SET productName = ?, description = ?, price = ?, buys = ?, available = ?, " +
+                    "userId = ?, status = ?, rating = ?, author = ?, discount = ? WHERE productId = ?";
+
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setString(1, product.getProductName());
+                statement.setString(2, product.getDescription());
+                statement.setDouble(3, product.getPrice());
+
+                int index = 4;
+                if (hasNewImage) {
+                    statement.setString(index++, image);
+                }
+                statement.setInt(index++, product.getBuys());
+                statement.setInt(index++, product.getAvailable());
+                statement.setLong(index++, product.getUserId());
+                statement.setInt(index++, product.getStatus());
+                statement.setDouble(index++, product.getRating());
+                statement.setString(index++, product.getAuthor());
+                statement.setInt(index++, product.getDiscount());
+                statement.setLong(index, product.getProductId());
+
+                affectedRows = statement.executeUpdate();
+            }
+
             if (affectedRows == 0) {
                 throw new RuntimeException("Failed to update product, no rows affected.");
             }
