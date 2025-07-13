@@ -10,10 +10,10 @@ async function loadNewArrivals() {
             return;
         }
 
-        let html = '<div class="row g-4">';
-        for (const product of products) {
+        let html = '<div class="row">';
+        for (const product of products.filter(p => p.status !== 0)) {
             html += `
-                <div class="col-lg-3 col-md-6">
+                <div class="col-lg-3 col-md-6 mb-5">
                     <div class="book-card bg-white rounded shadow-sm">
                         <img src="${product.imageFile.startsWith('http') ? product.imageFile : '/images/' + product.imageFile}"
                              class="card-img-top" alt="Book Cover"/>
@@ -63,7 +63,7 @@ function renderBooksSection(products, containerId) {
     }
 
     let html = '<div class="row g-4">';
-    products.forEach(product => {
+    products.filter(p => p.status !== 0).forEach(product => {
         const imageSrc = product.imageFile.startsWith('http') ? product.imageFile : `/images/${product.imageFile}`;
         html += `
             <div class="col-lg-3 col-md-6">

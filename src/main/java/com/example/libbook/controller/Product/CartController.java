@@ -1,10 +1,13 @@
 package com.example.libbook.controller.Product;
 
+import ch.qos.logback.core.model.Model;
+import com.example.libbook.dto.CartItemDTO;
 import com.example.libbook.dto.UserDTO;
 import com.example.libbook.entity.CartItem;
-import jakarta.mail.Message;
+import com.example.libbook.entity.User;
+import com.example.libbook.service.CartService;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.http.HttpHeaders;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -19,16 +22,49 @@ import java.util.Map;
 @RequestMapping("/cart/api")
 public class CartController {
 
+    @Autowired
+    private CartService cartService;
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Integer> cart(@PathVariable int id) {
+        int count = cartService.getCartItemCount(id);
+        return ResponseEntity.ok(count);
+    }
+
 
     @PostMapping("/add")
     public ResponseEntity<?> addItemToCart(@RequestBody CartItem cartItem, HttpSession session) {
-        if (session.getAttribute("USER") == null) {
+        User user = (User) session.getAttribute("USER");
+        if (user == null) {
             return new ResponseEntity<>("login", HttpStatus.UNAUTHORIZED);
-        } else {
-            int a = 1;
         }
-        return new ResponseEntity<>(HttpStatus.OK);
+        cartService.addOrUpdateCartItem(user.getUserId(), cartItem.getProductId(), cartItem.getQuantity());
+        return new ResponseEntity<>("success", HttpStatus.OK);
     }
+
+
+    @PostMapping("/delete")
+    public ResponseEntity<?> deleteItemFromCart(@RequestBody CartItem cartItem, HttpSession session) {
+        User user = (User) session.getAttribute("USER");
+        if (user == null) {
+            return new ResponseEntity<>("login", HttpStatus.UNAUTHORIZED);
+        }
+        cartService.addOrUpdateCartItem(user.getUserId(), cartItem.getProductId(), cartItem.getQuantity());
+        return new ResponseEntity<>("success", HttpStatus.OK);
+    }
+
+
+
+    @PostMapping("delete/allItems")
+    public ResponseEntity<?> deleteAllItemFromCart( HttpSession session) {
+        User user = (User) session.getAttribute("USER");
+        if (user == null) {
+            return new ResponseEntity<>("login", HttpStatus.UNAUTHORIZED);
+        }
+        cartService.deleteAllCartItem(user.getUserId());
+        return new ResponseEntity<>("success", HttpStatus.OK);
+    }
+
 
     @PostMapping("/update")
     @ResponseBody
@@ -143,23 +179,12 @@ public class CartController {
     }
 
     @GetMapping("/items")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> getCartItems(HttpSession session) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            @SuppressWarnings("unchecked")
-            List<Map<String, Object>> cart = (List<Map<String, Object>>) session.getAttribute("CART");
-            if (cart == null) {
-                cart = new ArrayList<>();
-                session.setAttribute("CART", cart);
-            }
-
-            response.put("success", true);
-            response.put("items", cart);
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "Có lỗi xảy ra: " + e.getMessage());
+    public ResponseEntity<List<CartItemDTO>> getCartItems(HttpSession session) {
+        User _u = (User) session.getAttribute("USER");
+        List<CartItemDTO> cartItems = cartService.getCartItemsByUserId(_u.getUserId());
+        if (cartItems == null || cartItems.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(cartItems);
     }
 }
