@@ -7,7 +7,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script defer src="/js/admin.js"></script>
 
+    <link rel="stylesheet" href="/css/admin.css"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Inline CSS with updated layout -->
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
     <style>
@@ -121,7 +123,7 @@
             color: #7f8c8d;
         }
 
-        .charts, .recent-books, .manage-orders, .manage-users, .manage-categories, .manage-discounts, .manage-comments, .settings, .upload-book {
+        .charts, .recent-books, .manage-orders, .manage-users, .manage-staffs, .manage-discounts, .manage-comments, .settings {
             background-color: #fff;
             padding: 20px;
             border-radius: 5px;
@@ -141,20 +143,20 @@
             border-radius: 5px;
         }
 
-        .recent-books table, .manage-orders table, .manage-users table, .manage-categories table, .manage-comments table {
+        .recent-books table, .manage-orders table, .manage-users table, .manage-staffs table, .manage-comments table {
             width: 100%;
             border-collapse: collapse;
             background-color: #fff;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        .recent-books th, .recent-books td, .manage-orders th, .manage-orders td, .manage-users th, .manage-users td, .manage-categories th, .manage-categories td, .manage-comments th, .manage-comments td {
+        .recent-books th, .recent-books td, .manage-orders th, .manage-orders td, .manage-users th, .manage-users td, .manage-staffs th, .manage-staffs td, .manage-comments th, .manage-comments td {
             padding: 10px;
             text-align: left;
             border-bottom: 1px solid #ddd;
         }
 
-        .recent-books th, .manage-orders th, .manage-users th, .manage-categories th, .manage-comments th {
+        .recent-books th, .manage-orders th, .manage-users th, .manage-staffs th, .manage-comments th {
             background-color: #ecf0f1;
             font-weight: bold;
         }
@@ -266,11 +268,6 @@
             background-color: #0b5ed7;
         }
 
-        .btn-update:disabled {
-            background-color: #6c757d;
-            cursor: not-allowed;
-        }
-
         .btn-details {
             background-color: #198754;
             color: #ffffff;
@@ -294,15 +291,13 @@
         }
 
         .modal-dialog {
-            max-width: 90%;
-            margin: 1.75rem auto;
+            max-width: 70%;
         }
 
         .modal-content {
             border-radius: 0.5rem;
             border: none;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            overflow: hidden;
         }
 
         .modal-header {
@@ -316,34 +311,8 @@
             color: #1a1a1a;
         }
 
-        .modal-body {
-            max-height: 70vh;
-            overflow-y: auto;
-            padding: 1.5rem;
-        }
-
         .modal-footer {
             border-top: 1px solid #e9ecef;
-        }
-
-        .details-table {
-            width: 100%;
-            table-layout: fixed;
-            border-collapse: collapse;
-        }
-
-        .details-table th, .details-table td {
-            padding: 8px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-            word-wrap: break-word;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .details-table th {
-            background-color: #ecf0f1;
-            font-weight: bold;
         }
 
         .order-summary {
@@ -389,17 +358,43 @@
             color: #721c24;
         }
 
+        .status-select {
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid #ced4da;
+            font-size: 0.875rem;
+            transition: border-color 0.2s ease;
+            width: 120px;
+        }
+
+        .status-select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
-            height: 100vh;
+            height: 100vh; /* thêm dòng này để căn giữa dọc */
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 1050;
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 500px;
+            margin-top: 100px;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
 
         .close {
@@ -409,24 +404,12 @@
             font-size: 24px;
             color: #888;
             cursor: pointer;
-            width: 80%;
         }
 
         .close:hover {
             color: #333;
         }
 
-        .status-select:disabled {
-            background-color: #e9ecef;
-            cursor: not-allowed;
-        }
-
-        .upload-form {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
     </style>
 </head>
 <body>
@@ -438,11 +421,11 @@
                 <li data-section="overview-section">📊 Overview</li>
                 <li data-section="manage-books-section">📦 Manage Books</li>
                 <li data-section="manage-orders-section">🛒 Manage Orders</li>
-                <li data-section="manage-users-section">👥 Manage Users</li>
+                <li data-section="manage-users-section">👥 Manage Customers</li>
+                <li data-section="manage-staffs-section">🏷️ Manage Staffs</li>
                 <li data-section="manage-discounts-section">💸 Manage Discounts & Promotions</li>
-                <li data-section="manage-comments-section">💬 Manage Ratings</li>
+                <li data-section="manage-comments-section">💬 Manage Comments</li>
                 <li data-section="settings-section">⚙️ Settings</li>
-                <!--                <li data-section="upload-book-section">📤 Upload Book</li>-->
             </ul>
         </nav>
     </aside>
@@ -532,8 +515,6 @@
                     <option value="price-asc">Price (Low to High)</option>
                     <option value="price-desc">Price (High to Low)</option>
                 </select>
-                <!-- Thêm nút để chuyển đến Upload Book -->
-                <button id="goToUploadButton" class="btn btn-primary">Add New Book</button>
             </div>
             <table>
                 <thead>
@@ -542,7 +523,6 @@
                     <th>Book Name</th>
                     <th>Author</th>
                     <th>Price</th>
-                    <th>Publisher</th>
                     <th>Discount</th>
                     <th>Updated Date</th>
                     <th>Actions</th>
@@ -556,8 +536,7 @@
         <section class="manage-orders" id="manage-orders-section">
             <h2>Order Management & Delivery Status</h2>
             <div class="search-sort-container">
-                <input type="text" id="orderSearchInput"
-                       placeholder="Search by order ID, user ID, customer name or Status"/>
+                <input type="text" id="orderSearchInput" placeholder="Search by order ID, user ID or Status"/>
                 <select id="orderSortSelect">
                     <option value="id-asc">Order ID (Asc)</option>
                     <option value="id-desc">Order ID (Desc)</option>
@@ -565,19 +544,17 @@
                     <option value="date-desc">Create Date (Newest First)</option>
                     <option value="status-asc">Status (A-Z)</option>
                     <option value="status-desc">Status (Z-A)</option>
-                    <option value="customer-asc">Customer Name (A-Z)</option>
-                    <option value="customer-desc">Customer Name (Z-A)</option>
                 </select>
             </div>
             <table>
                 <thead>
                 <tr>
                     <th>Order ID</th>
+                    <th>User ID</th>
                     <th>Create Date</th>
+                    <th>Complete</th>
                     <th>Coupon ID</th>
-                    <th>Customer Name</th>
                     <th>Status</th>
-                    <th>Address</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -601,8 +578,8 @@
                                     <th>Product Image</th>
                                     <th>Product Name</th>
                                     <th>Price</th>
-                                    <th>Publisher</th>
                                     <th>Quantity</th>
+                                    <th>User ID</th>
                                     <th>Rating</th>
                                     <th>Author</th>
                                     <th>Discount</th>
@@ -624,13 +601,10 @@
             </div>
         </section>
 
-        <!-- Manage Users Section -->
+        <!-- Manage Customers Section -->
         <section class="manage-users" style="display: none;" id="manage-users-section">
-            <h2>Manage Users</h2>
+            <h2>Manage Customers</h2>
             <div class="user-sections">
-
-                <!-- CUSTOMER -->
-                <h3 style="margin-top: 20px">Manage Customers</h3>
                 <table>
                     <thead>
                     <tr>
@@ -645,36 +619,13 @@
                     <!-- Đổ dữ liệu từ JS -->
                     </tbody>
                 </table>
-
-                <!-- STAFF -->
-                <h3 style="margin-top: 30px">
-                    Manage Staff
-                    <button id="create-staff-btn" class="btn btn-sm btn-success"
-                            style="float: right; margin-right: 50px; padding: 5px;">+ Create Staff
-                    </button>
-                </h3>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>User ID</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Joined Date</th>
-                        <th>Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody id="staff-body">
-                    <!-- Đổ dữ liệu từ JS -->
-                    </tbody>
-                </table>
             </div>
         </section>
 
         <!-- Create Staff Modal -->
         <div id="staff-modal" class="modal-overlay" style="display: none;">
-            <div class="modal-content" style="width: 1200px">
-                <span id="close-staff-modal" class="close">×</span>
+            <div class="modal-content">
+                <span id="close-staff-modal" class="close">&times;</span>
                 <h4 class="mb-3">Create Staff Account</h4>
                 <form id="staff-form">
                     <div class="form-group mb-2">
@@ -697,6 +648,30 @@
                 </form>
             </div>
         </div>
+
+
+
+        <!-- Manage staffs Section -->
+        <section class="manage-staffs" style="display: none;" id="manage-staffs-section">
+            <h2>Manage Staffs</h2>
+            <button id="create-staff-btn" class="btn btn-sm btn-success" style="margin-bottom: 15px;">+ Create Staff</button>
+            <table>
+                <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Joined Date</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="staff-body">
+                <!-- Đổ dữ liệu từ JS -->
+                </tbody>
+            </table>
+        </section>
+
 
         <!-- Manage Discounts & Promotions Section -->
         <section class="manage-discounts" style="display: none;" id="manage-discounts-section">
@@ -780,83 +755,8 @@
                 <button type="submit" class="btn">Save Settings</button>
             </form>
         </section>
-
-        <!-- Upload Book Section -->
-        <section class="upload-book" style="display: none;" id="upload-book-section">
-            <div class="upload-form">
-                <h2>Upload New Book</h2>
-                <form id="uploadBookForm">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="name" class="form-label">Book Name</label>
-                            <input type="text" class="form-control" id="name" name="productName"
-                                   placeholder="Enter book name" required/>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="author" class="form-label">Author</label>
-                            <input type="text" class="form-control" id="author" name="author"
-                                   placeholder="Enter author name" required/>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="publisher" class="form-label">Publisher</label>
-                            <input type="text" class="form-control" id="publisher" name="publisher"
-                                   placeholder="Enter publisher name"/>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="price" class="form-label">Price (VND)</label>
-                            <input type="number" step="0.01" class="form-control" id="price" name="price"
-                                   placeholder="Enter price" required/>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="discount" class="form-label">Discount (%)</label>
-                            <input type="number" class="form-control" id="discount" name="discount"
-                                   placeholder="Enter discount (0-100)" min="0" max="100" value="0"/>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="available" class="form-label">Available (Quantity)</label>
-                            <input type="number" class="form-control" id="available" name="available"
-                                   placeholder="Enter quantity available" required/>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="tags" class="form-label">Tags</label>
-                            <select class="form-control" id="tags" name="tags" multiple style="width: 100%;"></select>
-                        </div>
-                        <div class="col-12">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea class="form-control" id="description" name="description" rows="3"
-                                      placeholder="Enter description" required></textarea>
-                        </div>
-                        <div class="col-12">
-                            <label for="img" class="form-label">Image File</label>
-                            <input type="file" class="form-control" id="img" name="imageFile" accept="image/*"
-                                   required/>
-                        </div>
-                        <div class="col-12 text-center">
-                            <button type="submit" class="btn btn-primary mt-3">Upload Book</button>
-                            <button type="button" id="cancel-upload-btn" class="btn btn-secondary mt-3 ms-2">Cancel
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="row row-cols-1 row-cols-md-3 g-4 mt-5" id="bookList"></div>
-        </section>
     </main>
 </div>
-
-<!-- Toast Notification -->
-<div class="toast-container position-fixed top-0 end-0 p-3">
-    <div id="statusToast" class="toast bg-success text-white" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <strong class="me-auto">Notification</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-            Status updated successfully!
-        </div>
-    </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -877,18 +777,6 @@
         sections.forEach(section => section.style.display = 'none');
         document.getElementById('overview-section').style.display = 'grid';
         fetchBooks();
-        // Thêm sự kiện cho nút "Add New Book"
-        document.getElementById('goToUploadButton').addEventListener('click', () => {
-            sidebarItems.forEach(li => li.classList.remove('active'));
-            sections.forEach(section => section.style.display = 'none');
-            const uploadSection = document.getElementById('upload-book-section');
-            if (uploadSection) {
-                uploadSection.style.display = 'block';
-                const uploadItem = document.querySelector('[data-section="upload-book-section"]');
-                if (uploadItem) uploadItem.classList.add('active');
-                initializeUploadForm();
-            }
-        });
     });
 
     sidebarItems.forEach((item, index) => {
@@ -907,8 +795,6 @@
                     fetchBooks();
                 } else if (sectionId === 'manage-orders-section') {
                     fetchOrders();
-                } else if (sectionId === 'upload-book-section') {
-                    initializeUploadForm();
                 }
             }
             activeSectionIndex = index;
@@ -940,23 +826,21 @@
         const endIndex = startIndex + itemsPerPage;
         const paginatedBooks = allBooks.slice(startIndex, endIndex);
         paginatedBooks.forEach(book => {
-            console.log(book);
             const discountedPrice = book.price * ((100 - book.discount) / 100);
             const row = `
-           <tr>
-               <td><img src="${book.imageFile}" alt="${book.productName} Cover"/></td>
-               <td>${book.productName}</td>
-               <td>${book.author}</td>
-               <td>${discountedPrice.toFixed(2)} VND</td>
-               <td>${book.publisher || 'N/A'}</td>
-               <td>${book.discount}%</td>
-               <td>${new Date(book.createAt).toLocaleDateString('en-US', {timeZone: 'Asia/Ho_Chi_Minh'})}</td>
-               <td>
-                   <a href="/admin/edit-book/${book.productId}" class="btn btn-sm btn-primary">Edit</a>
-                   <button class="btn btn-sm btn-danger delete-btn" data-product-id="${book.productId}">Delete</button>
-               </td>
-           </tr>
-       `;
+               <tr>
+                   <td><img src="${book.imageFile}" alt="${book.productName} Cover"/></td>
+                   <td>${book.productName}</td>
+                   <td>${book.author}</td>
+                   <td>$${discountedPrice.toFixed(2)}</td>
+                   <td>${book.discount}%</td>
+                   <td>${new Date().toISOString().split('T')[0]}</td>
+                   <td>
+                       <a href="/admin/edit-book/${book.productId}" class="btn btn-sm btn-primary">Edit</a>
+                       <button class="btn btn-sm btn-danger delete-btn" data-product-id="${book.productId}">Delete</button>
+                   </td>
+               </tr>
+           `;
             tableBody.innerHTML += row;
         });
         document.querySelectorAll('.delete-btn').forEach(button => {
@@ -976,13 +860,13 @@
             body: JSON.stringify({status: 0})
         })
             .then(response => {
-                if (!response.ok) throw new Error('Failed to delete book');
+                if (!response.ok) throw new Error('Failed to soft delete book');
                 return fetchBooks();
             })
-            .then(() => alert('Book deleted successfully!'))
+            .then(() => alert('Book soft deleted successfully!'))
             .catch(error => {
-                console.error('Error deleting book:', error);
-                alert('Failed to delete book. Check console for details.');
+                console.error('Error soft deleting book:', error);
+                alert('Failed to soft delete book. Check console for details.');
             });
     }
 
@@ -1063,24 +947,6 @@
             originalAllOrders = await ordersResponse.json();
             orderStatuses = await statusesResponse.json();
             allOrders = [...originalAllOrders];
-
-            const userPromises = allOrders.map(async order => {
-                try {
-                    const userResponse = await fetch(`http://localhost:8080/${order.userId}`);
-                    if (userResponse.ok) {
-                        const user = await userResponse.json();
-                        order.customerName = `${user.firstName} ${user.lastName}` ?? 'Unknown Unknown';
-                    } else {
-                        order.customerName = 'Unknown Unknown';
-                        console.warn(`User ${order.userId} not found, status: ${userResponse.status}`);
-                    }
-                } catch (error) {
-                    console.error(`Error fetching user ${order.userId}:`, error);
-                    order.customerName = 'Unknown Unknown';
-                }
-            });
-            await Promise.all(userPromises);
-
             applyOrderFiltersAndSort();
             renderOrderPagination();
         } catch (error) {
@@ -1098,32 +964,31 @@
         paginatedOrders.forEach(order => {
             const status = orderStatuses.find(s => s.orderStatusId === order.orderStatusId)?.statusName || 'Unknown';
             const statusClass = `status-${status.toLowerCase().replace(/\s+/g, '-')}`;
-            const isLocked = order.orderStatusId === 3 || order.orderStatusId === 4; // Delivered (3) or Cancelled (4)
             const row = `
-                <tr>
-                    <td>${order.orderId}</td>
-                    <td>${(() => {
+                    <tr>
+                        <td>${order.orderId}</td>
+                        <td>${order.userId}</td>
+                        <td>${(() => {
                 const date = new Date(order.createDate);
                 return date.toLocaleString('sv-SE', {timeZone: 'Asia/Ho_Chi_Minh'}).slice(0, 19).replace('T', ' ');
             })()}</td>
-                    <td>${order.couponId || 'N/A'}</td>
-                    <td>${order.customerName || 'Unknown Unknown'}</td>
-                    <td>
-                        <select class="status-select ${statusClass}" id="status-${order.orderId}" onchange="updateStatusColor(this, ${order.orderId})" ${isLocked ? 'disabled' : ''}>
-                            ${orderStatuses.map(s => `
-                                <option value="${s.orderStatusId}" ${s.orderStatusId === order.orderStatusId ? 'selected' : ''}>
-                                    ${s.statusName}
-                                </option>
-                            `).join('')}
-                        </select>
-                    </td>
-                    <td>${order.address ?? "Unknown"}</td>
-                    <td>
-                        <button class="btn-update" onclick="updateStatus(${order.orderId})" ${isLocked ? 'disabled' : ''}>Update</button>
-                        <button class="btn-details" onclick="showDetails(${order.orderId})">View Details</button>
-                    </td>
-                </tr>
-            `;
+                        <td>${order.complete ? 'Yes' : 'No'}</td>
+                        <td>${order.couponId || 'N/A'}</td>
+                        <td>
+                            <select class="status-select ${statusClass}" id="status-${order.orderId}" onchange="updateStatusColor(this, ${order.orderId})">
+                                ${orderStatuses.map(s => `
+                                    <option value="${s.orderStatusId}" ${s.orderStatusId === order.orderStatusId ? 'selected' : ''}>
+                                        ${s.statusName}
+                                    </option>
+                                `).join('')}
+                            </select>
+                        </td>
+                        <td>
+                            <button class="btn-update" onclick="updateStatus(${order.orderId})">Update</button>
+                            <button class="btn-details" onclick="showDetails(${order.orderId})">View Details</button>
+                        </td>
+                    </tr>
+                `;
             tableBody.innerHTML += row;
         });
     }
@@ -1146,7 +1011,6 @@
                 return (
                     order.orderId.toString().includes(searchTerm) ||
                     order.userId.toString().includes(searchTerm) ||
-                    (order.customerName && order.customerName.toLowerCase().includes(searchTerm)) ||
                     status.toLowerCase().includes(searchTerm)
                 );
             });
@@ -1169,10 +1033,6 @@
                     const statusB2 = orderStatuses.find(s => s.orderStatusId === b.orderStatusId)?.statusName || '';
                     const statusA2 = orderStatuses.find(s => s.orderStatusId === a.orderStatusId)?.statusName || '';
                     return statusB2.localeCompare(statusA2);
-                case 'customer-asc':
-                    return (a.customerName || '').localeCompare(b.customerName || '');
-                case 'customer-desc':
-                    return (b.customerName || '').localeCompare(a.customerName || '');
                 default:
                     return 0;
             }
@@ -1219,36 +1079,22 @@
         renderOrderTable();
     }
 
-    async function updateStatus(orderId) {
-        const selectElement = document.getElementById(`status-${orderId}`);
-        const newStatusId = parseInt(selectElement.value);
-        const currentOrder = allOrders.find(order => order.orderId === orderId);
-        if (!currentOrder) {
-            alert('Order not found.');
-            return;
-        }
-
-        if (currentOrder.orderStatusId === 3 || currentOrder.orderStatusId === 4) {
-            alert('This order status cannot be changed because it is already Delivered or Cancelled.');
-            renderOrderTable();
-            return;
-        }
-
-        try {
-            const response = await fetch(`http://localhost:8080/api/orders/${orderId}/status`, {
-                method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({orderStatusId: newStatusId})
+    function updateStatus(orderId) {
+        const newStatusId = document.getElementById(`status-${orderId}`).value;
+        fetch(`http://localhost:8080/api/orders/${orderId}/status`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({orderStatusId: parseInt(newStatusId)})
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to update status: ' + response.statusText);
+                alert('Status updated successfully!');
+                fetchOrders();
+            })
+            .catch(error => {
+                console.error('Error updating status:', error);
+                alert('Failed to update status. Check console for details.');
             });
-            if (!response.ok) throw new Error('Failed to update status: ' + response.statusText);
-            // Hiển thị Toast thay vì alert
-            const toast = new bootstrap.Toast(document.getElementById('statusToast'), {delay: 3000});
-            toast.show();
-            await fetchOrders();
-        } catch (error) {
-            console.error('Error updating status:', error);
-            alert('Failed to update status. Check console for details.');
-        }
     }
 
     async function showDetails(orderId) {
@@ -1279,8 +1125,7 @@
                         userId: 'N/A',
                         rating: 'N/A',
                         author: 'N/A',
-                        discount: 'N/A',
-                        publisher: 'N/A'
+                        discount: 'N/A'
                     };
                     try {
                         const productResponse = await fetch(`http://localhost:8080/api/products/${detail.productId}`);
@@ -1294,21 +1139,21 @@
                     }
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>${detail.orderDetailId !== undefined ? detail.orderDetailId : 'N/A'}</td>
-                        <td><img src="${product.imageFile || ''}" alt="Product Image" class="product-image"></td>
-                        <td>${product.productName}</td>
-                        <td>${detail.price !== undefined ? (detail.price * (100 - product.discount) / 100).toFixed(2) + " VND" : 'N/A'}</td>
-                        <td>${product.publisher || 'N/A'}</td>
-                        <td>${detail.quantity !== undefined ? detail.quantity : 'N/A'}</td>
-                        <td>${product.rating}</td>
-                        <td>${product.author}</td>
-                        <td>${product.discount !== undefined ? product.discount + '%' : 'N/A'}</td>
-                    `;
+                    <td>${detail.orderDetailId !== undefined ? detail.orderDetailId : 'N/A'}</td>
+                    <td><img src="${product.imageFile || ''}" alt="Product Image" class="product-image"></td>
+                    <td>${product.productName}</td>
+                    <td>${detail.price !== undefined ? '$' + (detail.price*((100-product.discount)/100)).toFixed(2) : 'N/A'}</td>
+                    <td>${detail.quantity !== undefined ? detail.quantity : 'N/A'}</td>
+                    <td>${product.userId}</td>
+                    <td>${product.rating}</td>
+                    <td>${product.author}</td>
+                    <td>${product.discount !== undefined ? product.discount + '%' : 'N/A'}</td>
+                `;
                     tbody.appendChild(row);
                 }
             }
 
-            document.getElementById('orderTotal').textContent = `${totalAmount.toFixed(2)} VND`;
+            document.getElementById('orderTotal').textContent = `$${totalAmount.toFixed(2)}`;
             document.getElementById('orderQuantity').textContent = totalQuantity;
 
             const modalElement = document.getElementById('orderDetailsModal');
@@ -1318,7 +1163,7 @@
             console.error('Error fetching order details:', error);
             const tbody = document.getElementById('orderDetailsBody');
             tbody.innerHTML = '<tr><td colspan="9">Error loading details: ' + error.message + '</td></tr>';
-            document.getElementById('orderTotal').textContent = '0.00 VND';
+            document.getElementById('orderTotal').textContent = '$0.00';
             document.getElementById('orderQuantity').textContent = '0';
             new bootstrap.Modal(document.getElementById('orderDetailsModal')).show();
         }
@@ -1346,119 +1191,6 @@
         applyOrderFiltersAndSort();
         currentOrderPage = 1;
         renderOrderPagination();
-    });
-
-    function initializeUploadForm() {
-        const select = $('#tags');
-        if (select.data('select2')) {
-            select.select2('destroy');
-        }
-        fetch('http://localhost:8080/api/Tag/')
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
-            })
-            .then(tags => {
-                select.select2({
-                    data: tags.map(tag => ({id: tag.tagId, text: tag.tagName})),
-                    placeholder: "Select tags...",
-                    allowClear: true
-                });
-                console.log('Tags loaded:', tags);
-            })
-            .catch(error => {
-                console.error('Error fetching tags:', error);
-                alert('Failed to load tags. Check console for details.');
-            });
-    }
-
-    document.getElementById('uploadBookForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const name = document.getElementById('name').value;
-        const description = document.getElementById('description').value;
-        const price = parseFloat(document.getElementById('price').value);
-        const available = parseInt(document.getElementById('available').value);
-        const author = document.getElementById('author').value;
-        let publisher = document.getElementById('publisher').value.trim();
-        const discount = parseInt(document.getElementById('discount').value) || 0;
-        const tagIds = $('#tags').val() || [];
-        const imgInput = document.getElementById('img');
-        const file = imgInput.files[0];
-
-        if (!file) {
-            alert('Please select an image file!');
-            return;
-        }
-
-        if (!tagIds || tagIds.length === 0) {
-            alert('Please select at least one tag!');
-            return;
-        }
-
-        if (isNaN(available) || available < 0) {
-            alert('Please enter a valid quantity for Available!');
-            return;
-        }
-
-        if (discount < 0 || discount > 100) {
-            alert('Discount must be between 0 and 100!');
-            return;
-        }
-
-        const publishers = publisher.split(',').map(p => p.trim()).filter(p => p.length > 0);
-        const uniquePublishers = [...new Set(publishers)].join(',');
-        console.log('Cleaned publisher:', uniquePublishers);
-
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const imgDataUrl = e.target.result;
-
-            const newBook = {
-                productName: name,
-                description: description,
-                price: price,
-                available: available,
-                author: author,
-                publisher: uniquePublishers,
-                discount: discount,
-                imageFile: imgDataUrl,
-                status: 1,
-                buys: 0,
-                userId: 2,
-                rating: 0.0
-            };
-
-            console.log('New Book Data:', newBook);
-
-            fetch('http://localhost:8080/api/products?tagIds=' + (tagIds ? tagIds.join(',') : ''), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(newBook)
-            })
-                .then(response => {
-                    if (!response.ok) throw new Error('Failed to upload book');
-                    return response.json();
-                })
-                .then(data => {
-                    fetchBooks();
-                    document.getElementById('uploadBookForm').reset();
-                    $('#tags').val(null).trigger('change');
-                    alert('Book uploaded successfully!');
-                })
-                .catch(error => {
-                    console.error('Error uploading book:', error);
-                    alert('Failed to upload book. Check console for details.');
-                });
-        };
-        reader.readAsDataURL(file);
-    });
-
-    document.getElementById('cancel-upload-btn').addEventListener('click', function () {
-        document.getElementById('uploadBookForm').reset();
-        $('#tags').val(null).trigger('change');
     });
 </script>
 <script src="/js/admin-user.js"></script>

@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="../../static/css/chat-widget.css">
     <style>
         .new-arrivals .carousel-item {
+            padding: 0 15px;
             transition: transform 0.5s ease-in-out;
         }
 
@@ -20,7 +21,6 @@
             height: 400px;
             display: flex;
             flex-direction: column;
-
         }
 
         .new-arrivals .book-card img {
@@ -42,6 +42,19 @@
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
+        }
+
+        .top-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: gold;
+            color: black;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-weight: bold;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+            z-index: 10;
         }
 
         .combo-card {
@@ -193,65 +206,6 @@
     </div>
 </section>
 
-<section id="new-arrivals" class="new-arrivals py-3 bg-light">
-    <div class="container">
-        <h2 class="text-center mb-5">New Arrivals</h2>
-        <div id="new-arrivals-content">
-            <!-- JavaScript sẽ render nội dung ở đây -->
-        </div>
-        <!--        <div th:if="${products == null or products.isEmpty()}">-->
-        <!--            <p class="text-center text-muted">No products available at the moment.</p>-->
-        <!--        </div>-->
-        <!--        <div th:unless="${products == null or products.isEmpty()}" id="newArrivalsCarousel" class="carousel slide"-->
-        <!--             data-bs-ride="carousel">-->
-        <!--            <div class="new-arrivals-content" style="height: 500px">-->
-        <!--                <div th:each="i : ${#numbers.sequence(0, products.size() - 1, 8)}"-->
-        <!--                     th:with="pageProducts=${products.subList(i, i + 8 < products.size() ? i + 8 : products.size())}"-->
-        <!--                     th:classappend="${i == 0} ? 'carousel-item active' : 'carousel-item'">-->
-        <!--                    <div class="row g-4">-->
-        <!--                        <div class="col-lg-3 col-md-6" th:each="product : ${pageProducts}">-->
-        <!--                            <div class="book-card bg-white rounded shadow-sm p-1">-->
-        <!--                                <img th:src="${product.imageFile}"-->
-        <!--                                     class="card-img-top" alt="Book Cover"/>-->
-        <!--                                <div class="card-body">-->
-        <!--                                    <p class="text-primary mb-1">Book</p>-->
-        <!--                                    <h5 class="card-title" th:text="${product.productName}"></h5>-->
-        <!--&lt;!&ndash;                                    <p class="card-text text-muted" th:text="${product.description}"></p>&ndash;&gt;-->
-        <!--                                    <div class="d-flex justify-content-between align-items-center">-->
-        <!--                                        <div>-->
-        <!--                                            <span style="font-size: 14px; color: red"-->
-        <!--                                                  th:if="${product.discount > 0}"-->
-        <!--                                                  class="h5 mb-0 text-decoration-line-through ms-2"-->
-        <!--                                                  th:text="${#numbers.formatDecimal(product.price, 2, 2)}+' VND'">-->
-        <!--                                            </span>-->
-        <!--                                            <span style="font-size: 16px;font-weight: bold"-->
-        <!--                                                  th:with="discountedPrice=${product.discount > 0 ? product.price * (100 - product.discount) / 100 : product.price}"-->
-        <!--                                                  th:text="${#numbers.formatDecimal(discountedPrice, 2, 2)}+' VND'">-->
-        <!--                                            </span>-->
-        <!--                                        </div>-->
-        <!--                                    </div>-->
-        <!--                                    <div style="max-width: 50%; margin-top: 10px">-->
-        <!--                                        <a th:href="@{/product/{id}(id=${product.productId})}"-->
-        <!--                                           class="btn btn-outline-primary">View Details</a>-->
-        <!--                                    </div>-->
-        <!--                                </div>-->
-        <!--                            </div>-->
-        <!--                        </div>-->
-        <!--                    </div>-->
-        <!--                </div>-->
-        <!--            </div>-->
-        <!--            <div class="custom-carousel-buttons">-->
-        <!--                <button class="btn btn-primary" id="prevButton">-->
-        <!--                    <i class="ri-arrow-left-line"></i> Previous-->
-        <!--                </button>-->
-        <!--                <button class="btn btn-primary" id="nextButton">-->
-        <!--                    Next <i class="ri-arrow-right-line"></i>-->
-        <!--                </button>-->
-        <!--            </div>-->
-        <!--        </div>-->
-    </div>
-</section>
-
 <!-- Top Sale -->
 <section id="top-sale" class="new-arrivals py-5">
     <div class="container">
@@ -262,15 +216,16 @@
     </div>
 </section>
 
-<!-- Book Combos by Tag -->
+<!-- Book by Tag -->
 <section id="tag-combos" class="py-5 bg-light">
     <div class="container">
-        <h2 class="text-center mb-5">Book Combos by Theme</h2>
+        <h2 class="text-center mb-5">Books by Category</h2>
         <div id="tag-combo-content" class="row gy-4">
-            <!-- JS sẽ render từng combo tại đây -->
+            <!-- JS sẽ render tại đây -->
         </div>
     </div>
 </section>
+
 
 <!-- About Section -->
 <section id="about" class="about py-5">

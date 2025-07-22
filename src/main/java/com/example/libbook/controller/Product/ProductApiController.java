@@ -13,7 +13,10 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -51,27 +54,15 @@ public class ProductApiController {
             @RequestBody Product product,
             @RequestParam("tagIds") List<Long> tagIds,
             @RequestParam(value = "discount", required = false, defaultValue = "0") int discount) throws IOException {
-        System.out.println("API: Adding product with name: " + product.getProductName() + ", publisher: " + product.getPublisher());
+        System.out.println("API: Adding product with name: " + product.getProductName());
         product.setBuys(0);
         product.setUserId(2L);
         product.setStatus(1);
         product.setRating(0.0);
         product.setDiscount(discount);
-
         if (product.getDiscount() < 0 || product.getDiscount() > 100) {
             return ResponseEntity.badRequest().build();
         }
-
-        // Làm sạch publisher để loại bỏ duplicate
-        if (product.getPublisher() != null) {
-            String[] publishers = product.getPublisher().split(",");
-            product.setPublisher(String.join(",", new HashSet<String>() {{
-                for (String p : publishers) {
-                    add(p.trim());
-                }
-            }}));
-        }
-
         productService.addProduct(product, tagIds);
         System.out.println("API: Product added with ID: " + product.getProductId());
         return ResponseEntity.ok(product);
@@ -85,13 +76,13 @@ public class ProductApiController {
             @RequestParam("price") double price,
             @RequestParam("available") int available,
             @RequestParam("userId") Long userId,
+            @RequestParam("status") int status,
             @RequestParam("author") String author,
-            @RequestParam(value = "publisher", required = false) String publisher,
             @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
             @RequestParam("base64") String baseImage,
             @RequestParam(value = "tagIds", required = false) List<Long> tagIds,
             @RequestParam(value = "discount", required = false, defaultValue = "0") int discount) {
-        System.out.println("API: Received update for product with id: " + id + ", publisher: " + publisher);
+        System.out.println("API: Received update for product with id: " + id + ", status: " + status);
         Product existingProduct = productService.getProductById(id);
         if (existingProduct == null) {
             System.out.println("API: Product with id " + id + " not found");
@@ -102,31 +93,18 @@ public class ProductApiController {
             return ResponseEntity.badRequest().build();
         }
 
-        // Làm sạch publisher để loại bỏ duplicate
-        if (publisher != null) {
-            String[] publishers = publisher.split(",");
-            publisher = String.join(",", new HashSet<String>() {{
-                for (String p : publishers) {
-                    add(p.trim());
-                }
-            }});
-        } else {
-            publisher = existingProduct.getPublisher();
-        }
-
         existingProduct.setProductName(productName);
         existingProduct.setDescription(description);
         existingProduct.setPrice(price);
         existingProduct.setAvailable(available);
         existingProduct.setUserId(userId);
-        existingProduct.setStatus(1);
+        existingProduct.setStatus(status);
         existingProduct.setAuthor(author);
-        existingProduct.setPublisher(publisher);
         existingProduct.setDiscount(discount);
         existingProduct.setImageFile(baseImage);
 
         productService.updateProduct(existingProduct, tagIds == null ? new ArrayList<>() : tagIds);
-        System.out.println("API: Product updated successfully with ID: " + id);
+        System.out.println("API: Product updated successfully with ID: " + id + ", new status: " + existingProduct.getStatus());
         return ResponseEntity.ok(existingProduct);
     }
 
@@ -155,23 +133,17 @@ public class ProductApiController {
         return ResponseEntity.ok(hasReviewed);
     }
 
-    @GetMapping("/product/new-arrivals")
-    public ResponseEntity<List<Product>> getNewArrivals(@RequestParam(defaultValue = "10") int limit) {
-        List<Product> products = productService.getNewArrivals(limit);
-        return products.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(products);
-    }
-
     @GetMapping("/product/top-sale")
     public ResponseEntity<List<Product>> getTopSellingProducts(@RequestParam(defaultValue = "10") int limit) {
         List<Product> products = productService.getTopSellingProducts(limit);
         return products.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(products);
     }
 
-    @GetMapping("/product/combo-by-tag")
-    public ResponseEntity<Map<String, List<Product>>> getProductCombos(
-            @RequestParam(defaultValue = "3") int combos,
-            @RequestParam(defaultValue = "3") int booksPerCombo) {
-        Map<String, List<Product>> result = productService.getProductCombosByRandomTags(combos, booksPerCombo);
+    @GetMapping("/product/list-by-tag")
+    public ResponseEntity<Map<String, List<Product>>> getProductListByTag() {
+        Map<String, List<Product>> result = productService.getProductListByTag();
         return result.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(result);
     }
+
+
 }
