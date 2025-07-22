@@ -96,6 +96,7 @@ public class OrderRepositoryImpl implements OrderRepository {
         order.setComplete(rs.getInt("Complete"));
         order.setCouponId(rs.getInt("CouponId") == 0 ? null : rs.getInt("CouponId"));
         order.setOrderStatusId(rs.getInt("OrderStatusId"));
+        order.setAddress(rs.getString("Address"));
         return order;
     }
 

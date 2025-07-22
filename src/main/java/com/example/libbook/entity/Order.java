@@ -17,4 +17,5 @@ public class Order {
     private Integer orderStatusId;
     private List<OrderDetail> orderDetails;
     private OrderStatus orderStatus;
+    private String address;
 }

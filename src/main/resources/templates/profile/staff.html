@@ -106,8 +106,14 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .topbar h1 {
@@ -142,8 +148,8 @@
         }
 
         .overview {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            /*display: grid;*/
+            /*grid-template-columns: repeat(2, 1fr);*/
             gap: 25px;
             margin-bottom: 25px;
         }
@@ -258,8 +264,14 @@
         }
 
         @keyframes slideIn {
-            from { opacity: 0; transform: translateX(20px); }
-            to { opacity: 1; transform: translateX(0); }
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .profile-section h2, .upload-section h2, .orders-table h2 {
@@ -398,15 +410,19 @@
             .sidebar {
                 width: 200px;
             }
+
             .main-content {
                 margin-left: 200px;
             }
+
             .overview {
                 grid-template-columns: 1fr;
             }
+
             .card {
                 margin-bottom: 15px;
             }
+
             .topbar {
                 flex-direction: column;
                 gap: 15px;
@@ -419,13 +435,16 @@
                 height: auto;
                 position: relative;
             }
+
             .main-content {
                 margin-left: 0;
                 padding: 15px;
             }
+
             .search-sort-container {
                 flex-direction: column;
             }
+
             .search-sort-container input,
             .search-sort-container select {
                 width: 100%;
@@ -443,7 +462,6 @@
                 <li data-section="manage-books-section">📦 Manage Books</li>
                 <li data-section="upload-book-section">📤 Upload Book</li>
                 <li data-section="manage-profile-section">👤 Manage Profile</li>
-                <!--                <li data-section="view-orders-section">📑 View Orders</li>-->
             </ul>
         </nav>
     </aside>
@@ -458,20 +476,22 @@
         </header>
 
         <section class="overview" id="overview-section">
-            <div class="card">
-                <h3>Books Added</h3>
-                <p id="books-added">0</p>
-            </div>
-            <div class="card">
-                <h3>Profile Status</h3>
-                <p id="profile-status">Updated</p>
+            <div style="display: flex; justify-content: space-between">
+                <div class="card" style="width: 50%">
+                    <h3>Books Added</h3>
+                    <p id="books-added">0</p>
+                </div>
+                <div class="card" style="width: 50%">
+                    <h3>Profile Status</h3>
+                    <p id="profile-status">Updated</p>
+                </div>
             </div>
         </section>
 
         <section class="recent-books" id="manage-books-section">
             <h2>Manage Books</h2>
             <div class="search-sort-container">
-                <input type="text" id="searchInput" placeholder="Search by book name or author..." />
+                <input type="text" id="searchInput" placeholder="Search by book name or author..."/>
                 <select id="sortSelect">
                     <option value="name-asc">Name (A-Z)</option>
                     <option value="name-desc">Name (Z-A)</option>
@@ -485,6 +505,7 @@
                     <th>Image</th>
                     <th>Book Name</th>
                     <th>Author</th>
+                    <th>Publisher</th>
                     <th>Price</th>
                     <th>Discount</th>
                     <th>Updated Date</th>
@@ -627,28 +648,6 @@
             });
     }
 
-    function renderBooks() {
-        const bookList = document.getElementById('bookList');
-        bookList.innerHTML = '';
-        books.forEach(book => {
-            const card = `
-                <div class="col">
-                    <div class="book-card card h-100">
-                        <img src="${book.img}" class="card-img-top" alt="${book.name}">
-                        <div class="card-body">
-                            <p class="book-tag">${book.tag || 'No tags'}</p>
-                            <h5 class="card-title">${book.name}</h5>
-                            <p class="card-text">${book.description}</p>
-                            <p class="book-author">by ${book.author}</p>
-                            <p class="card-text fw-bold">$${book.price.toFixed(2)}</p>
-                        </div>
-                    </div>
-                </div>
-            `;
-            bookList.innerHTML += card;
-        });
-    }
-
     document.getElementById('uploadBookForm').addEventListener('submit', function (e) {
         e.preventDefault();
 
@@ -657,7 +656,9 @@
         const price = parseFloat(document.getElementById('price').value);
         const available = parseInt(document.getElementById('available').value);
         const author = document.getElementById('author').value;
-        const tagIds = $('#tags').val();
+        let publisher = document.getElementById('publisher').value.trim();
+        const discount = parseInt(document.getElementById('discount').value) || 0;
+        const tagIds = $('#tags').val() || [];
         const imgInput = document.getElementById('img');
         const file = imgInput.files[0];
 
@@ -676,18 +677,36 @@
             return;
         }
 
+        if (discount < 0 || discount > 100) {
+            alert('Discount must be between 0 and 100!');
+            return;
+        }
+
+        // Làm sạch publisher để loại bỏ duplicate
+        const publishers = publisher.split(',').map(p => p.trim()).filter(p => p.length > 0);
+        const uniquePublishers = [...new Set(publishers)].join(',');
+        console.log('Cleaned publisher:', uniquePublishers);
+
         const reader = new FileReader();
         reader.onload = function (e) {
             const imgDataUrl = e.target.result;
-            console.log('base64: ' + imgDataUrl);
+
             const newBook = {
                 productName: name,
                 description: description,
                 price: price,
                 available: available,
                 author: author,
-                imageFile: imgDataUrl
+                publisher: uniquePublishers, // Sử dụng giá trị đã làm sạch
+                discount: discount,
+                imageFile: imgDataUrl,
+                status: 1,
+                buys: 0,
+                userId: 2,
+                rating: 0.0
             };
+
+            console.log('New Book Data:', newBook);
 
             fetch('http://localhost:8080/api/products?tagIds=' + (tagIds ? tagIds.join(',') : ''), {
                 method: 'POST',
@@ -702,7 +721,6 @@
                 })
                 .then(data => {
                     books.push({...newBook, img: imgDataUrl, tag: tagIds.map(id => id).join(', ')});
-                    renderBooks();
                     fetchBooks();
                     document.getElementById('uploadBookForm').reset();
                     $('#tags').val(null).trigger('change');
@@ -714,6 +732,11 @@
                 });
         };
         reader.readAsDataURL(file);
+    });
+
+    document.getElementById('cancel-upload-btn').addEventListener('click', function () {
+        document.getElementById('uploadBookForm').reset();
+        $('#tags').val(null).trigger('change');
     });
 
     function fetchBooks() {
@@ -752,7 +775,8 @@
                     <td><img src="${book.imageFile}" alt="${book.productName} Cover"/></td>
                     <td>${book.productName}</td>
                     <td>${book.author}</td>
-                    <td> $${discountedPrice.toFixed(2)}</td>
+                    <td>${book.publisher ?? 'Unknown'}</td>
+                    <td>${discountedPrice.toFixed(2) + " VND"}</td>
                     <td>${book.discount}%</td>
                     <td>${new Date().toISOString().split('T')[0]}</td>
                     <td>
@@ -782,18 +806,18 @@
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ status: 0 })
+            body: JSON.stringify({status: 0})
         })
             .then(response => {
-                if (!response.ok) throw new Error('Failed to soft delete book');
+                if (!response.ok) throw new Error('Failed to delete book');
                 return fetchBooks();
             })
             .then(() => {
-                alert('Book soft deleted successfully!');
+                alert('Book deleted successfully!');
             })
             .catch(error => {
-                console.error('Error soft deleting book:', error);
-                alert('Failed to soft delete book. Check console for details.');
+                console.error('Error deleting book:', error);
+                alert('Failed to delete book. Check console for details.');
             });
     }
 
@@ -817,9 +841,9 @@
                 case 'name-desc':
                     return b.productName.localeCompare(a.productName);
                 case 'price-asc':
-                    return a.price*(100-a.discount)/100 - b.price*(100-b.discount)/100;
+                    return a.price * ((100 - a.discount) / 100) - b.price * ((100 - b.discount) / 100);
                 case 'price-desc':
-                    return b.price*(100-b.discount)/100 - a.price*(100-a.discount)/100;
+                    return b.price * ((100 - b.discount) / 100) - a.price * ((100 - a.discount) / 100);
                 default:
                     return 0;
             }
@@ -881,10 +905,6 @@
 
         renderTable();
     }
-
-    renderBooks();
-
-
 </script>
 </body>
 </html>

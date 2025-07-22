@@ -45,9 +45,11 @@ public class ProductRepositoryImpl implements ProductRepository {
         product.setStatus(rs.getInt("Status"));
         product.setRating(rs.getDouble("Rating"));
         product.setCreateAt(rs.getTimestamp("CreateAt"));
+        product.setAuthor(rs.getString("author"));
+        product.setDiscount(rs.getInt("discount"));
+        product.setPublisher(rs.getString("publisher"));
         return product;
     }
-
 
     @Override
     public List<Product> getAllProduct() {
@@ -69,7 +71,9 @@ public class ProductRepositoryImpl implements ProductRepository {
                 product.setStatus(resultSet.getInt("status"));
                 product.setRating(resultSet.getDouble("rating"));
                 product.setAuthor(resultSet.getString("author"));
+                product.setCreateAt(resultSet.getTimestamp("createAt"));
                 product.setDiscount(resultSet.getInt("discount"));
+                product.setPublisher(resultSet.getString("publisher"));
                 if (product.getStatus() == 1) {
                     products.add(product);
                 }
@@ -103,6 +107,7 @@ public class ProductRepositoryImpl implements ProductRepository {
                     product.setRating(resultSet.getDouble("rating"));
                     product.setAuthor(resultSet.getString("author"));
                     product.setDiscount(resultSet.getInt("discount"));
+                    product.setPublisher(resultSet.getString("publisher"));
                 }
             }
         } catch (Exception e) {
@@ -137,6 +142,7 @@ public class ProductRepositoryImpl implements ProductRepository {
                     product.setRating(resultSet.getDouble("rating"));
                     product.setAuthor(resultSet.getString("author"));
                     product.setDiscount(resultSet.getInt("discount"));
+                    product.setPublisher(resultSet.getString("publisher"));
                     if (product.getStatus() == 1) {
                         products.add(product);
                     }
@@ -152,9 +158,9 @@ public class ProductRepositoryImpl implements ProductRepository {
     @Override
     public void addProduct(Product product, List<Long> tagIds) throws IOException {
         byte[] baseImage = imageUtils.decodeBase64(product.getImageFile());
-        String image = imageUtils.uploadAvatar(baseImage,2);
-        String sql = "INSERT INTO product (productName, description, price, imageFile, buys, available, userId, status, rating, author, discount) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String image = imageUtils.uploadAvatar(baseImage, 2);
+        String sql = "INSERT INTO product (productName, description, price, imageFile, buys, available, userId, status, rating, author, discount, publisher) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, product.getProductName());
@@ -168,6 +174,7 @@ public class ProductRepositoryImpl implements ProductRepository {
             statement.setDouble(9, product.getRating());
             statement.setString(10, product.getAuthor());
             statement.setInt(11, product.getDiscount());
+            statement.setString(12, product.getPublisher());
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
                 throw new RuntimeException("Failed to add product, no rows affected.");
@@ -179,7 +186,6 @@ public class ProductRepositoryImpl implements ProductRepository {
                 }
             }
 
-            // Thêm mối quan hệ vào ProductTag
             if (tagIds != null && !tagIds.isEmpty()) {
                 String insertTagSql = "INSERT INTO ProductTag (ProductId, TagId) VALUES (?, ?)";
                 try (PreparedStatement tagStatement = connection.prepareStatement(insertTagSql)) {
@@ -214,9 +220,9 @@ public class ProductRepositoryImpl implements ProductRepository {
 
             String sql = hasNewImage
                     ? "UPDATE product SET productName = ?, description = ?, price = ?, imageFile = ?, buys = ?, available = ?, " +
-                    "userId = ?, status = ?, rating = ?, author = ?, discount = ? WHERE productId = ?"
+                    "userId = ?, status = ?, rating = ?, author = ?, discount = ?, publisher = ? WHERE productId = ?"
                     : "UPDATE product SET productName = ?, description = ?, price = ?, buys = ?, available = ?, " +
-                    "userId = ?, status = ?, rating = ?, author = ?, discount = ? WHERE productId = ?";
+                    "userId = ?, status = ?, rating = ?, author = ?, discount = ?, publisher = ? WHERE productId = ?";
 
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setString(1, product.getProductName());
@@ -234,6 +240,7 @@ public class ProductRepositoryImpl implements ProductRepository {
                 statement.setDouble(index++, product.getRating());
                 statement.setString(index++, product.getAuthor());
                 statement.setInt(index++, product.getDiscount());
+                statement.setString(index++, product.getPublisher());
                 statement.setLong(index, product.getProductId());
 
                 affectedRows = statement.executeUpdate();
@@ -243,14 +250,12 @@ public class ProductRepositoryImpl implements ProductRepository {
                 throw new RuntimeException("Failed to update product, no rows affected.");
             }
 
-            // Xóa các mối quan hệ cũ trong ProductTag
             String deleteTagSql = "DELETE FROM ProductTag WHERE ProductId = ?";
             try (PreparedStatement deleteStatement = connection.prepareStatement(deleteTagSql)) {
                 deleteStatement.setLong(1, product.getProductId());
                 deleteStatement.executeUpdate();
             }
 
-            // Thêm các mối quan hệ mới
             if (tagIds != null && !tagIds.isEmpty()) {
                 String insertTagSql = "INSERT INTO ProductTag (productId, tagId) VALUES (?, ?)";
                 try (PreparedStatement tagStatement = connection.prepareStatement(insertTagSql)) {
@@ -291,7 +296,6 @@ public class ProductRepositoryImpl implements ProductRepository {
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
-
             statement.setInt(1, limit);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
@@ -312,7 +316,6 @@ public class ProductRepositoryImpl implements ProductRepository {
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
-
             statement.setInt(1, limit);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
@@ -332,7 +335,6 @@ public class ProductRepositoryImpl implements ProductRepository {
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setInt(1, limit);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -344,6 +346,4 @@ public class ProductRepositoryImpl implements ProductRepository {
         }
         return tags;
     }
-
-
 }
