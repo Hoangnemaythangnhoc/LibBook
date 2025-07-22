@@ -152,8 +152,8 @@
 
 
 <!-- Featured Categories -->
-    <!-- From Uiverse.io by vinodjangid07 -->
-    <section class="featured-categories py-5">
+<!-- From Uiverse.io by vinodjangid07 -->
+<section class="featured-categories py-5">
     <div class="container">
         <h2 class="text-center mb-5">Popular Categories</h2>
         <div class="row g-4">
@@ -196,9 +196,9 @@
 <section id="new-arrivals" class="new-arrivals py-3 bg-light">
     <div class="container">
         <h2 class="text-center mb-5">New Arrivals</h2>
-<!--        <div id="new-arrivals-content">-->
-<!--            &lt;!&ndash; JavaScript sẽ render nội dung ở đây &ndash;&gt;-->
-<!--        </div>-->
+        <!--        <div id="new-arrivals-content">-->
+        <!--            &lt;!&ndash; JavaScript sẽ render nội dung ở đây &ndash;&gt;-->
+        <!--        </div>-->
         <div th:if="${products == null or products.isEmpty()}">
             <p class="text-center text-muted">No products available at the moment.</p>
         </div>
@@ -216,7 +216,7 @@
                                 <div class="card-body">
                                     <p class="text-primary mb-1">Book</p>
                                     <h5 class="card-title" th:text="${product.productName}"></h5>
-<!--                                    <p class="card-text text-muted" th:text="${product.description}"></p>-->
+                                    <!--                                    <p class="card-text text-muted" th:text="${product.description}"></p>-->
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
                                             <span style="font-size: 14px; color: red"

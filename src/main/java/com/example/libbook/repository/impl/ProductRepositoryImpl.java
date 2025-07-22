@@ -276,11 +276,11 @@ public class ProductRepositoryImpl implements ProductRepository {
             statement.setLong(1, productId);
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
-                throw new RuntimeException("Failed to soft delete product, no rows affected.");
+                throw new RuntimeException("Failed to delete product, no rows affected.");
             }
         } catch (Exception e) {
-            System.err.println("Error soft deleting product: " + e.getMessage());
-            throw new RuntimeException("Error soft deleting product", e);
+            System.err.println("Error deleting product: " + e.getMessage());
+            throw new RuntimeException("Error deleting product", e);
         }
     }
 

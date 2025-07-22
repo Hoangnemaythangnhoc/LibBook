@@ -26,22 +26,22 @@ function loadCartItems() {
       "X-Requested-With": "XMLHttpRequest",
     },
   })
-    .then((response) => response.json())
-    .then((data) => {
-      showLoading(false);
-      if (data.length !== 0) {
-        cartData.items = data;
-        renderCartItems(data);
-        calculateTotals();
-      } else {
+      .then((response) => response.json())
+      .then((data) => {
+        showLoading(false);
+        if (data.length !== 0) {
+          cartData.items = data;
+          renderCartItems(data);
+          calculateTotals();
+        } else {
+          showEmptyCart();
+        }
+      })
+      .catch((error) => {
+        showLoading(false);
+        console.error("Error loading cart:", error);
         showEmptyCart();
-      }
-    })
-    .catch((error) => {
-      showLoading(false);
-      console.error("Error loading cart:", error);
-      showEmptyCart();
-    });
+      });
 }
 
 function renderCartItems(items) {
@@ -57,8 +57,8 @@ function renderCartItems(items) {
   cartItemsContainer.style.display = "block";
   emptyCart.style.display = "none";
   const itemsHTML = items
-    .map(
-      (item) => `
+      .map(
+          (item) => `
       <div class="cart-item" data-item-id="${item.id}">
           <div class="item-image">
               <img src="${item.imageFile}" alt="${item.productName}" 
@@ -92,8 +92,8 @@ function renderCartItems(items) {
           </div>
       </div>
     `
-    )
-    .join("");
+      )
+      .join("");
 
   cartItemsContainer.innerHTML = itemsHTML;
 }
@@ -110,24 +110,24 @@ async function updateQuantity(itemId, change, isAbsolute = false) {
   };
 
   if (available.available >= quantity) {
-  await fetch("/cart/api/add", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Requested-With": "XMLHttpRequest",
-    },
-    body: JSON.stringify(cartItem),
-  })
-    .then((data) => {
-      showLoading(false);
-        loadCartItems();
-        showToast("Đã cập nhật số lượng", "success");
+    await fetch("/cart/api/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+      },
+      body: JSON.stringify(cartItem),
     })
-    .catch((error) => {
-      showLoading(false);
-      console.error("Error:", error);
-      showToast("Có lỗi xảy ra khi cập nhật", "error");
-    });
+        .then((data) => {
+          showLoading(false);
+          loadCartItems();
+          showToast("Đã cập nhật số lượng", "success");
+        })
+        .catch((error) => {
+          showLoading(false);
+          console.error("Error:", error);
+          showToast("Có lỗi xảy ra khi cập nhật", "error");
+        });
   } else {
     showToast("Vượt quá số lượng trong kho!", "error")
     showLoading(false);
@@ -152,16 +152,16 @@ function removeItem(itemId) {
       },
       body: JSON.stringify(cartItem)
     }).then(() => {
-          showLoading(false);
-          loadCartItems();
-          showToast("Đã xóa sản phẩm khỏi giỏ hàng", "success");
+      showLoading(false);
+      loadCartItems();
+      showToast("Đã xóa sản phẩm khỏi giỏ hàng", "success");
 
-      })
-      .catch((error) => {
-        showLoading(false);
-        console.error("Error:", error);
-        showToast("Có lỗi xảy ra", "error");
-      });
+    })
+        .catch((error) => {
+          showLoading(false);
+          console.error("Error:", error);
+          showToast("Có lỗi xảy ra", "error");
+        });
   });
 }
 
@@ -180,17 +180,17 @@ function clearCart() {
         "X-Requested-With": "XMLHttpRequest",
       },
     })
-      .then(() => {
-        showLoading(false);
+        .then(() => {
+          showLoading(false);
           showEmptyCart();
           showToast("Đã xóa tất cả sản phẩm", "success");
 
-      })
-      .catch((error) => {
-        showLoading(false);
-        console.error("Error:", error);
-        showToast("Có lỗi xảy ra", "error");
-      });
+        })
+        .catch((error) => {
+          showLoading(false);
+          console.error("Error:", error);
+          showToast("Có lỗi xảy ra", "error");
+        });
   });
 }
 
@@ -288,11 +288,11 @@ function confirmOrder(event) {
   }
 
   showModal(
-    "Xác nhận đặt hàng",
-    `Tổng tiền: ${formatCurrency(cartData.total)}<br>
+      "Xác nhận đặt hàng",
+      `Tổng tiền: ${formatCurrency(cartData.total)}<br>
      Phương thức thanh toán: ${orderData.payment}<br><br>
      Bạn có chắc chắn muốn đặt hàng?`,
-    () => submitOrder(orderData)
+      () => submitOrder(orderData)
   );
 }
 
