@@ -285,27 +285,6 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public List<Product> getNewArrivals(int limit) {
-        List<Product> products = new ArrayList<>();
-        String sql = "SELECT * FROM Product ORDER BY CreateAt DESC OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY";
-
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-
-            statement.setInt(1, limit);
-            try (ResultSet rs = statement.executeQuery()) {
-                while (rs.next()) {
-                    Product product = mapResultSetToProduct(rs);
-                    products.add(product);
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error fetching new arrivals", e);
-        }
-        return products;
-    }
-
-    @Override
     public List<Product> getTopSellingProducts(int limit) {
         List<Product> products = new ArrayList<>();
         String sql = "SELECT * FROM Product ORDER BY Buys DESC OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY";
@@ -326,24 +305,23 @@ public class ProductRepositoryImpl implements ProductRepository {
         return products;
     }
 
-    public List<String> getRandomTags(int limit) {
+    public List<String> getAllTags() {
         List<String> tags = new ArrayList<>();
-        String sql = "SELECT TOP (?) TagName FROM Tag ORDER BY NEWID()";
+        String sql = "SELECT TagName FROM Tag";
 
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
-            ps.setInt(1, limit);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    tags.add(rs.getString("TagName"));
-                }
+            while (rs.next()) {
+                tags.add(rs.getString("TagName"));
             }
         } catch (Exception e) {
-            throw new RuntimeException("Error fetching random tags", e);
+            throw new RuntimeException("Error fetching tags", e);
         }
         return tags;
     }
+
 
 
 }

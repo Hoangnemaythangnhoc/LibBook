@@ -13,19 +13,33 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label for="name" class="form-label">Book Name</label>
-                    <input type="text" class="form-control" id="name" placeholder="Enter book name" required/>
+                    <input type="text" class="form-control" id="name" name="productName" placeholder="Enter book name"
+                           required/>
                 </div>
                 <div class="col-md-6">
                     <label for="author" class="form-label">Author</label>
-                    <input type="text" class="form-control" id="author" placeholder="Enter author name" required/>
+                    <input type="text" class="form-control" id="author" name="author" placeholder="Enter author name"
+                           required/>
                 </div>
                 <div class="col-md-6">
-                    <label for="price" class="form-label">Price ($)</label>
-                    <input type="number" step="0.01" class="form-control" id="price" placeholder="Enter price" required/>
+                    <label for="publisher" class="form-label">Publisher</label>
+                    <input type="text" class="form-control" id="publisher" name="publisher"
+                           placeholder="Enter publisher name"/>
+                </div>
+                <div class="col-md-6">
+                    <label for="price" class="form-label">Price (VND)</label>
+                    <input type="number" step="0.01" class="form-control" id="price" name="price"
+                           placeholder="Enter price" required/>
+                </div>
+                <div class="col-md-6">
+                    <label for="discount" class="form-label">Discount (%)</label>
+                    <input type="number" class="form-control" id="discount" name="discount"
+                           placeholder="Enter discount (0-100)" min="0" max="100" value="0"/>
                 </div>
                 <div class="col-md-6">
                     <label for="available" class="form-label">Available (Quantity)</label>
-                    <input type="number" class="form-control" id="available" placeholder="Enter quantity available" required/>
+                    <input type="number" class="form-control" id="available" name="available"
+                           placeholder="Enter quantity available" required/>
                 </div>
                 <div class="col-md-6">
                     <label for="tags" class="form-label">Tags</label>
@@ -33,14 +47,16 @@
                 </div>
                 <div class="col-12">
                     <label for="description" class="form-label">Description</label>
-                    <textarea class="form-control" id="description" rows="3" placeholder="Enter description" required></textarea>
+                    <textarea class="form-control" id="description" name="description" rows="3"
+                              placeholder="Enter description" required></textarea>
                 </div>
                 <div class="col-12">
                     <label for="img" class="form-label">Image File</label>
-                    <input type="file" class="form-control" id="img" accept="image/*" required/>
+                    <input type="file" class="form-control" id="img" name="imageFile" accept="image/*" required/>
                 </div>
                 <div class="col-12 text-center">
                     <button type="submit" class="btn btn-primary mt-3">Upload Book</button>
+                    <button type="button" id="cancel-upload-btn" class="btn btn-secondary mt-3 ms-2">Cancel</button>
                 </div>
             </div>
         </form>

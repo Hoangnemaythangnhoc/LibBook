@@ -58,28 +58,23 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> getNewArrivals(int limit) {
-        return productRepository.getNewArrivals(limit);
-    }
-
-    @Override
     public List<Product> getTopSellingProducts(int limit) {
         return productRepository.getTopSellingProducts(limit);
     }
 
     @Override
-    public Map<String, List<Product>> getProductCombosByRandomTags(int comboCount, int booksPerCombo) {
-        List<String> tags = productRepository.getRandomTags(comboCount);
-        Map<String, List<Product>> combos = new HashMap<>();
+    public Map<String, List<Product>> getProductListByTag() {
+        List<String> tags = productRepository.getAllTags();
+        Map<String, List<Product>> result = new HashMap<>();
 
         for (String tag : tags) {
-            List<Product> taggedProducts = productRepository.getProductsByTag(tag);
-            if (!taggedProducts.isEmpty()) {
-                Collections.shuffle(taggedProducts);
-                combos.put(tag, taggedProducts.subList(0, Math.min(booksPerCombo, taggedProducts.size())));
+            List<Product> products = productRepository.getProductsByTag(tag);
+            if (!products.isEmpty()) {
+                result.put(tag, products);
             }
         }
-        return combos;
+        return result;
     }
+
 
 }

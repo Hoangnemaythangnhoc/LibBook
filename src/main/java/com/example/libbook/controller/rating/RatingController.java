@@ -3,6 +3,7 @@ package com.example.libbook.controller.rating;
 import com.example.libbook.dto.RatingDTO;
 import com.example.libbook.dto.UserDTO;
 import com.example.libbook.entity.Rating;
+import com.example.libbook.entity.User;
 import com.example.libbook.service.RatingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,25 +33,26 @@ public class RatingController {
     @PostMapping("/submitted")
     public ResponseEntity<String> submitRating(
             @RequestBody RatingDTO ratingDTO,
-            HttpSession session,
-            Model model) {
+            HttpSession session) {
         try {
-            UserDTO currentUser = (UserDTO) session.getAttribute("USER");
+            User currentUser = (User) session.getAttribute("USER");
             if (currentUser == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Please log in to submit a rating.");
             }
+
+            // Gán userId từ session vào RatingDTO
             ratingDTO.setUserId(currentUser.getUserId());
+
             boolean result = ratingService.saveRating(ratingDTO);
             if (result) {
                 return ResponseEntity.ok("Rating submitted successfully!");
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to submit rating.");
             }
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
-            model.addAttribute("message", "Error: " + e.getMessage());
-            model.addAttribute("messageType", "error");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Please buy the product before rating.");
         }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error occurred.");
     }
 }

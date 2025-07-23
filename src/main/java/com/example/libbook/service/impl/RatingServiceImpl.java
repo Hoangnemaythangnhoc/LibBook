@@ -44,6 +44,7 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public boolean saveRating(RatingDTO ratingDTO) {
+        // Kiểm tra xem người dùng đã mua sản phẩm chưa
         CheckBuy checkBuy = new CheckBuy();
         checkBuy.setUserId(ratingDTO.getUserId());
         checkBuy.setProductId(ratingDTO.getProductId());
@@ -55,6 +56,7 @@ public class RatingServiceImpl implements RatingService {
                 throw new IllegalStateException("You have already rated this product.");
             }
 
+            // Lưu đánh giá
             Rating rating = new Rating();
             rating.setUserId(ratingDTO.getUserId());
             rating.setProductId(ratingDTO.getProductId());
@@ -63,9 +65,9 @@ public class RatingServiceImpl implements RatingService {
             rating.setCreatedAt(LocalDateTime.now());
             return ratingRepository.saveRating(rating);
         } catch (IllegalStateException e) {
-            throw e;
+            throw e; // Lỗi "You have already rated" hoặc "You have not purchased"
         } catch (Exception e) {
-            throw new RuntimeException("You have not purchased this product, so you cannot rate it.");
+            throw new RuntimeException("An error occurred while saving the rating.", e);
         }
     }
 }

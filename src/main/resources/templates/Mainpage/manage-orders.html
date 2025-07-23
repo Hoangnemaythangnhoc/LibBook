@@ -307,7 +307,7 @@
                         <td>${detail.orderDetailId !== undefined ? detail.orderDetailId : 'N/A'}</td>
                         <td><img src="${product.imageFile !== undefined ? product.imageFile : ''}" alt="Product Image" class="product-image"></td>
                         <td>${product.productName !== undefined ? product.productName : 'N/A'}</td>
-                        <td>${isNaN(discountedPrice) ? 'N/A' : '$' + discountedPrice.toFixed(2)}</td>
+                        <td>${isNaN(discountedPrice) ? 'N/A' : discountedPrice.toFixed(2)+' VND'}</td>
                         <td>${detail.quantity !== undefined ? detail.quantity : 'N/A'}</td>
                         <td>${product.userId !== undefined ? product.userId : 'N/A'}</td>
                         <td>${product.status !== undefined ? product.status : 'N/A'}</td>

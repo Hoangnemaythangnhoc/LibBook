@@ -247,7 +247,6 @@
             border: 1px solid #ddd;
         }
 
-        /* Styles from admin.html for Manage Orders */
         .manage-orders {
             background: linear-gradient(145deg, #ffffff 0%, #f9f9f9 100%);
             padding: 25px;
@@ -455,7 +454,6 @@
         <nav>
             <ul>
                 <li data-section="profile-section">👤 Manage Profile</li>
-                <!--                <li data-section="orders-section">📦 Manage Orders</li>-->
                 <li data-section="manage-orders-section">🛒 Manage Orders</li>
             </ul>
         </nav>
@@ -497,57 +495,6 @@
             </form>
         </section>
 
-        <section class="orders-table" id="orders-section">
-            <h2>Manage Orders</h2>
-            <table>
-                <thead>
-                <tr>
-                    <th>Order ID</th>
-                    <th>Customer Name</th>
-                    <th>Book Name</th>
-                    <th>Price</th>
-                    <th>Address</th>
-                    <th>Order Date</th>
-                    <th>Status</th>
-                </tr>
-                </thead>
-                <tbody id="order-table-body">
-                <tr>
-                    <td>#001</td>
-                    <td>John Doe</td>
-                    <td>The Universe Explained</td>
-                    <td>$25.99</td>
-                    <td>123 FPTU, Hoa Hai, Ngu Hanh Son, Da Nang</td>
-                    <td>2025-06-01</td>
-                    <td>
-                        <select class="status-select" onchange="updateStatus(this, '#001')">
-                            <option value="pending">Pending</option>
-                            <option value="processing">Processing</option>
-                            <option value="delivered">Delivered</option>
-                            <option value="cancelled">Cancelled</option>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td>#002</td>
-                    <td>Jane Smith</td>
-                    <td>The Mystery of Time</td>
-                    <td>$15.99</td>
-                    <td>123 FPTU, Khu CNC Hoa Lac, Ha Noi</td>
-                    <td>2025-06-02</td>
-                    <td>
-                        <select class="status-select" onchange="updateStatus(this, '#002')">
-                            <option value="pending">Pending</option>
-                            <option value="processing">Processing</option>
-                            <option value="delivered">Delivered</option>
-                            <option value="cancelled">Cancelled</option>
-                        </select>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </section>
-
         <section class="manage-orders" id="manage-orders-section">
             <h2>Order Management & Delivery Status</h2>
             <div class="search-sort-container">
@@ -565,9 +512,10 @@
                 <thead>
                 <tr>
                     <th>Order ID</th>
-                    <th>User ID</th>
+                    <th>Customer Name</th>
+                    <th>Phone</th>
+                    <th>Address</th>
                     <th>Create Date</th>
-                    <th>Complete</th>
                     <th>Coupon ID</th>
                     <th>Status</th>
                     <th>Actions</th>
@@ -679,11 +627,6 @@
         }
     });
 
-    function updateStatus(select, orderId) {
-        const newStatus = select.value;
-        alert(`Order ${orderId} status updated to: ${newStatus} (Hardcoded)`);
-    }
-
     async function fetchOrders() {
         try {
             const [ordersResponse, statusesResponse] = await Promise.all([
@@ -692,9 +635,35 @@
             ]);
             if (!ordersResponse.ok) throw new Error('Failed to load orders: ' + ordersResponse.statusText);
             if (!statusesResponse.ok) throw new Error('Failed to load statuses: ' + statusesResponse.statusText);
-            originalAllOrders = await ordersResponse.json();
-            orderStatuses = await statusesResponse.json();
+
+            const ordersData = await ordersResponse.json();
+            const statusesData = await statusesResponse.json();
+
+            originalAllOrders = ordersData;
+            orderStatuses = statusesData;
             allOrders = [...originalAllOrders];
+
+            // Fetch customer names and phones for each order
+            const userPromises = allOrders.map(async order => {
+                try {
+                    const userResponse = await fetch(`http://localhost:8080/${order.userId}`);
+                    if (userResponse.ok) {
+                        const user = await userResponse.json();
+                        order.customerName = `${user.firstName || 'Unknown'} ${user.lastName || 'Unknown'}`.trim() || 'Unknown Unknown';
+                        order.phoneNumber = user.phoneNumber || 'N/A';
+                    } else {
+                        order.customerName = 'Unknown Unknown';
+                        order.phoneNumber = 'N/A';
+                        console.warn(`User ${order.userId} not found, status: ${userResponse.status}`);
+                    }
+                } catch (error) {
+                    console.error(`Error fetching user ${order.userId}:`, error);
+                    order.customerName = 'Unknown Unknown';
+                    order.phoneNumber = 'N/A';
+                }
+            });
+            await Promise.all(userPromises);
+
             applyOrderFiltersAndSort();
             renderOrderPagination();
         } catch (error) {
@@ -712,18 +681,20 @@
         paginatedOrders.forEach(order => {
             const status = orderStatuses.find(s => s.orderStatusId === order.orderStatusId)?.statusName || 'Unknown';
             const statusClass = `status-${status.toLowerCase().replace(/\s+/g, '-')}`;
+            const isLocked = order.orderStatusId === 3 || order.orderStatusId === 4; // Delivered (3) or Cancelled (4)
             const row = `
                 <tr>
                     <td>${order.orderId}</td>
-                    <td>${order.userId}</td>
+                    <td>${order.customerName || 'Unknown Unknown'}</td>
+                    <td>${order.phoneNumber || 'N/A'}</td>
+                    <td>${order.address || 'N/A'}</td>
                     <td>${(() => {
                 const date = new Date(order.createDate);
                 return date.toLocaleString('sv-SE', {timeZone: 'Asia/Ho_Chi_Minh'}).slice(0, 19).replace('T', ' ');
             })()}</td>
-                    <td>${order.complete ? 'Yes' : 'No'}</td>
                     <td>${order.couponId || 'N/A'}</td>
                     <td>
-                        <select class="status-select ${statusClass}" id="status-${order.orderId}" onchange="updateStatusColor(this, ${order.orderId})">
+                        <select class="status-select ${statusClass}" id="status-${order.orderId}" onchange="updateStatusColor(this, ${order.orderId})" ${isLocked ? 'disabled' : ''}>
                             ${orderStatuses.map(s => `
                                 <option value="${s.orderStatusId}" ${s.orderStatusId === order.orderStatusId ? 'selected' : ''}>
                                     ${s.statusName}
@@ -732,7 +703,7 @@
                         </select>
                     </td>
                     <td>
-                        <button class="btn-update" onclick="updateStatus(${order.orderId})">Update</button>
+                        <button class="btn-update" onclick="updateStatus(${order.orderId})" ${isLocked ? 'disabled' : ''}>Update</button>
                         <button class="btn-details" onclick="showDetails(${order.orderId})">View Details</button>
                     </td>
                 </tr>
@@ -758,7 +729,8 @@
                 const status = orderStatuses.find(s => s.orderStatusId === order.orderStatusId)?.statusName || '';
                 return (
                     order.orderId.toString().includes(searchTerm) ||
-                    order.userId.toString().includes(searchTerm) ||
+                    (order.customerName && order.customerName.toLowerCase().includes(searchTerm)) ||
+                    (order.phone && order.phone.toLowerCase().includes(searchTerm)) ||
                     status.toLowerCase().includes(searchTerm)
                 );
             });
@@ -890,7 +862,7 @@
                     <td>${detail.orderDetailId !== undefined ? detail.orderDetailId : 'N/A'}</td>
                     <td><img src="${product.imageFile || ''}" alt="Product Image" class="product-image"></td>
                     <td>${product.productName}</td>
-                    <td>${detail.price !== undefined ? '$' + (detail.price * ((100 - product.discount) / 100)).toFixed(2) : 'N/A'}</td>
+                    <td>${detail.price !== undefined ? (detail.price * ((100 - product.discount) / 100)).toFixed(2) + " VND" : 'N/A'}</td>
                     <td>${detail.quantity !== undefined ? detail.quantity : 'N/A'}</td>
                     <td>${product.userId}</td>
                     <td>${product.rating}</td>
@@ -901,7 +873,7 @@
                 }
             }
 
-            document.getElementById('orderTotal').textContent = `$${totalAmount.toFixed(2)}`;
+            document.getElementById('orderTotal').textContent = `${totalAmount.toFixed(2)} VND`;
             document.getElementById('orderQuantity').textContent = totalQuantity;
 
             const modalElement = document.getElementById('orderDetailsModal');
@@ -911,7 +883,7 @@
             console.error('Error fetching order details:', error);
             const tbody = document.getElementById('orderDetailsBody');
             tbody.innerHTML = '<tr><td colspan="9">Error loading details: ' + error.message + '</td></tr>';
-            document.getElementById('orderTotal').textContent = '$0.00';
+            document.getElementById('orderTotal').textContent = '0.00 VND';
             document.getElementById('orderQuantity').textContent = '0';
             new bootstrap.Modal(document.getElementById('orderDetailsModal')).show();
         }

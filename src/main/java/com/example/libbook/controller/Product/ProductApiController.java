@@ -135,24 +135,15 @@ public class ProductApiController {
         return ResponseEntity.ok(hasReviewed);
     }
 
-    @GetMapping("/product/new-arrivals")
-    public ResponseEntity<List<Product>> getNewArrivals(@RequestParam(defaultValue = "10") int limit) {
-        List<Product> products = productService.getNewArrivals(limit);
-        return products.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(products);
-    }
-
     @GetMapping("/product/top-sale")
     public ResponseEntity<List<Product>> getTopSellingProducts(@RequestParam(defaultValue = "10") int limit) {
         List<Product> products = productService.getTopSellingProducts(limit);
         return products.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(products);
     }
 
-    @GetMapping("/product/combo-by-tag")
-    public ResponseEntity<Map<String, List<Product>>> getProductCombos(
-            @RequestParam(defaultValue = "3") int combos,
-            @RequestParam(defaultValue = "3") int booksPerCombo) {
-        Map<String, List<Product>> result = productService.getProductCombosByRandomTags(combos, booksPerCombo);
+    @GetMapping("/product/list-by-tag")
+    public ResponseEntity<Map<String, List<Product>>> getProductListByTag() {
+        Map<String, List<Product>> result = productService.getProductListByTag();
         return result.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(result);
     }
 
-}

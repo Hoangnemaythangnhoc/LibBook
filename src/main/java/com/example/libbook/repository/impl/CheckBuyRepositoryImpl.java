@@ -36,8 +36,9 @@ public class CheckBuyRepositoryImpl implements CheckBuyRepository {
 
     @Override
     public boolean saveCheckBuy(CheckBuy checkBuy) {
-        ConnectUtils db = ConnectUtils.getInstance();
         String checkSql = "SELECT Status FROM [CheckBuy] WHERE [UserId] = ? AND [ProductId] = ?";
+        String updateSql = "UPDATE [CheckBuy] SET [Status] = ? WHERE [UserId] = ? AND [ProductId] = ?";
+        ConnectUtils db = ConnectUtils.getInstance();
 
         try (Connection conn = db.openConnection();
              PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
@@ -48,9 +49,8 @@ public class CheckBuyRepositoryImpl implements CheckBuyRepository {
             if (rs.next()) {
                 boolean currentStatus = rs.getBoolean("Status");
                 if (currentStatus) {
-                    return false;
+                    return false; // Người dùng đã đánh giá, không cho phép đánh giá lại
                 } else {
-                    String updateSql = "UPDATE [CheckBuy] SET [Status] = ? WHERE [UserId] = ? AND [ProductId] = ?";
                     try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
                         updateStmt.setBoolean(1, true);
                         updateStmt.setInt(2, checkBuy.getUserId());

@@ -282,8 +282,6 @@ public class UserRepositoryImpl implements UserRepository {
         return result;
     }
 
-
-
     @Override
     public boolean banUser(int userId) {
         return updateStatus(userId, 0);
