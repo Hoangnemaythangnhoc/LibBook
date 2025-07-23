@@ -268,7 +268,7 @@ public class ProductRepositoryImpl implements ProductRepository {
         }
     }
 
-    @Override
+        @Override
     public void softDeleteProduct(Long productId) {
         String sql = "UPDATE product SET status = 0 WHERE productId = ?";
         try (Connection connection = dataSource.getConnection();

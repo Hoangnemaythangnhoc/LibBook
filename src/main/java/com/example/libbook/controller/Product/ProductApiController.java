@@ -1,3 +1,4 @@
+
 package com.example.libbook.controller.Product;
 
 import com.example.libbook.dto.UserDTO;
@@ -78,10 +79,11 @@ public class ProductApiController {
             @RequestParam("userId") Long userId,
             @RequestParam("status") int status,
             @RequestParam("author") String author,
+            @RequestParam(value = "imageBase64", required = false) String imageBase64,
             @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
             @RequestParam("base64") String baseImage,
             @RequestParam(value = "tagIds", required = false) List<Long> tagIds,
-            @RequestParam(value = "discount", required = false, defaultValue = "0") int discount) {
+            @RequestParam(value = "discount", required = false, defaultValue = "0") int discount) throws IOException {
         System.out.println("API: Received update for product with id: " + id + ", status: " + status);
         Product existingProduct = productService.getProductById(id);
         if (existingProduct == null) {
