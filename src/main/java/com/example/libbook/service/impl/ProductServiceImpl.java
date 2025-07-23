@@ -42,7 +42,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void updateProduct(Product product, List<Long> tagIds) {
+    public void updateProduct(Product product, List<Long> tagIds) throws IOException {
         System.out.println("ProductServiceImpl: Calling updateProduct with id: " + product.getProductId());
         try {
             productRepository.updateProduct(product, tagIds);

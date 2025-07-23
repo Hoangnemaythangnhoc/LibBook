@@ -6,6 +6,8 @@
     <title>Admin Dashboard - LibBook</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script defer src="/js/admin.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 
     <link rel="stylesheet" href="/css/admin.css"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -167,6 +169,10 @@
             border-radius: 5px;
         }
 
+        .thead-gray th {
+            background-color: #eeeeee !important;
+        }
+
         .pagination {
             margin-top: 20px;
             display: flex;
@@ -206,7 +212,6 @@
         }
 
         .manage-discounts button, .settings button {
-            background-color: #2c3e50;
             color: white;
             padding: 10px 20px;
             border: none;
@@ -676,24 +681,95 @@
         <!-- Manage Discounts & Promotions Section -->
         <section class="manage-discounts" style="display: none;" id="manage-discounts-section">
             <h2>Manage Discounts & Promotions</h2>
-            <form>
-                <div class="mb-3">
-                    <label for="discount-name">Discount Name</label>
-                    <input type="text" id="discount-name" class="form-control" placeholder="Enter discount name"/>
+            <br>
+
+            <!-- Search bar -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="w-50">
+                    <input type="text" id="couponSearchInput" class="form-control" placeholder="Enter code to search">
                 </div>
-                <div class="mb-3">
-                    <label for="discount-value">Discount Value (%)</label>
-                    <input type="number" id="discount-value" class="form-control"
-                           placeholder="Enter discount percentage"/>
+                <div>
+<!--                    <button class="btn btn-primary me-2" id="btnSearchCoupon">Search</button>-->
+                    <button id="addCouponBtn" class="btn btn-primary" onclick="openCreateCouponForm()"><i class="fa fa-plus"></i> Add Coupon</button>
                 </div>
-                <div class="mb-3">
-                    <label for="discount-description">Description</label>
-                    <textarea id="discount-description" class="form-control" rows="3"
-                              placeholder="Enter description"></textarea>
-                </div>
-                <button type="submit" class="btn">Add Discount</button>
-            </form>
+            </div>
+
+
+            <!-- Coupon Table -->
+            <table class="table table-bordered table-hover">
+                <thead class="thead-gray">
+                <tr>
+                    <th>ID</th>
+                    <th>Code</th>
+                    <th>Discount (%)</th>
+                    <th>Quantity</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody id="couponTableBody">
+                <!-- JS sẽ render dữ liệu vào đây -->
+                </tbody>
+            </table>
+            <ul class="pagination justify-content-center" id="couponPagination"></ul>
         </section>
+
+        <!-- Modal Form Thêm/Sửa Coupon -->
+        <div class="modal fade" id="couponModal" tabindex="-1" aria-labelledby="couponModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form id="couponForm">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="couponModalLabel">Coupon Form</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <input type="hidden" id="couponId">
+
+                            <div class="mb-3">
+                                <label for="code" class="form-label">Code</label>
+                                <input type="text" id="code" class="form-control" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="discountPercent" class="form-label">Discount Percent (%)</label>
+                                <input type="number" id="discountPercent" class="form-control" required min="0" max="100" step="0.01">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="quantity" class="form-label">Quantity</label>
+                                <input type="number" id="quantity" class="form-control" required min="0" step="1">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="startDate" class="form-label">Start Date</label>
+                                <input type="date" id="startDate" class="form-control">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="endDate" class="form-label">End Date</label>
+                                <input type="date" id="endDate" class="form-control">
+                            </div>
+
+                            <div class="form-check mb-3">
+                                <input type="checkbox" class="form-check-input" id="isActive" checked>
+                                <label class="form-check-label" for="isActive">Active</label>
+                            </div>
+
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="btnSaveCoupon">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
 
         <!-- Manage Comments Section -->
         <section class="manage-comments" style="display: none;" id="manage-comments-section">
@@ -1194,5 +1270,8 @@
     });
 </script>
 <script src="/js/admin-user.js"></script>
+<script src="/js/coupon-management.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 </body>
 </html>
