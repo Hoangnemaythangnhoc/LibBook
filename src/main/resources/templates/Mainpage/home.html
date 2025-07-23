@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="../../static/css/chat-widget.css">
     <style>
         .new-arrivals .carousel-item {
-            padding: 0 15px;
             transition: transform 0.5s ease-in-out;
         }
 
@@ -21,6 +20,7 @@
             height: 400px;
             display: flex;
             flex-direction: column;
+
         }
 
         .new-arrivals .book-card img {
@@ -42,6 +42,38 @@
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
+        }
+
+        .combo-card {
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .combo-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .combo-books {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .combo-books .book-card {
+            flex: 1 1 calc(25% - 15px);
+            max-width: calc(25% - 15px);
+            background-color: #f8f9fa;
+        }
+
+        @media (max-width: 768px) {
+            .combo-books .book-card {
+                flex: 1 1 calc(50% - 10px);
+                max-width: calc(50% - 10px);
+            }
         }
 
         .carousel-indicators {
@@ -118,6 +150,9 @@
     </div>
 </section>
 
+
+<!-- Featured Categories -->
+<!-- From Uiverse.io by vinodjangid07 -->
 <section class="featured-categories py-5">
     <div class="container">
         <h2 class="text-center mb-5">Popular Categories</h2>
@@ -161,18 +196,21 @@
 <section id="new-arrivals" class="new-arrivals py-3 bg-light">
     <div class="container">
         <h2 class="text-center mb-5">New Arrivals</h2>
+        <!--        <div id="new-arrivals-content">-->
+        <!--            &lt;!&ndash; JavaScript sẽ render nội dung ở đây &ndash;&gt;-->
+        <!--        </div>-->
         <div th:if="${products == null or products.isEmpty()}">
             <p class="text-center text-muted">No products available at the moment.</p>
         </div>
         <div th:unless="${products == null or products.isEmpty()}" id="newArrivalsCarousel" class="carousel slide"
-             data-bs-ride="carousel" style="height: 950px">
-            <div class="carousel-inner" style="height: 900px">
+             data-bs-ride="carousel">
+            <div class="new-arrivals-content" style="height: 500px">
                 <div th:each="i : ${#numbers.sequence(0, products.size() - 1, 8)}"
                      th:with="pageProducts=${products.subList(i, i + 8 < products.size() ? i + 8 : products.size())}"
                      th:classappend="${i == 0} ? 'carousel-item active' : 'carousel-item'">
                     <div class="row g-4">
                         <div class="col-lg-3 col-md-6" th:each="product : ${pageProducts}">
-                            <div class="book-card bg-white rounded shadow-sm">
+                            <div class="book-card bg-white rounded shadow-sm p-1">
                                 <img th:src="${product.imageFile}"
                                      class="card-img-top" alt="Book Cover"/>
                                 <div class="card-body">
@@ -214,6 +252,27 @@
     </div>
 </section>
 
+<!-- Top Sale -->
+<section id="top-sale" class="new-arrivals py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Top Sale</h2>
+        <div id="top-sale-content">
+            <!-- JavaScript sẽ render sách bán chạy tại đây -->
+        </div>
+    </div>
+</section>
+
+<!-- Book Combos by Tag -->
+<section id="tag-combos" class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">Book Combos by Theme</h2>
+        <div id="tag-combo-content" class="row gy-4">
+            <!-- JS sẽ render từng combo tại đây -->
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
 <section id="about" class="about py-5">
     <div class="container">
         <div class="row align-items-center">
@@ -236,6 +295,7 @@
     </div>
 </section>
 
+<!-- Customer Reviews -->
 <section class="reviews py-5 bg-light">
     <div class="container">
         <h2 class="text-center mb-5">What Our Readers Say</h2>
@@ -310,8 +370,7 @@
 
 <div th:insert="~{fragments/footer :: footer}"></div>
 
-<div th:insert="~{fragments/chat-widget :: chat-widget}"></div>
-
+<!-- Bootstrap Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/js/components.js"></script>
 <script>
@@ -337,6 +396,11 @@
             window.location.href = '/category/' + encodeURIComponent(selectedTag);
         }
     }
+    document.querySelector('.chatBtn').addEventListener('click', function() {
+        // Logic để mở/đóng widget chat
+        console.log('Chat button clicked');
+    });
 </script>
+<script src="/js/home.js"></script>
 </body>
 </html>

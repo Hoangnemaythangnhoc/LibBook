@@ -14,9 +14,41 @@ import java.util.List;
 
 @Repository
 public class RatingRepositoryImpl implements RatingRepository {
+
+    @Override
+    public List<Rating> getAllRatings() {
+        String sql = "SELECT * FROM [Rating]";
+        List<Rating> ratings = new ArrayList<>();
+        ConnectUtils db = ConnectUtils.getInstance();
+
+        try (Connection conn = db.openConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Rating rating = new Rating();
+                rating.setRatingId(rs.getInt("RatingId"));
+                rating.setProductId(rs.getInt("ProductId"));
+                rating.setUserId(rs.getInt("UserId"));
+                rating.setStars(rs.getInt("Stars"));
+                rating.setCreatedAt(rs.getTimestamp("CreatedDate") != null ?
+                        rs.getTimestamp("CreatedDate").toLocalDateTime() : null);
+                rating.setContent(rs.getString("Content"));
+                rating.setStatus(rs.getBoolean("Status"));
+                ratings.add(rating);
+            }
+            rs.close();
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi khi lấy danh sách tất cả rating", e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return ratings;
+    }
+
     @Override
     public List<Rating> getRatingsByProductId(int productId) {
-        String sql = "SELECT * FROM [Rating] WHERE [ProductId] = ?";
+        String sql = "SELECT * FROM [Rating] WHERE [ProductId] = ? AND Status = 1";
         List<Rating> ratings = new ArrayList<>();
         ConnectUtils db = ConnectUtils.getInstance();
 
@@ -34,6 +66,7 @@ public class RatingRepositoryImpl implements RatingRepository {
                 rating.setCreatedAt(rs.getTimestamp("CreatedDate") != null ?
                         rs.getTimestamp("CreatedDate").toLocalDateTime() : null);
                 rating.setContent(rs.getString("Content"));
+                rating.setStatus(rs.getBoolean("Status"));
                 ratings.add(rating);
             }
             rs.close();
@@ -48,18 +81,16 @@ public class RatingRepositoryImpl implements RatingRepository {
     @Override
     public boolean saveRating(Rating rating) {
         String ratingSql = "INSERT INTO [Rating] (UserId, ProductId, Stars, Content, CreatedDate) VALUES (?, ?, ?, ?, ?)";
-        String checkBuySql = "INSERT INTO [CheckBuy] (UserId, ProductId, Status) VALUES (?, ?, ?)";
         ConnectUtils db = ConnectUtils.getInstance();
 
-        Connection connection = null;
+        Connection conn = null;
         PreparedStatement ratingStmt = null;
-        PreparedStatement checkBuyStmt = null;
 
         try {
-            connection = db.openConnection();
-            connection.setAutoCommit(false); // Start transaction
+            conn = db.openConnection();
+            conn.setAutoCommit(false); // Start transaction
 
-            ratingStmt = connection.prepareStatement(ratingSql);
+            ratingStmt = conn.prepareStatement(ratingSql);
             ratingStmt.setInt(1, rating.getUserId());
             ratingStmt.setInt(2, rating.getProductId());
             ratingStmt.setInt(3, rating.getStars());
@@ -67,49 +98,52 @@ public class RatingRepositoryImpl implements RatingRepository {
             ratingStmt.setObject(5, rating.getCreatedAt());
             int ratingRowsAffected = ratingStmt.executeUpdate();
 
-            checkBuyStmt = connection.prepareStatement(checkBuySql);
-            checkBuyStmt.setInt(1, rating.getUserId());
-            checkBuyStmt.setInt(2, rating.getProductId());
-            checkBuyStmt.setInt(3, 1); // Status = 1
-            int checkBuyRowsAffected = checkBuyStmt.executeUpdate();
-
-            if (ratingRowsAffected > 0 && checkBuyRowsAffected > 0) {
-                connection.commit();
+            if (ratingRowsAffected > 0) {
+                conn.commit();
                 return true;
             } else {
-                connection.rollback();
+                conn.rollback();
                 return false;
             }
         } catch (SQLException e) {
             try {
-                if (connection != null) {
-                    connection.rollback();
+                if (conn != null) {
+                    conn.rollback();
                 }
             } catch (SQLException rollbackEx) {
                 throw new RuntimeException("Lỗi khi rollback giao dịch", rollbackEx);
             }
-            e.printStackTrace();
-            return false;
+            throw new RuntimeException("Lỗi khi lưu rating", e);
         } catch (Exception e) {
-            try {
-                if (connection != null) {
-                    connection.rollback();
-                }
-            } catch (SQLException rollbackEx) {
-                throw new RuntimeException("Lỗi khi rollback giao dịch", rollbackEx);
-            }
-            throw new RuntimeException("Lỗi khi lưu rating và checkbuy", e);
+            throw new RuntimeException(e);
         } finally {
             try {
                 if (ratingStmt != null) ratingStmt.close();
-                if (checkBuyStmt != null) checkBuyStmt.close();
-                if (connection != null) {
-                    connection.setAutoCommit(true);
-                    connection.close();
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                    conn.close();
                 }
             } catch (SQLException e) {
                 throw new RuntimeException("Lỗi khi đóng tài nguyên", e);
             }
+        }
+    }
+
+    @Override
+    public boolean updateRatingStatus(int ratingId, boolean status) {
+        String sql = "UPDATE [Rating] SET Status = ? WHERE RatingId = ?";
+        ConnectUtils db = ConnectUtils.getInstance();
+
+        try (Connection conn = db.openConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setBoolean(1, status);
+            pstmt.setInt(2, ratingId);
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi khi cập nhật trạng thái rating", e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

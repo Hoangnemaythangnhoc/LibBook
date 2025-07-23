@@ -1,188 +1,302 @@
-/* Hero Section */
-.hero {
-    background-color: var(--light-bg);
-    padding-top: 7rem;
-}
+// Dữ liệu mẫu cho contacts
+let contacts = [];
+const currentUserId = Number(document.getElementById("currentUserId").value);
+// Dữ liệu tin nhắn mẫu
+let messages = {};
 
-.hero h1 span {
-    color: var(--primary-color);
-}
+let currentContactId = null;
 
-/* Search Form */
-.search-form {
-    background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 10px;
-}
+// Khởi tạo ứng dụng
+document.addEventListener('DOMContentLoaded', async function() {
+    contacts = await fetchUserRelated();
+    messages = groupMessagesByUser(await fetchUserChat())
+    renderContacts();
+    setupEventListeners();
+});
 
-/* Category Cards */
-.category-card {
-    transition: transform 0.3s ease;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-}
+const fetchUserRelated = async () => {
+    try {
+        const response = await fetch("/chat/related", {
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+            },
+        });
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        return [];
+    }
+};
 
-.category-card:hover {
-    transform: translateY(-5px);
-}
-
-.category-card i {
-    color: var(--primary-color);
-}
-
-/* Book Cards */
-.book-card {
-    transition: transform 0.3s ease;
-    border: none;
-}
-
-.book-card:hover {
-    transform: translateY(-5px);
-}
-
-.book-card img {
-    height: 300px;
-    object-fit: cover;
-}
-
-.book-card .card-body {
-    padding: 1.5rem;
-}
-
-/* Review Cards */
-.review-card {
-    transition: transform 0.3s ease;
-}
-
-.review-card:hover {
-    transform: translateY(-5px);
-}
-
-/* Featured Categories */
-.featured-categories {
-    padding: 5rem 0;
-}
-
-.category-icon {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    color: var(--primary-color);
-}
-
-/* New Arrivals */
-.new-arrivals {
-    background-color: var(--light-bg);
-}
-
-/* About Section */
-.about-section img {
-    border-radius: 10px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-}
-
-/* Reviews Section */
-.reviews-section {
-    background-color: var(--light-bg);
-}
-
-.review-author-img {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-/* Responsive Adjustments */
-@media (max-width: 991.98px) {
-    .hero {
-        padding-top: 5rem;
+const fetchUserChat = async () => {
+    try {
+        const response = await fetch("/chat/user", {
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+            },
+        });
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        return [];
     }
 
-    .book-card img {
-        height: 250px;
+}
+
+const sentMessage = async () => {
+
+}
+
+function groupMessagesByUser(flatMessages) {
+    const grouped = {};
+
+    flatMessages.forEach(msg => {
+        const { senderId, receiverId, messageId, messageText, dateTime } = msg;
+        const time = dateTime.split("T")[1].slice(0, 5);
+        const otherUserId = senderId === currentUserId ? receiverId : senderId;
+        const sent = senderId === currentUserId;
+        const message = {
+            id: messageId,
+            text: messageText,
+            sent,
+            time
+        };
+        if (!sent) {
+
+            const _u = contacts.find(u => u.userId === otherUserId);
+            if (_u && _u.profilePicture) {
+                message.avatar = _u.profilePicture;
+            }
+
+        }
+        if (!grouped[otherUserId]) {
+            grouped[otherUserId] = [];
+        }
+        grouped[otherUserId].push(message);
+    });
+
+    return grouped;
+}
+
+
+
+// Render danh sách contacts
+function renderContacts() {
+    const contactsList = document.getElementById('contactsList');
+    contactsList.innerHTML = '';
+
+    contacts.forEach(contact => {
+        const contactElement = createContactElement(contact);
+        contactsList.appendChild(contactElement);
+    });
+}
+
+// Tạo element cho contact
+function createContactElement(contact) {
+    const contactDiv = document.createElement('div');
+    contactDiv.className = 'contact-item';
+    contactDiv.dataset.contactId = contact.userId;
+
+    contactDiv.innerHTML = `
+        <div class="avatar-container">
+            <img src="${contact.profilePicture}" alt="${contact.firstName}" class="contact-avatar">
+        </div>
+        <div class="contact-info">
+            <div class="contact-name">${contact.firstName} ${contact.lastName}</div>
+        </div>
+    `;
+
+    contactDiv.addEventListener('click', () => selectContact(contact.userId));
+
+    return contactDiv;
+}
+
+// Chọn contact
+function selectContact(contactId) {
+    // Remove active class from all contacts
+    document.querySelectorAll('.contact-item').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Add active class to selected contact
+    document.querySelector(`[data-contact-id="${contactId}"]`).classList.add('active');
+
+    // Update current contact
+    currentContactId = contactId;
+    const contact = contacts.find(c => c.userId === contactId);
+
+    // Update chat header
+    updateChatHeader(contact);
+
+    // Load messages
+    loadMessages(contactId);
+
+    // Clear unread badge
+    contact.unread = 0;
+    renderContacts();
+}
+
+// Cập nhật header chat
+function updateChatHeader(contact) {
+    document.getElementById('headerAvatar').src = contact.profilePicture;
+    document.getElementById('headerName').textContent = `${contact.firstName} ${contact.lastName}`;
+    document.getElementById('headerStatus').textContent = contact.status === 'online' ? 'Đang hoạt động' : 'Không hoạt động';
+    document.getElementById('headerStatus').className = `status ${contact.status}`;
+}
+
+// Load tin nhắn
+function loadMessages(contactId) {
+    const messagesContainer = document.getElementById('messagesContainer');
+    messagesContainer.innerHTML = '';
+
+    const contactMessages = messages[contactId] || [];
+    contactMessages.forEach(message => {
+        const messageElement = createMessageElement(message);
+        messagesContainer.appendChild(messageElement);
+    });
+
+    // Scroll to bottom
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// Tạo element tin nhắn
+function createMessageElement(message) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${message.sent ? 'sent' : 'received'}`;
+
+    messageDiv.innerHTML = `
+        ${!message.sent ? `<img src="${message.avatar}" alt="Avatar" class="message-avatar">` : ''}
+        <div class="message-content">
+            ${message.text}
+            <div class="message-time">${message.time}</div>
+        </div>
+    `;
+
+    return messageDiv;
+}
+
+// Gửi tin nhắn
+function sendMessage() {
+    if (!currentContactId) return;
+
+    const messageInput = document.getElementById('messageInput');
+    const messageText = messageInput.value.trim();
+
+    if (!messageText) return;
+
+    // Tạo tin nhắn mới
+    const newMessage = {
+        id: Date.now(),
+        text: messageText,
+        sent: true,
+        time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+    };
+    //DATABASE
+
+    // Thêm vào dữ liệu
+    if (!messages[currentContactId]) {
+        messages[currentContactId] = [];
     }
+    messages[currentContactId].push(newMessage);
+    // Render lại
+    loadMessages(currentContactId);
+    renderContacts();
+
+    // Clear input
+    messageInput.value = '';
+
+    // Simulate response (optional)
+    setTimeout(() => {
+        simulateResponse();
+    }, 1000 + Math.random() * 2000);
 }
 
-@media (max-width: 767.98px) {
-    .hero h1 {
-        font-size: 2.5rem;
-    }
+// Mô phỏng phản hồi tự động
+function simulateResponse() {
+    if (!currentContactId) return;
 
-    .search-form {
-        padding: 1rem;
-    }
+    const responses = [
+        "Cảm ơn bạn!",
+        "Tôi hiểu rồi",
+        "Được thôi",
+        "OK, không vấn đề gì",
+        "Haha, thú vị đấy",
+        "Tôi sẽ suy nghĩ về điều đó",
+        "Sounds good!",
+        "Chắc chắn rồi!"
+    ];
 
-    .featured-categories {
-        padding: 3rem 0;
-    }
+    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+    const contact = contacts.find(c => c.id === currentContactId);
+
+    const responseMessage = {
+        id: Date.now(),
+        text: randomResponse,
+        sent: false,
+        time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+        avatar: contact.avatar
+    };
+
+    messages[currentContactId].push(responseMessage);
+    contact.time = responseMessage.time;
+
+    loadMessages(currentContactId);
+    renderContacts();
 }
 
-/* Animations */
-.fade-in {
-    animation: fadeIn 0.5s ease-in;
+// Thiết lập event listeners
+function setupEventListeners() {
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const searchInput = document.getElementById('searchInput');
+
+    // Send message on button click
+    sendBtn.addEventListener('click', sendMessage);
+
+    // Send message on Enter key
+    messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    // Search functionality
+    searchInput.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const contactItems = document.querySelectorAll('.contact-item');
+
+        contactItems.forEach(item => {
+            const name = item.querySelector('.contact-name').textContent.toLowerCase();
+            const message = item.querySelector('.contact-last-message').textContent.toLowerCase();
+
+            if (name.includes(searchTerm) || message.includes(searchTerm)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+
+    // Auto-resize message input
+    messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+    });
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+// Responsive menu toggle (for mobile)
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('active');
 }
 
-
-/* CSS cho chatBtn */
-.chatBtn {
-    width: 55px;
-    height: 55px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    border: none;
-    background-color: #FFE53B;
-    background-image: linear-gradient(147deg, #FFE53B, #FF2525, #FFE53B);
-    cursor: pointer;
-    padding-top: 3px;
-    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.164);
-    position: fixed !important; /* Đảm bảo cố định */
-    bottom: 20px !important; /* Cách mép dưới 20px */
-    right: 20px !important; /* Cách mép phải 20px */
-    left: auto !important; /* Xóa bất kỳ left nào có thể ghi đè */
-    z-index: 1000 !important; /* Luôn hiển thị trên các phần tử khác */
-    background-size: 300%;
-    background-position: left; /* Sửa từ right sang left */
-    transition: background-position 1s ease;
-    overflow: hidden;
-    position: relative;
-}
-
-.chatBtn:hover {
-    background-position: right; /* Chuyển gradient khi hover */
-}
-
-.chatBtn:hover .tooltip {
-    opacity: 1;
-    transition-duration: 0.5s;
-}
-
-.chatBtn:hover .star {
-    animation: starMove 0.7s ease-in-out infinite; /* Hiệu ứng sao băng */
-}
-
-.tooltip {
-    position: absolute;
-    top: -40px;
-    opacity: 0;
-    background-color: rgb(255, 180, 82);
-    color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition-duration: 0.5s;
-    pointer-events: none;
-    letter-spacing: 0.5px;
+// Add menu button for mobile (you can add this to HTML if needed)
+if (window.innerWidth <= 768) {
+    const chatHeader = document.querySelector('.chat-header');
+    const menuBtn = document.createElement('button');
+    menuBtn.className = 'menu-btn';
+    menuBtn.innerHTML = '☰';
+    menuBtn.addEventListener('click', toggleSidebar);
+    chatHeader.insertBefore(menuBtn, chatHeader.firstChild);
 }

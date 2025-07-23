@@ -11,8 +11,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpSession;
+
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -30,6 +34,7 @@ public class ProductApiController {
         System.out.println("API: Fetching all products");
         return productService.getAllProduct();
     }
+
 
     @GetMapping("/products/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable Long id) {
@@ -49,7 +54,7 @@ public class ProductApiController {
     public ResponseEntity<Product> addProduct(
             @RequestBody Product product,
             @RequestParam("tagIds") List<Long> tagIds,
-            @RequestParam(value = "discount", required = false, defaultValue = "0") int discount) {
+            @RequestParam(value = "discount", required = false, defaultValue = "0") int discount) throws IOException {
         System.out.println("API: Adding product with name: " + product.getProductName());
         product.setBuys(0);
         product.setUserId(2L);
@@ -75,6 +80,7 @@ public class ProductApiController {
             @RequestParam("status") int status,
             @RequestParam("author") String author,
             @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+            @RequestParam("base64") String baseImage,
             @RequestParam(value = "tagIds", required = false) List<Long> tagIds,
             @RequestParam(value = "discount", required = false, defaultValue = "0") int discount) {
         System.out.println("API: Received update for product with id: " + id + ", status: " + status);
@@ -96,10 +102,7 @@ public class ProductApiController {
         existingProduct.setStatus(status);
         existingProduct.setAuthor(author);
         existingProduct.setDiscount(discount);
-
-        if (imageFile != null && !imageFile.isEmpty()) {
-            existingProduct.setImageFile(imageFile.getOriginalFilename());
-        }
+        existingProduct.setImageFile(baseImage);
 
         productService.updateProduct(existingProduct, tagIds == null ? new ArrayList<>() : tagIds);
         System.out.println("API: Product updated successfully with ID: " + id + ", new status: " + existingProduct.getStatus());
@@ -130,4 +133,25 @@ public class ProductApiController {
         boolean hasReviewed = checkBuyService.hasUserReviewed(currentUser.getUserId(), productId);
         return ResponseEntity.ok(hasReviewed);
     }
+
+    @GetMapping("/product/new-arrivals")
+    public ResponseEntity<List<Product>> getNewArrivals(@RequestParam(defaultValue = "10") int limit) {
+        List<Product> products = productService.getNewArrivals(limit);
+        return products.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(products);
+    }
+
+    @GetMapping("/product/top-sale")
+    public ResponseEntity<List<Product>> getTopSellingProducts(@RequestParam(defaultValue = "10") int limit) {
+        List<Product> products = productService.getTopSellingProducts(limit);
+        return products.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(products);
+    }
+
+    @GetMapping("/product/combo-by-tag")
+    public ResponseEntity<Map<String, List<Product>>> getProductCombos(
+            @RequestParam(defaultValue = "3") int combos,
+            @RequestParam(defaultValue = "3") int booksPerCombo) {
+        Map<String, List<Product>> result = productService.getProductCombosByRandomTags(combos, booksPerCombo);
+        return result.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(result);
+    }
+
 }
