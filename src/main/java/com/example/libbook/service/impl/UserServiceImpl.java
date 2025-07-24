@@ -85,6 +85,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public boolean updateStaffRole(int userId, int roleId) {
+        return userRepository.updateStaffRole(userId, roleId);
+    }
+
+    @Override
     public void updateUser(User user) {
         userRepository.updateUser(user);
     }
