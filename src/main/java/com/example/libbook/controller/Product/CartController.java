@@ -31,7 +31,6 @@ public class CartController {
         return ResponseEntity.ok(count);
     }
 
-
     @PostMapping("/add")
     public ResponseEntity<?> addItemToCart(@RequestBody CartItem cartItem, HttpSession session) {
         User user = (User) session.getAttribute("USER");

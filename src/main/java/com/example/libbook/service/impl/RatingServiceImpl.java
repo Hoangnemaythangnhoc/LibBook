@@ -94,4 +94,7 @@ public class RatingServiceImpl implements RatingService {
     public boolean updateRatingStatus(int ratingId, boolean status) {
         return ratingRepository.updateRatingStatus(ratingId, status);
     }
+
+
 }
+

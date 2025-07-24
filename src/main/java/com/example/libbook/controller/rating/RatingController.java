@@ -79,4 +79,8 @@ public class RatingController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update rating status.");
         }
     }
+
 }
+
+}
+

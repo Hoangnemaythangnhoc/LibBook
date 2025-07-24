@@ -1,6 +1,5 @@
 package com.example.libbook.controller.webStart;
 
-import com.example.libbook.dto.UserDTO;
 import com.example.libbook.entity.*;
 import com.example.libbook.service.*;
 import jakarta.servlet.http.Cookie;
@@ -11,12 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.net.http.HttpRequest;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+
 
 @Controller
 @RequestMapping
@@ -327,5 +325,11 @@ public class RouterSetting {
 
         return "redirect:/login";
     }
+
+    @GetMapping("/chat-widget")
+    public String chat(HttpSession session, HttpServletResponse response) {
+        return "fragments/chat-widget";
+    }
+
 
 }

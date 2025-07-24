@@ -146,4 +146,8 @@ public class RatingRepositoryImpl implements RatingRepository {
             throw new RuntimeException(e);
         }
     }
+
 }
+
+}
+

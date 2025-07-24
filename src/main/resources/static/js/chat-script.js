@@ -1,145 +1,302 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const chatIconBtn = document.getElementById('chatIconBtn');
-    const navbarChatBtn = document.getElementById('navbarChatBtn');
-    const chatWidgetModal = document.getElementById('chatWidgetModal');
-    const minimizeChatBtn = document.getElementById('minimizeChatBtn');
-    const closeChatBtn = document.getElementById('closeChatBtn');
-    const sendBtn = document.getElementById('sendBtn');
-    const messageInput = document.getElementById('messageInput');
-    const chatMessages = document.getElementById('chatMessages');
-    const typingIndicator = document.getElementById('typingIndicator');
-    const chatNotificationBadge = document.getElementById('chatNotificationBadge');
+// Dữ liệu mẫu cho contacts
+let contacts = [];
+const currentUserId = Number(document.getElementById("currentUserId").value);
+// Dữ liệu tin nhắn mẫu
+let messages = {};
 
-    const toggleChatModal = () => {
-        if (chatWidgetModal) {
-            chatWidgetModal.classList.toggle('show');
-            if (chatWidgetModal.classList.contains('show')) {
-                chatWidgetModal.classList.add('fade-in');
-                if (chatNotificationBadge) {
-                    chatNotificationBadge.style.display = 'none';
-                }
-            } else {
-                chatWidgetModal.classList.remove('fade-in');
-                if (chatNotificationBadge) {
-                    chatNotificationBadge.style.display = 'flex';
-                }
+let currentContactId = null;
+
+// Khởi tạo ứng dụng
+document.addEventListener('DOMContentLoaded', async function() {
+    contacts = await fetchUserRelated();
+    messages = groupMessagesByUser(await fetchUserChat())
+    renderContacts();
+    setupEventListeners();
+});
+
+const fetchUserRelated = async () => {
+    try {
+        const response = await fetch("/chat/related", {
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+            },
+        });
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        return [];
+    }
+};
+
+const fetchUserChat = async () => {
+    try {
+        const response = await fetch("/chat/user", {
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+            },
+        });
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        return [];
+    }
+
+}
+
+const sentMessage = async () => {
+
+}
+
+function groupMessagesByUser(flatMessages) {
+    const grouped = {};
+
+    flatMessages.forEach(msg => {
+        const { senderId, receiverId, messageId, messageText, dateTime } = msg;
+        const time = dateTime.split("T")[1].slice(0, 5);
+        const otherUserId = senderId === currentUserId ? receiverId : senderId;
+        const sent = senderId === currentUserId;
+        const message = {
+            id: messageId,
+            text: messageText,
+            sent,
+            time
+        };
+        if (!sent) {
+
+            const _u = contacts.find(u => u.userId === otherUserId);
+            if (_u && _u.profilePicture) {
+                message.avatar = _u.profilePicture;
             }
+
         }
+        if (!grouped[otherUserId]) {
+            grouped[otherUserId] = [];
+        }
+        grouped[otherUserId].push(message);
+    });
+
+    return grouped;
+}
+
+
+
+// Render danh sách contacts
+function renderContacts() {
+    const contactsList = document.getElementById('contactsList');
+    contactsList.innerHTML = '';
+
+    contacts.forEach(contact => {
+        const contactElement = createContactElement(contact);
+        contactsList.appendChild(contactElement);
+    });
+}
+
+// Tạo element cho contact
+function createContactElement(contact) {
+    const contactDiv = document.createElement('div');
+    contactDiv.className = 'contact-item';
+    contactDiv.dataset.contactId = contact.userId;
+
+    contactDiv.innerHTML = `
+        <div class="avatar-container">
+            <img src="${contact.profilePicture}" alt="${contact.firstName}" class="contact-avatar">
+        </div>
+        <div class="contact-info">
+            <div class="contact-name">${contact.firstName} ${contact.lastName}</div>
+        </div>
+    `;
+
+    contactDiv.addEventListener('click', () => selectContact(contact.userId));
+
+    return contactDiv;
+}
+
+// Chọn contact
+function selectContact(contactId) {
+    // Remove active class from all contacts
+    document.querySelectorAll('.contact-item').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Add active class to selected contact
+    document.querySelector(`[data-contact-id="${contactId}"]`).classList.add('active');
+
+    // Update current contact
+    currentContactId = contactId;
+    const contact = contacts.find(c => c.userId === contactId);
+
+    // Update chat header
+    updateChatHeader(contact);
+
+    // Load messages
+    loadMessages(contactId);
+
+    // Clear unread badge
+    contact.unread = 0;
+    renderContacts();
+}
+
+// Cập nhật header chat
+function updateChatHeader(contact) {
+    document.getElementById('headerAvatar').src = contact.profilePicture;
+    document.getElementById('headerName').textContent = `${contact.firstName} ${contact.lastName}`;
+    document.getElementById('headerStatus').textContent = contact.status === 'online' ? 'Đang hoạt động' : 'Không hoạt động';
+    document.getElementById('headerStatus').className = `status ${contact.status}`;
+}
+
+// Load tin nhắn
+function loadMessages(contactId) {
+    const messagesContainer = document.getElementById('messagesContainer');
+    messagesContainer.innerHTML = '';
+
+    const contactMessages = messages[contactId] || [];
+    contactMessages.forEach(message => {
+        const messageElement = createMessageElement(message);
+        messagesContainer.appendChild(messageElement);
+    });
+
+    // Scroll to bottom
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// Tạo element tin nhắn
+function createMessageElement(message) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${message.sent ? 'sent' : 'received'}`;
+
+    messageDiv.innerHTML = `
+        ${!message.sent ? `<img src="${message.avatar}" alt="Avatar" class="message-avatar">` : ''}
+        <div class="message-content">
+            ${message.text}
+            <div class="message-time">${message.time}</div>
+        </div>
+    `;
+
+    return messageDiv;
+}
+
+// Gửi tin nhắn
+function sendMessage() {
+    if (!currentContactId) return;
+
+    const messageInput = document.getElementById('messageInput');
+    const messageText = messageInput.value.trim();
+
+    if (!messageText) return;
+
+    // Tạo tin nhắn mới
+    const newMessage = {
+        id: Date.now(),
+        text: messageText,
+        sent: true,
+        time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+    };
+    //DATABASE
+
+    // Thêm vào dữ liệu
+    if (!messages[currentContactId]) {
+        messages[currentContactId] = [];
+    }
+    messages[currentContactId].push(newMessage);
+    // Render lại
+    loadMessages(currentContactId);
+    renderContacts();
+
+    // Clear input
+    messageInput.value = '';
+
+    // Simulate response (optional)
+    setTimeout(() => {
+        simulateResponse();
+    }, 1000 + Math.random() * 2000);
+}
+
+// Mô phỏng phản hồi tự động
+function simulateResponse() {
+    if (!currentContactId) return;
+
+    const responses = [
+        "Cảm ơn bạn!",
+        "Tôi hiểu rồi",
+        "Được thôi",
+        "OK, không vấn đề gì",
+        "Haha, thú vị đấy",
+        "Tôi sẽ suy nghĩ về điều đó",
+        "Sounds good!",
+        "Chắc chắn rồi!"
+    ];
+
+    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+    const contact = contacts.find(c => c.id === currentContactId);
+
+    const responseMessage = {
+        id: Date.now(),
+        text: randomResponse,
+        sent: false,
+        time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+        avatar: contact.avatar
     };
 
-    if (navbarChatBtn) {
-        navbarChatBtn.addEventListener('click', (e) => {
+    messages[currentContactId].push(responseMessage);
+    contact.time = responseMessage.time;
+
+    loadMessages(currentContactId);
+    renderContacts();
+}
+
+// Thiết lập event listeners
+function setupEventListeners() {
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const searchInput = document.getElementById('searchInput');
+
+    // Send message on button click
+    sendBtn.addEventListener('click', sendMessage);
+
+    // Send message on Enter key
+    messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            toggleChatModal();
-        });
-    }
+            sendMessage();
+        }
+    });
 
-    if (chatIconBtn) {
-        chatIconBtn.addEventListener('click', toggleChatModal);
-    }
+    // Search functionality
+    searchInput.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const contactItems = document.querySelectorAll('.contact-item');
 
-    if (minimizeChatBtn) {
-        minimizeChatBtn.addEventListener('click', () => {
-            chatWidgetModal.classList.remove('show', 'fade-in');
-            if (chatNotificationBadge) {
-                chatNotificationBadge.style.display = 'flex';
+        contactItems.forEach(item => {
+            const name = item.querySelector('.contact-name').textContent.toLowerCase();
+            const message = item.querySelector('.contact-last-message').textContent.toLowerCase();
+
+            if (name.includes(searchTerm) || message.includes(searchTerm)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
             }
         });
-    }
+    });
 
-    if (closeChatBtn) {
-        closeChatBtn.addEventListener('click', () => {
-            chatWidgetModal.classList.remove('show', 'fade-in');
-            if (chatNotificationBadge) {
-                chatNotificationBadge.style.display = 'flex';
-            }
-        });
-    }
+    // Auto-resize message input
+    messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+    });
+}
 
-    if (sendBtn) {
-        sendBtn.addEventListener('click', async () => {
-            const message = messageInput.value.trim();
-            if (!message) return;
+// Responsive menu toggle (for mobile)
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('active');
+}
 
-            const userMessage = `
-                <div class="message-wrapper mb-2 flex-row-reverse">
-                    <div class="flex-grow-1">
-                        <div class="message-sender text-muted small mb-1 text-end">You</div>
-                        <div class="message-bubble bg-primary text-white border rounded-3 p-2 shadow-sm">
-                            <p class="mb-0 small">${message}</p>
-                        </div>
-                        <div class="message-time text-muted small mt-1 text-end">Just now</div>
-                    </div>
-                </div>
-            `;
-            chatMessages.insertAdjacentHTML('beforeend', userMessage);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            messageInput.value = '';
-            typingIndicator.classList.remove('d-none');
-
-            try {
-                const response = await fetch('/send-message', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.getElementById('csrfToken')?.value
-                    },
-                    body: JSON.stringify({ message }),
-                });
-
-                const contentType = response.headers.get('Content-Type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    const text = await response.text();
-                    console.error('Expected JSON, got:', text);
-                    throw new Error('Server returned non-JSON response');
-                }
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                typingIndicator.classList.add('d-none');
-
-                const botMessage = `
-                    <div class="message-wrapper mb-2">
-                        <div class="d-flex align-items-start">
-                            <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face"
-                                 alt="Support" class="rounded-circle me-2" width="28" height="28">
-                            <div class="flex-grow-1">
-                                <div class="message-sender text-muted small mb-1">Sarah - Book Consultant</div>
-                                <div class="message-bubble bg-light border rounded-3 p-2 shadow-sm">
-                                    <p class="mb-0 small">${data.reply}</p>
-                                </div>
-                                <div class="message-time text-muted small mt-1">Just now</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                chatMessages.insertAdjacentHTML('beforeend', botMessage);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            } catch (error) {
-                typingIndicator.classList.add('d-none');
-                const errorMessage = `
-                    <div class="message-wrapper mb-2">
-                        <div class="flex-grow-1">
-                            <div class="message-bubble bg-danger text-white border rounded-3 p-2 shadow-sm">
-                                <p class="mb-0 small">Error: ${error.message}</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                chatMessages.insertAdjacentHTML('beforeend', errorMessage);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }
-        });
-    }
-
-    if (messageInput) {
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendBtn.click();
-            }
-        });
-    }
-});
+// Add menu button for mobile (you can add this to HTML if needed)
+if (window.innerWidth <= 768) {
+    const chatHeader = document.querySelector('.chat-header');
+    const menuBtn = document.createElement('button');
+    menuBtn.className = 'menu-btn';
+    menuBtn.innerHTML = '☰';
+    menuBtn.addEventListener('click', toggleSidebar);
+    chatHeader.insertBefore(menuBtn, chatHeader.firstChild);
+}
