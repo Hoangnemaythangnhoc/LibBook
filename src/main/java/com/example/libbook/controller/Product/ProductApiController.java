@@ -1,4 +1,3 @@
-
 package com.example.libbook.controller.Product;
 
 import com.example.libbook.dto.UserDTO;
@@ -14,10 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api")
@@ -55,15 +51,27 @@ public class ProductApiController {
             @RequestBody Product product,
             @RequestParam("tagIds") List<Long> tagIds,
             @RequestParam(value = "discount", required = false, defaultValue = "0") int discount) throws IOException {
-        System.out.println("API: Adding product with name: " + product.getProductName());
+        System.out.println("API: Adding product with name: " + product.getProductName() + ", publisher: " + product.getPublisher());
         product.setBuys(0);
         product.setUserId(2L);
         product.setStatus(1);
         product.setRating(0.0);
         product.setDiscount(discount);
+
         if (product.getDiscount() < 0 || product.getDiscount() > 100) {
             return ResponseEntity.badRequest().build();
         }
+
+        // Làm sạch publisher để loại bỏ duplicate
+        if (product.getPublisher() != null) {
+            String[] publishers = product.getPublisher().split(",");
+            product.setPublisher(String.join(",", new HashSet<String>() {{
+                for (String p : publishers) {
+                    add(p.trim());
+                }
+            }}));
+        }
+
         productService.addProduct(product, tagIds);
         System.out.println("API: Product added with ID: " + product.getProductId());
         return ResponseEntity.ok(product);
@@ -77,14 +85,13 @@ public class ProductApiController {
             @RequestParam("price") double price,
             @RequestParam("available") int available,
             @RequestParam("userId") Long userId,
-            @RequestParam("status") int status,
             @RequestParam("author") String author,
-            @RequestParam(value = "imageBase64", required = false) String imageBase64,
+            @RequestParam(value = "publisher", required = false) String publisher,
             @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
             @RequestParam("base64") String baseImage,
             @RequestParam(value = "tagIds", required = false) List<Long> tagIds,
             @RequestParam(value = "discount", required = false, defaultValue = "0") int discount) throws IOException {
-        System.out.println("API: Received update for product with id: " + id + ", status: " + status);
+        System.out.println("API: Received update for product with id: " + id + ", publisher: " + publisher);
         Product existingProduct = productService.getProductById(id);
         if (existingProduct == null) {
             System.out.println("API: Product with id " + id + " not found");
@@ -95,18 +102,31 @@ public class ProductApiController {
             return ResponseEntity.badRequest().build();
         }
 
+        // Làm sạch publisher để loại bỏ duplicate
+        if (publisher != null) {
+            String[] publishers = publisher.split(",");
+            publisher = String.join(",", new HashSet<String>() {{
+                for (String p : publishers) {
+                    add(p.trim());
+                }
+            }});
+        } else {
+            publisher = existingProduct.getPublisher();
+        }
+
         existingProduct.setProductName(productName);
         existingProduct.setDescription(description);
         existingProduct.setPrice(price);
         existingProduct.setAvailable(available);
         existingProduct.setUserId(userId);
-        existingProduct.setStatus(status);
+        existingProduct.setStatus(1);
         existingProduct.setAuthor(author);
+        existingProduct.setPublisher(publisher);
         existingProduct.setDiscount(discount);
         existingProduct.setImageFile(baseImage);
 
         productService.updateProduct(existingProduct, tagIds == null ? new ArrayList<>() : tagIds);
-        System.out.println("API: Product updated successfully with ID: " + id + ", new status: " + existingProduct.getStatus());
+        System.out.println("API: Product updated successfully with ID: " + id);
         return ResponseEntity.ok(existingProduct);
     }
 
@@ -147,3 +167,5 @@ public class ProductApiController {
         return result.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(result);
     }
 
+
+}

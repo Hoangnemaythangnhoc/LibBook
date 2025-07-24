@@ -14,4 +14,5 @@ public class Rating {
     private int stars;
     private LocalDateTime createdAt;
     public String content;
+    public boolean Status;
 }

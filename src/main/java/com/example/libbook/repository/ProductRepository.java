@@ -14,5 +14,7 @@ public interface ProductRepository {
     void updateProduct(Product product, List<Long> tagIds) throws IOException, SQLException;
     void softDeleteProduct(Long productId); // Thêm phương thức soft delete
     List<Product> getTopSellingProducts(int limit);
+    List<String> getRandomTags(int limit);
+    List<Product> getAllDataChart();
     List<String> getAllTags();
 }

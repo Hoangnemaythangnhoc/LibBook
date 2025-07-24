@@ -24,6 +24,25 @@ public class RatingServiceImpl implements RatingService {
     private RestTemplate restTemplate;
 
     @Override
+    public List<Rating> getAllRatings() {
+        List<Rating> ratings = ratingRepository.getAllRatings();
+        for (Rating rating : ratings) {
+            try {
+                String url = "http://localhost:8080/" + rating.getUserId();
+                User user = restTemplate.getForObject(url, User.class);
+                if (user != null) {
+                    rating.setUserName(user.getUserName());
+                } else {
+                    rating.setUserName("Unknown");
+                }
+            } catch (Exception e) {
+                rating.setUserName("Error");
+            }
+        }
+        return ratings;
+    }
+
+    @Override
     public List<Rating> getRatingsByProductId(int productId) {
         List<Rating> ratings = ratingRepository.getRatingsByProductId(productId);
         for (Rating rating : ratings) {
@@ -69,5 +88,10 @@ public class RatingServiceImpl implements RatingService {
         } catch (Exception e) {
             throw new RuntimeException("An error occurred while saving the rating.", e);
         }
+    }
+
+    @Override
+    public boolean updateRatingStatus(int ratingId, boolean status) {
+        return ratingRepository.updateRatingStatus(ratingId, status);
     }
 }
