@@ -8,6 +8,7 @@ let currentContactId = null;
 
 // Khởi tạo ứng dụng
 document.addEventListener('DOMContentLoaded', async function() {
+    connectWebSocket(currentUserId);
     contacts = await fetchUserRelated();
     messages = groupMessagesByUser(await fetchUserChat())
     renderContacts();
@@ -42,10 +43,24 @@ const fetchUserChat = async () => {
     }
 
 }
+async function fetchSendMessage(messageData) {
+    try {
+        const response = await fetch("/chat/send-message", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: JSON.stringify(messageData)
+        });
 
-const sentMessage = async () => {
-
+        if (!response.ok) {
+            throw new Error("Gửi tin nhắn thất bại!");
+        }
+    } catch (error) {
+    }
 }
+
 
 function groupMessagesByUser(flatMessages) {
     const grouped = {};
@@ -192,7 +207,13 @@ function sendMessage() {
         time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
     };
     //DATABASE
-
+    const newDbMessage = {
+        receiverId : currentContactId,
+        senderId : currentUserId,
+        messageText : messageText
+    }
+    fetchSendMessage(newDbMessage);
+    sendSocketMessage(currentUserId,currentContactId,messageText)
     // Thêm vào dữ liệu
     if (!messages[currentContactId]) {
         messages[currentContactId] = [];
@@ -205,43 +226,6 @@ function sendMessage() {
     // Clear input
     messageInput.value = '';
 
-    // Simulate response (optional)
-    setTimeout(() => {
-        simulateResponse();
-    }, 1000 + Math.random() * 2000);
-}
-
-// Mô phỏng phản hồi tự động
-function simulateResponse() {
-    if (!currentContactId) return;
-
-    const responses = [
-        "Cảm ơn bạn!",
-        "Tôi hiểu rồi",
-        "Được thôi",
-        "OK, không vấn đề gì",
-        "Haha, thú vị đấy",
-        "Tôi sẽ suy nghĩ về điều đó",
-        "Sounds good!",
-        "Chắc chắn rồi!"
-    ];
-
-    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-    const contact = contacts.find(c => c.id === currentContactId);
-
-    const responseMessage = {
-        id: Date.now(),
-        text: randomResponse,
-        sent: false,
-        time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
-        avatar: contact.avatar
-    };
-
-    messages[currentContactId].push(responseMessage);
-    contact.time = responseMessage.time;
-
-    loadMessages(currentContactId);
-    renderContacts();
 }
 
 // Thiết lập event listeners
@@ -261,22 +245,7 @@ function setupEventListeners() {
         }
     });
 
-    // Search functionality
-    searchInput.addEventListener('input', function(e) {
-        const searchTerm = e.target.value.toLowerCase();
-        const contactItems = document.querySelectorAll('.contact-item');
 
-        contactItems.forEach(item => {
-            const name = item.querySelector('.contact-name').textContent.toLowerCase();
-            const message = item.querySelector('.contact-last-message').textContent.toLowerCase();
-
-            if (name.includes(searchTerm) || message.includes(searchTerm)) {
-                item.style.display = 'flex';
-            } else {
-                item.style.display = 'none';
-            }
-        });
-    });
 
     // Auto-resize message input
     messageInput.addEventListener('input', function() {
@@ -299,4 +268,42 @@ if (window.innerWidth <= 768) {
     menuBtn.innerHTML = '☰';
     menuBtn.addEventListener('click', toggleSidebar);
     chatHeader.insertBefore(menuBtn, chatHeader.firstChild);
+}
+
+
+//SOCKE JS
+let stompClient = null;
+
+function connectWebSocket(currentUserId) {
+    const socket = new SockJS('/ws');
+    stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, () => {
+        console.log("✅ WebSocket connected");
+        stompClient.subscribe(`/topic/messages/${currentUserId}`, (message) => {
+            const msg = JSON.parse(message.body);
+            if (msg.senderId !== currentUserId) {
+                messages[msg.senderId].push({
+                    id: Date.now(),
+                    text: msg.messageText,
+                    sent: false,
+                    time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+                    avatar: contacts.find(u => u.userId === msg.senderId).profilePicture
+                })
+                loadMessages(msg.senderId);
+                renderContacts();
+            }
+        });
+    });
+}
+
+function sendSocketMessage(senderId, receiverId, text) {
+    const msg = {
+        senderId,
+        receiverId,
+        messageText: text,
+        sentAt: new Date().toISOString()
+    };
+
+    stompClient.send("/app/chat.send", {}, JSON.stringify(msg));
 }
