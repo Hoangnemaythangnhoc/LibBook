@@ -8,4 +8,6 @@ import java.util.List;
 public interface RatingService {
     List<Rating> getRatingsByProductId(int productId);
     boolean saveRating(RatingDTO ratingDTO);
+    List<Rating> getAllRatings();
+    boolean updateRatingStatus(int ratingId, boolean status);
 }

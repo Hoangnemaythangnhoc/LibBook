@@ -1,4 +1,3 @@
-
 package com.example.libbook.controller.Product;
 
 import com.example.libbook.dto.UserDTO;
@@ -35,6 +34,7 @@ public class ProductApiController {
         System.out.println("API: Fetching all products");
         return productService.getAllProduct();
     }
+
 
     @GetMapping("/products/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable Long id) {
@@ -79,11 +79,10 @@ public class ProductApiController {
             @RequestParam("userId") Long userId,
             @RequestParam("status") int status,
             @RequestParam("author") String author,
-            @RequestParam(value = "imageBase64", required = false) String imageBase64,
             @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
             @RequestParam("base64") String baseImage,
             @RequestParam(value = "tagIds", required = false) List<Long> tagIds,
-            @RequestParam(value = "discount", required = false, defaultValue = "0") int discount) throws IOException {
+            @RequestParam(value = "discount", required = false, defaultValue = "0") int discount) {
         System.out.println("API: Received update for product with id: " + id + ", status: " + status);
         Product existingProduct = productService.getProductById(id);
         if (existingProduct == null) {
@@ -135,15 +134,24 @@ public class ProductApiController {
         return ResponseEntity.ok(hasReviewed);
     }
 
+    @GetMapping("/product/new-arrivals")
+    public ResponseEntity<List<Product>> getNewArrivals(@RequestParam(defaultValue = "10") int limit) {
+        List<Product> products = productService.getNewArrivals(limit);
+        return products.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(products);
+    }
+
     @GetMapping("/product/top-sale")
     public ResponseEntity<List<Product>> getTopSellingProducts(@RequestParam(defaultValue = "10") int limit) {
         List<Product> products = productService.getTopSellingProducts(limit);
         return products.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(products);
     }
 
-    @GetMapping("/product/list-by-tag")
-    public ResponseEntity<Map<String, List<Product>>> getProductListByTag() {
-        Map<String, List<Product>> result = productService.getProductListByTag();
+    @GetMapping("/product/combo-by-tag")
+    public ResponseEntity<Map<String, List<Product>>> getProductCombos(
+            @RequestParam(defaultValue = "3") int combos,
+            @RequestParam(defaultValue = "3") int booksPerCombo) {
+        Map<String, List<Product>> result = productService.getProductCombosByRandomTags(combos, booksPerCombo);
         return result.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(result);
     }
 
+}

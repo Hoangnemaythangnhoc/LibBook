@@ -14,9 +14,41 @@ import java.util.List;
 
 @Repository
 public class RatingRepositoryImpl implements RatingRepository {
+
+    @Override
+    public List<Rating> getAllRatings() {
+        String sql = "SELECT * FROM [Rating]";
+        List<Rating> ratings = new ArrayList<>();
+        ConnectUtils db = ConnectUtils.getInstance();
+
+        try (Connection conn = db.openConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Rating rating = new Rating();
+                rating.setRatingId(rs.getInt("RatingId"));
+                rating.setProductId(rs.getInt("ProductId"));
+                rating.setUserId(rs.getInt("UserId"));
+                rating.setStars(rs.getInt("Stars"));
+                rating.setCreatedAt(rs.getTimestamp("CreatedDate") != null ?
+                        rs.getTimestamp("CreatedDate").toLocalDateTime() : null);
+                rating.setContent(rs.getString("Content"));
+                rating.setStatus(rs.getBoolean("Status"));
+                ratings.add(rating);
+            }
+            rs.close();
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi khi lấy danh sách tất cả rating", e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return ratings;
+    }
+
     @Override
     public List<Rating> getRatingsByProductId(int productId) {
-        String sql = "SELECT * FROM [Rating] WHERE [ProductId] = ?";
+        String sql = "SELECT * FROM [Rating] WHERE [ProductId] = ? AND Status = 1";
         List<Rating> ratings = new ArrayList<>();
         ConnectUtils db = ConnectUtils.getInstance();
 
@@ -34,6 +66,7 @@ public class RatingRepositoryImpl implements RatingRepository {
                 rating.setCreatedAt(rs.getTimestamp("CreatedDate") != null ?
                         rs.getTimestamp("CreatedDate").toLocalDateTime() : null);
                 rating.setContent(rs.getString("Content"));
+                rating.setStatus(rs.getBoolean("Status"));
                 ratings.add(rating);
             }
             rs.close();
@@ -93,6 +126,24 @@ public class RatingRepositoryImpl implements RatingRepository {
             } catch (SQLException e) {
                 throw new RuntimeException("Lỗi khi đóng tài nguyên", e);
             }
+        }
+    }
+
+    @Override
+    public boolean updateRatingStatus(int ratingId, boolean status) {
+        String sql = "UPDATE [Rating] SET Status = ? WHERE RatingId = ?";
+        ConnectUtils db = ConnectUtils.getInstance();
+
+        try (Connection conn = db.openConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setBoolean(1, status);
+            pstmt.setInt(2, ratingId);
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi khi cập nhật trạng thái rating", e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }
