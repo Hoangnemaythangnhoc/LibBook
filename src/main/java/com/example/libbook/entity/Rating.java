@@ -15,5 +15,9 @@ public class Rating {
     private LocalDateTime createdAt;
     public String content;
     public boolean Status;
+
 }
+
+}
+
 

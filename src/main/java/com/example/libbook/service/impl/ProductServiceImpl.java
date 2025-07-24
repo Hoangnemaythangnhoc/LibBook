@@ -76,5 +76,10 @@ public class ProductServiceImpl implements ProductService {
         return result;
     }
 
+    @Override
+    public Map<String, List<Product>> getProductCombosByRandomTags(int comboCount, int booksPerCombo) {
+        return Map.of();
+    }
+
 
 }
