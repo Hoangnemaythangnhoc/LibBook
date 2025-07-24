@@ -107,10 +107,10 @@ public class UserRepositoryImpl implements UserRepository {
             while (resultSet.next()) {
                 userDTO = new User();
                 userDTO.setEmail(resultSet.getString("Email"));
-                 userDTO.setUserName(resultSet.getString("UserName"));
-                 userDTO.setUserId(resultSet.getInt("UserId"));
-                 userDTO.setRoleId(resultSet.getInt("RoleId"));
-                 password = resultSet.getString("Password");
+                userDTO.setUserName(resultSet.getString("UserName"));
+                userDTO.setUserId(resultSet.getInt("UserId"));
+                userDTO.setRoleId(resultSet.getInt("RoleId"));
+                password = resultSet.getString("Password");
             }
             if (password.equals(hashPassword(pass)))
                 return userDTO;
@@ -218,10 +218,10 @@ public class UserRepositoryImpl implements UserRepository {
         String sql = "UPDATE [User] SET [Password] = ? WHERE [Email] = ? ";
         try (Connection connection = db.openConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
-                statement.setString(1, hashPass);
-                statement.setString(2, email);
-                int check = statement.executeUpdate();
-                return check > 0;
+            statement.setString(1, hashPass);
+            statement.setString(2, email);
+            int check = statement.executeUpdate();
+            return check > 0;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } catch (Exception e) {
@@ -315,6 +315,20 @@ public class UserRepositoryImpl implements UserRepository {
             stmt.setString(4, hashPassword(userDTO.getPassword()));
             return stmt.executeUpdate() > 0;
         } catch (Exception e) { e.printStackTrace(); }
+        return false;
+    }
+
+    @Override
+    public boolean updateStaffRole(int userId, int roleId) {
+        String sql = "UPDATE [User] SET RoleId = ? WHERE UserId = ?";
+        try (Connection con = ConnectUtils.getInstance().openConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setInt(1, roleId);
+            stmt.setInt(2, userId);
+            return stmt.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return false;
     }
 

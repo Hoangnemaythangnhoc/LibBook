@@ -8,8 +8,9 @@ let cartData = {
   subtotal: 0,
   discount: 0,
   tax: 0,
-  shippingFee: 10000,
+  shippingFee: 10000, // Default shipping fee
   total: 0,
+  appliedPromo: null, // Track applied promo code
 };
 
 const MY_BANK = {
@@ -26,6 +27,52 @@ function initializeCartPage() {
   loadCartItems();
   calculateTotals();
   initializePaymentMethod();
+  initializePromoForm();
+  initializeShippingForm(); // Added to initialize shippingForm event listener
+}
+
+function initializePromoForm() {
+  const promoForm = document.getElementById("promoForm");
+  if (promoForm) {
+    promoForm.addEventListener("submit", applyPromoCode);
+  }
+}
+
+function initializeShippingForm() {
+  const shippingForm = document.getElementById("shippingForm");
+  if (shippingForm) {
+    shippingForm.addEventListener("submit", confirmOrder);
+  }
+}
+
+function applyPromoCode(event) {
+  event.preventDefault();
+  const promoCode = document.getElementById("promoCode").value.trim().toUpperCase();
+  const appliedPromos = document.getElementById("appliedPromos");
+
+  if (!promoCode) {
+    showToast("Vui lòng nhập mã giảm giá", "warning");
+    return;
+  }
+
+  // Sample promo code validation (replace with actual backend API call)
+  const validPromoCodes = {
+    "SAVE10": 0.1, // 10% discount
+    "SAVE20": 0.2, // 20% discount
+  };
+
+  if (validPromoCodes[promoCode]) {
+    cartData.appliedPromo = { code: promoCode, discount: validPromoCodes[promoCode] };
+    appliedPromos.innerHTML = `<span class="promo-code">${promoCode} (${cartData.appliedPromo.discount * 100}%)</span>`;
+    calculateTotals();
+    showToast(`Mã ${promoCode} được áp dụng thành công!`, "success");
+    document.getElementById("promoCode").value = "";
+  } else {
+    showToast("Mã giảm giá không hợp lệ", "error");
+    appliedPromos.innerHTML = "";
+    cartData.appliedPromo = null;
+    calculateTotals();
+  }
 }
 
 function initializePaymentMethod() {
@@ -48,14 +95,16 @@ function initializePaymentMethod() {
 }
 
 function initializeBankTransfer() {
-  if (!userInSession || !userInSession.userId || !userInSession.phoneNumber) {
+  if (!userInSession || !userInSession.userId ) {
     showToast("Vui lòng đăng nhập để sử dụng thanh toán chuyển khoản", "error");
     document.getElementById("bankTransferContainer").classList.remove("active");
     document.getElementById("bankTransferContainer").style.display = "none";
     document.getElementById("cod").checked = true;
     return;
   }
-
+  let email = userInSession.email;
+  let customEmail = email.slice(0, email.length - 10)
+  console.log(customEmail);
   const qrCodeUrl =
       "https://img.vietqr.io/image/" +
       MY_BANK.BANK_ID +
@@ -67,7 +116,7 @@ function initializeBankTransfer() {
       "&amount=" + cartData.total +
       "&addInfo=" +
       userInSession.userId +
-      userInSession.phoneNumber +
+      customEmail +
       "&accountName=" +
       MY_BANK.ACCOUNT_NAME;
 
@@ -107,11 +156,14 @@ function stopPaymentCheck() {
 async function checkPaid() {
   if (paymentSuccess || !userInSession) return;
 
-  const appScriptUrl = "https://script.googleusercontent.com/macros/echo?user_content_key=BkINLbtlTn49vfGL7uDFErRGyFRs-i-0j4f98qZpOrySgH3A4XWudFvBAnnOOluUkSRIgUXC0-Ikkbmzr1rJCIA5e_tt4tP5m5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnDzsAlD6ug9FsXOxdoyN-BO226sy0AJl2UoKLOqjRp3h9KpIYTSbk9vet7j5ea-Rg4Ol3lRZLwCEBiCs-ictM-yoBFes96d7Hg&lib=MLQuxm21goJkl3evos7ArRqisV3GZFA2q";
+  const appScriptUrl = "https://script.google.com/macros/s/AKfycbw9z_wC_vFCS3D2886b3jOUZyaL644Nv2HuZotjeVqB-Pu2c16bQdf051LRlDCWu9O3/exec";
 
   try {
     showLoading(true);
-    const response = await fetch(appScriptUrl);
+    const response = await fetch(appScriptUrl, {
+      method: "GET",
+      mode: "cors" // Đảm bảo CORS được xử lý
+    });
     if (!response.ok) throw new Error("Không thể kiểm tra trạng thái thanh toán");
     const data = await response.json();
     const finalRes = data.data;
@@ -333,6 +385,7 @@ async function updateQuantity(itemId, change, isAbsolute = false) {
           showLoading(false);
           loadCartItems();
           showToast("Đã cập nhật số lượng", "success");
+          updateBankTransferQR();
         })
         .catch((error) => {
           showLoading(false);
@@ -365,6 +418,7 @@ function removeItem(itemId) {
           showLoading(false);
           loadCartItems();
           showToast("Đã xóa sản phẩm khỏi giỏ hàng", "success");
+          updateBankTransferQR();
         })
         .catch((error) => {
           showLoading(false);
@@ -393,6 +447,7 @@ function clearCart() {
           showLoading(false);
           showEmptyCart();
           showToast("Đã xóa tất cả sản phẩm", "success");
+          updateBankTransferQR();
         })
         .catch((error) => {
           showLoading(false);
@@ -406,12 +461,18 @@ function showEmptyCart() {
   document.getElementById("cartItems").style.display = "none";
   document.getElementById("emptyCart").style.display = "block";
   cartData.items = [];
+  cartData.appliedPromo = null;
+  document.getElementById("appliedPromos").innerHTML = "";
   calculateTotals();
+  updateBankTransferQR();
 }
 
 function calculateTotals() {
   const subtotal = cartData.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const discount = calculateDiscount(subtotal);
+  let discount = calculateDiscount(subtotal);
+  if (cartData.appliedPromo) {
+    discount += Math.round(subtotal * cartData.appliedPromo.discount);
+  }
   const tax = Math.round((subtotal - discount) * 0.1);
   const total = subtotal - discount + tax + cartData.shippingFee;
 
@@ -423,6 +484,7 @@ function calculateTotals() {
   document.getElementById("totalAmount").textContent = formatCurrency(total);
 
   cartData = { ...cartData, subtotal, discount, tax, total };
+  updateBankTransferQR();
 }
 
 function calculateDiscount(subtotal) {
@@ -431,23 +493,43 @@ function calculateDiscount(subtotal) {
   return 0;
 }
 
+function updateShippingFee() {
+  const shippingMethod = document.querySelector('input[name="shippingMethod"]:checked').value;
+  cartData.shippingFee = shippingMethod === "express" ? 30000 : 10000;
+  calculateTotals();
+}
+
 function proceedToCheckout() {
   if (cartData.items.length === 0) {
     showToast("Giỏ hàng của bạn đang trống", "warning");
     return;
   }
 
-  const orderSummary = document.querySelector(".order-summary");
   const shippingSection = document.getElementById("shippingSection");
-
-  if (!orderSummary || !shippingSection) {
-    console.error("Required elements not found");
+  if (!shippingSection) {
+    console.error("Shipping section not found");
     showToast("Có lỗi xảy ra", "error");
     return;
   }
 
-  orderSummary.classList.add("hidden");
+  shippingSection.style.display = "block";
   shippingSection.classList.add("active");
+  updateShippingFee(); // Initialize shipping fee based on default selection
+}
+
+function backToSummary() {
+  const shippingSection = document.getElementById("shippingSection");
+  shippingSection.classList.remove("active");
+  shippingSection.style.display = "none";
+  cartData.shippingFee = 10000; // Reset to default
+  calculateTotals();
+  stopPaymentCheck();
+}
+
+function updateBankTransferQR() {
+  if (document.querySelector('input[name="paymentMethod"]:checked').value === "bank_transfer" && document.getElementById("bankTransferContainer").classList.contains("active")) {
+    initializeBankTransfer();
+  }
 }
 
 function prepareOrderData() {
@@ -490,6 +572,7 @@ function prepareOrderData() {
       shipping: cartData.shippingFee,
       total: cartData.total,
     },
+    promoCode: cartData.appliedPromo ? cartData.appliedPromo.code : null,
   };
 }
 
@@ -502,7 +585,8 @@ function confirmOrder(event) {
   showModal(
       "Xác nhận đặt hàng",
       `Tổng tiền: ${formatCurrency(cartData.total)}<br>
-     Phương thức thanh toán: ${orderData.payment === "cod" ? "Thanh toán khi nhận hàng" : orderData.payment === "vnpay" ? "VNPay" : "Chuyển khoản ngân hàng"}<br><br>
+     Phương thức thanh toán: ${orderData.payment === "cod" ? "Thanh toán khi nhận hàng" : orderData.payment === "vnpay" ? "VNPay" : "Chuyển khoản ngân hàng"}<br>
+     ${orderData.promoCode ? `Mã giảm giá: ${orderData.promoCode}<br>` : ""}
      Bạn có chắc chắn muốn đặt hàng?`,
       () => submitOrder(orderData)
   );
