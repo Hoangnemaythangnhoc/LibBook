@@ -49,6 +49,7 @@ public class RouterSetting {
         List<Tag> tags = tagService.getAllTags();
         System.out.println("User in session: " + session.getAttribute("USER"));
 
+        // Auto login via cookie (if not already logged in)
         if (session.getAttribute("USER") == null) {
             Cookie[] cookies = request.getCookies();
             String email = null;
@@ -327,6 +328,7 @@ public class RouterSetting {
     }
 
     @GetMapping("/chat-widget")
+
     public String chat(HttpSession session, HttpServletResponse response) {
         return "fragments/chat-widget";
     }

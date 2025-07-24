@@ -10,10 +10,7 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -49,5 +46,12 @@ public class ChatMessageController {
 
         }
         return new ResponseEntity<>(messages, HttpStatus.OK);
+    }
+
+    @PostMapping("/send-message")
+    public ResponseEntity<String> sendMessage(HttpSession session, @RequestBody ChatMessage message) {
+        User _u = (User) session.getAttribute("USER");
+        chatMessageService.sendChatMessage(message);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

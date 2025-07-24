@@ -19,7 +19,7 @@ function renderTopSales(products) {
     }
 
     let html = '<div class="row g-4">';
-    products.forEach((product, index) => {
+    products.filter(e => e.status !== 0).forEach((product, index) => {
         const imageSrc = product.imageFile.startsWith('http') ? product.imageFile : `/images/${product.imageFile}`;
 
         let badge = '';

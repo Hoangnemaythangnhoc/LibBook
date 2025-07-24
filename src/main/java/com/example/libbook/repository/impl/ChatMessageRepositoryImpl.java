@@ -55,7 +55,7 @@ public class ChatMessageRepositoryImpl implements ChatMessageRepository {
 
     @Override
     public void sendChatMessage(ChatMessage chatMessage) {
-        String sql = "INSERT INTO ChatMessage (SenderId, ReceiverId, MessageText) VALUES (?, ?, N'?')";
+        String sql = "INSERT INTO ChatMessage (SenderId, ReceiverId, MessageText) VALUES (?, ?, ?)";
         jdbcTemplate.update(sql, chatMessage.getSenderId(), chatMessage.getReceiverId(), chatMessage.getMessageText());
     }
 }
