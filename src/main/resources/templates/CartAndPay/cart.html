@@ -173,6 +173,7 @@
                   </div>
                 </label>
               </div>
+
 <!--              <div class="payment-option">-->
 <!--                <input type="radio" id="vnpay" name="paymentMethod" value="vnpay" />-->
 <!--                <label for="vnpay">-->
@@ -185,6 +186,19 @@
 <!--                  </div>-->
 <!--                </label>-->
 <!--              </div>-->
+              <!--              <div class="payment-option">-->
+              <!--                <input type="radio" id="vnpay" name="paymentMethod" value="vnpay" />-->
+              <!--                <label for="vnpay">-->
+              <!--                  <div class="payment-icon">-->
+              <!--                    <i class="ri-bank-card-line"></i>-->
+              <!--                  </div>-->
+              <!--                  <div class="payment-info">-->
+              <!--                    <span class="payment-name">VNPay</span>-->
+              <!--                    <span class="payment-desc">Thanh toán qua thẻ ATM, Visa, MasterCard</span>-->
+              <!--                  </div>-->
+              <!--                </label>-->
+              <!--              </div>-->
+
               <div class="payment-option">
                 <input type="radio" id="bank_transfer" name="paymentMethod" value="bank_transfer" />
                 <label for="bank_transfer">
@@ -243,6 +257,31 @@
 <!--        </div>-->
 <!--      </div>-->
 <!--    </div>-->
+    <div th:include="fragments/footer :: footer"></div>
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="loading-spinner"></div>
+    </div>
+    <div class="recommendations">
+      <h2>Có thể bạn quan tâm</h2>
+      <div class="recommended-grid" id="recommendedProducts">
+        <div class="product-card">
+          <div class="product-image">
+            <img src="${book.ImageFile}" alt="Book Title" />
+            <button class="quick-add-btn">
+              <i class="ri-add-line"></i>
+            </button>
+          </div>
+          <div class="product-info">
+            <h4>${book.title}</h4>
+            <p>${book.author}</p>
+            <div class="product-price">
+              <span class="current">${book.price} VNĐ</span>
+              <span class="original">${book.originalPrice} VNĐ</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div th:include="fragments/footer :: footer"></div>
     <div class="loading-overlay" id="loadingOverlay">
       <div class="loading-spinner"></div>

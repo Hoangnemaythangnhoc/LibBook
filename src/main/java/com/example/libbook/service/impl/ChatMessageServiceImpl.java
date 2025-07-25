@@ -28,5 +28,6 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 
     @Override
     public void sendChatMessage(ChatMessage chatMessage) {
+        chatMessageRepository.sendChatMessage(chatMessage);
     }
 }

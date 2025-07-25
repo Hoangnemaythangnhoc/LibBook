@@ -90,6 +90,34 @@ function fetchDashboardData({timeType}) {
           chartInstance.destroy();
         }
 
+
+
+  fetch(url)
+      .then(response => {
+        if (!response.ok) throw new Error('Failed to load chart data');
+        return response.json();
+      })
+      .then(data => {
+        // Update summary cards
+        const dashboardUrl = `/admin/users/dashboard-data?timeType=${timeType || '1month'}`;
+        fetch(dashboardUrl)
+            .then(response => response.json())
+            .then(dashboardData => {
+              document.getElementById('revenue').textContent = dashboardData.revenue ? `${dashboardData.revenue.toFixed(2)}₫` : '0₫';
+              document.getElementById('orders').textContent = dashboardData.orders || 0;
+              document.getElementById('top-book').textContent = dashboardData.topBook || 'N/A';
+              document.getElementById('users').textContent = dashboardData.users || 0;
+            })
+            .catch(error => {
+              console.error('Error loading summary data:', error);
+              document.getElementById('overview-section').insertAdjacentHTML('beforeend', '<p class="error">Error loading summary data</p>');
+            });
+
+        // Destroy old chart to prevent memory leaks
+        if (chartInstance) {
+          chartInstance.destroy();
+        }
+
         const ctx = document.getElementById('Chart').getContext('2d');
         const labelMap = {
           '1day': 'Last Day',
@@ -439,6 +467,256 @@ function renderOrderPagination() {
       currentOrderPage--;
       renderOrderTable();
       renderOrderPagination();
+function fetchOrders() {
+  showLoading();
+  const timeType = document.getElementById('timeTypeSelect').value;
+  Promise.all([
+    fetch(`/api/orders?timeType=${timeType}`),
+    fetch('/api/order-statuses')
+  ])
+      .then(([ordersResponse, statusesResponse]) => {
+        if (!ordersResponse.ok) throw new Error('Failed to load orders');
+        if (!statusesResponse.ok) throw new Error('Failed to load statuses');
+        return Promise.all([ordersResponse.json(), statusesResponse.json()]);
+      })
+      .then(([orders, statuses]) => {
+        originalAllOrders = orders;
+        orderStatuses = statuses;
+        allOrders = [...originalAllOrders];
+        applyOrderFiltersAndSort();
+        renderOrderPagination();
+        hideLoading();
+      })
+      .catch(error => {
+        console.error('Error loading orders or statuses:', error);
+        document.getElementById('order-table-body').insertAdjacentHTML('beforeend', '<tr><td colspan="7">Error loading orders</td></tr>');
+        hideLoading();
+      });
+}
+
+function renderOrderTable() {
+  const tableBody = document.getElementById('order-table-body');
+  tableBody.innerHTML = '';
+  const startIndex = (currentOrderPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedOrders = allOrders.slice(startIndex, endIndex);
+  paginatedOrders.forEach(order => {
+    const status = orderStatuses.find(s => s.orderStatusId === order.orderStatusId)?.statusName || 'Unknown';
+    const statusClass = `status-${status.toLowerCase().replace(/\s+/g, '-')}`;
+    const row = `
+            <tr>
+                <td>${order.orderId}</td>
+                <td>${order.userId}</td>
+                <td>${(() => {
+      const date = new Date(order.createDate);
+      return date.toLocaleString('en-US', {timeZone: 'Asia/Ho_Chi_Minh'}).slice(0, 19).replace('T', ' ');
+    })()}</td>
+                <td>${order.complete ? 'Yes' : 'No'}</td>
+                <td>${order.couponId || 'N/A'}</td>
+                <td>
+                    <select class="status-select ${statusClass}" id="status-${order.orderId}" onchange="updateStatusColor(this, ${order.orderId})">
+                        ${orderStatuses.map(s => `
+                            <option value="${s.orderStatusId}" ${s.orderStatusId === order.orderStatusId ? 'selected' : ''}>
+                                ${s.statusName}
+                            </option>
+                        `).join('')}
+                    </select>
+                </td>
+                <td>
+                    <button class="btn-update" onclick="updateStatus(${order.orderId})">Update</button>
+                    <button class="btn-details" onclick="showDetails(${order.orderId})">Details</button>
+                </td>
+            </tr>
+        `;
+    tableBody.innerHTML += row;
+  });
+}
+
+function updateStatusColor(selectElement, orderId) {
+  const selectedStatusId = parseInt(selectElement.value);
+  const status = orderStatuses.find(s => s.orderStatusId === selectedStatusId)?.statusName || 'Unknown';
+  const statusClass = `status-${status.toLowerCase().replace(/\s+/g, '-')}`;
+  selectElement.classList.remove('status-pending', 'status-processing', 'status-delivered', 'status-cancelled');
+  selectElement.classList.add(statusClass);
+}
+
+function applyOrderFiltersAndSort() {
+  const searchTerm = document.getElementById('orderSearchInput').value.toLowerCase();
+  const sortOption = document.getElementById('orderSortSelect').value;
+  allOrders = [...originalAllOrders];
+  if (searchTerm) {
+    allOrders = allOrders.filter(order => {
+      const status = orderStatuses.find(s => s.orderStatusId === order.orderStatusId)?.statusName || '';
+      return (
+          order.orderId.toString().includes(searchTerm) ||
+          order.userId.toString().includes(searchTerm) ||
+          status.toLowerCase().includes(searchTerm)
+      );
+    });
+  }
+  allOrders.sort((a, b) => {
+    switch (sortOption) {
+      case 'id-asc':
+        return a.orderId - b.orderId;
+      case 'id-desc':
+        return b.orderId - a.orderId;
+      case 'date-asc':
+        return new Date(a.createDate) - new Date(b.createDate);
+      case 'date-desc':
+        return new Date(b.createDate) - new Date(a.createDate);
+      case 'status-asc':
+        const statusA = orderStatuses.find(s => s.orderStatusId === a.orderStatusId)?.statusName || '';
+        const statusB = orderStatuses.find(s => s.orderStatusId === b.orderStatusId)?.statusName || '';
+        return statusA.localeCompare(statusB);
+      case 'status-desc':
+        const statusB2 = orderStatuses.find(s => s.orderStatusId === b.orderStatusId)?.statusName || '';
+        const statusA2 = orderStatuses.find(s => s.orderStatusId === a.orderStatusId)?.statusName || '';
+        return statusB2.localeCompare(statusA2);
+      default:
+        return 0;
+    }
+  });
+}
+
+function renderOrderPagination() {
+  const totalPages = Math.ceil(allOrders.length / itemsPerPage);
+  const pagination = document.getElementById('order-pagination');
+  pagination.innerHTML = '';
+  const prevButton = document.createElement('button');
+  prevButton.textContent = 'Previous';
+  prevButton.disabled = currentOrderPage === 1;
+  prevButton.addEventListener('click', () => {
+    if (currentOrderPage > 1) {
+      currentOrderPage--;
+      renderOrderTable();
+      renderOrderPagination();
+    }
+  });
+  pagination.appendChild(prevButton);
+  for (let i = 1; i <= totalPages; i++) {
+    const pageButton = document.createElement('button');
+    pageButton.textContent = i;
+    pageButton.disabled = i === currentOrderPage;
+    pageButton.addEventListener('click', () => {
+      currentOrderPage = i;
+      renderOrderTable();
+      renderOrderPagination();
+    });
+    pagination.appendChild(pageButton);
+  }
+  const nextButton = document.createElement('button');
+  nextButton.textContent = 'Next';
+  nextButton.disabled = currentOrderPage === totalPages;
+  nextButton.addEventListener('click', () => {
+    if (currentOrderPage < totalPages) {
+      currentOrderPage++;
+      renderOrderTable();
+      renderOrderPagination();
+    }
+  });
+  pagination.appendChild(nextButton);
+  renderOrderTable();
+}
+
+function updateStatus(orderId) {
+  const newStatusId = document.getElementById(`status-${orderId}`).value;
+  fetch(`/api/orders/${orderId}/status`, {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({orderStatusId: parseInt(newStatusId)})
+  })
+      .then(response => {
+        if (!response.ok) throw new Error('Failed to update status');
+        alert('Status updated successfully!');
+        fetchOrders();
+      })
+      .catch(error => {
+        console.error('Error updating status:', error);
+        alert('Failed to update status. Check console for details.');
+      });
+}
+
+function exportTableToCSV() {
+  const sections = document.querySelectorAll('.main-content section');
+  if (sections.length === 0) {
+    alert('No sections found to export.');
+    return;
+  }
+
+  const baseFileName = 'Admin_Data.xlsx';
+  let downloadedFiles = JSON.parse(localStorage.getItem('downloadedFiles') || '{}');
+  let sheetCounter = downloadedFiles[baseFileName]?.sheetCount || 0;
+
+  const wb = XLSX.utils.book_new();
+  let newSheetCounter = sheetCounter;
+
+  sections.forEach((section) => {
+    const tables = section.querySelectorAll('.dataTable');
+    tables.forEach((table, index) => {
+      // Ưu tiên lấy tiêu đề từ h2 hoặc h3
+      let sectionTitle = section.querySelector('h2')?.innerText
+          || section.querySelector('h3')?.innerText
+          || `Sheet_${index + 1}`;
+
+      // Tên sheet: loại bỏ ký tự đặc biệt và rút gọn tối đa 28 ký tự
+      let sheetNameBase = sectionTitle.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 28);
+      let sheetName = (sheetCounter === 0)
+          ? sheetNameBase
+          : `${sheetNameBase}_${newSheetCounter + 1}`;
+
+      // Cắt ngắn nếu vượt quá 31 ký tự (phòng trường hợp vẫn lỗi)
+      if (sheetName.length > 31) {
+        sheetName = sheetName.substring(0, 31);
+      }
+
+      const data = extractTableData(table);
+      if (data.length > 0) {
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        newSheetCounter++;
+      }
+    });
+  });
+
+  if (newSheetCounter === sheetCounter) {
+    alert('No tables found to export.');
+    return;
+  }
+
+  downloadedFiles[baseFileName] = { sheetCount: newSheetCounter };
+  localStorage.setItem('downloadedFiles', JSON.stringify(downloadedFiles));
+
+  XLSX.writeFile(wb, baseFileName);
+}
+
+function extractTableData(table) {
+  const data = [];
+  const rows = table.querySelectorAll('tr');
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = [];
+    const cols = rows[i].querySelectorAll('td, th');
+
+    for (let j = 0; j < cols.length; j++) {
+      // Bỏ qua cột chứa nút hoặc select
+      if (cols[j].querySelector('.btn') || cols[j].querySelector('.status-select')) {
+        continue;
+      }
+
+      let cellData = '';
+      const img = cols[j].querySelector('img');
+      if (img) {
+        cellData = img.getAttribute('src') || '';
+      } else {
+        cellData = cols[j].innerText.replace(/"/g, '""');
+      }
+
+      row.push(cellData);
+    }
+
+    if (row.length > 0) {
+      data.push(row);
+
     }
   });
   pagination.appendChild(prevButton);
@@ -667,5 +945,6 @@ document.getElementById('timeTypeSelect').addEventListener('change', updateDashb
   data.push(row);
 }
 }
+
   return data;
 }
