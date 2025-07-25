@@ -319,6 +319,20 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public boolean updateStaffRole(int userId, int roleId) {
+        String sql = "UPDATE [User] SET RoleId = ? WHERE UserId = ?";
+        try (Connection con = ConnectUtils.getInstance().openConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setInt(1, roleId);
+            stmt.setInt(2, userId);
+            return stmt.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
     public void updateUser(User user) {
         String sql = "UPDATE [User] SET " +
                 "FirstName = ?, " +

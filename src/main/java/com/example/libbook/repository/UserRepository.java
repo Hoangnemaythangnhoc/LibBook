@@ -20,5 +20,6 @@ public interface UserRepository {
     boolean banUser(int userId);
     boolean unbanUser(int userId);
     boolean createStaffAccount(UserDTO userDTO);
+    boolean updateStaffRole(int userId, int roleId);
     void updateUser(User user);
 }
