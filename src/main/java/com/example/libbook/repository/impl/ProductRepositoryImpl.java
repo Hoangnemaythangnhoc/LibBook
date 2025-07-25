@@ -156,7 +156,7 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public void addProduct(Product product, List<Long> tagIds) throws IOException {
+    public Long addProduct(Product product, List<Long> tagIds) throws IOException {
         byte[] baseImage = imageUtils.decodeBase64(product.getImageFile());
         String image = imageUtils.uploadAvatar(baseImage, 2);
         String sql = "INSERT INTO product (productName, description, price, imageFile, buys, available, userId, status, rating, author, discount, publisher) " +
@@ -183,6 +183,8 @@ public class ProductRepositoryImpl implements ProductRepository {
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     product.setProductId(generatedKeys.getLong(1));
+                    return generatedKeys.getLong(1);
+
                 }
             }
 
@@ -201,6 +203,7 @@ public class ProductRepositoryImpl implements ProductRepository {
             System.err.println("Error adding product: " + e.getMessage());
             throw new RuntimeException("Error adding product", e);
         }
+        return null;
     }
 
     @Override

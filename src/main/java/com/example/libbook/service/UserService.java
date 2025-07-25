@@ -22,5 +22,6 @@ public interface UserService {
     boolean createStaffAccount(UserDTO userDTO);
     boolean updateStaffRole(int userId, int roleId);
     void updateUser(User user);
-
+    void updateUserSubscription(int userId, boolean isSubscribed);
+    List<String> getSubscribedEmails();
 }

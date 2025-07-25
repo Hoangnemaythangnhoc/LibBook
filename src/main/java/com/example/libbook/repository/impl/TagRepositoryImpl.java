@@ -14,11 +14,6 @@ import java.util.List;
 
 @Repository
 public class TagRepositoryImpl implements TagRepository {
-    private final TagController tagController;
-
-    public TagRepositoryImpl(TagController tagController) {
-        this.tagController = tagController;
-    }
 
     @Override
     public ArrayList<Tag> getAllTags() {
@@ -32,7 +27,7 @@ public class TagRepositoryImpl implements TagRepository {
 
             while (resultSet.next()){
                 Tag tag = new Tag();
-                tag.setTagId(resultSet.getInt("TagId"));
+                tag.setTagId(resultSet.getLong("TagId"));
                 tag.setTagName(resultSet.getString("TagName"));
                 tags.add(tag);
             }
@@ -53,7 +48,7 @@ public class TagRepositoryImpl implements TagRepository {
             try (ResultSet resultSet = statement.executeQuery()){
                 if (resultSet.next()){
                     Tag tag = new Tag();
-                    tag.setTagId(resultSet.getInt("TagID"));
+                    tag.setTagId(resultSet.getLong("TagID"));
                     tag.setTagName(resultSet.getString("TagName"));
                     return tag;
                 }
@@ -67,10 +62,11 @@ public class TagRepositoryImpl implements TagRepository {
     }
 
     @Override
-    public List<Long> getTagByTagName(List<String> Taglist) {String sql = "SELECT * FROM [dbo].[Tag] WHERE TagName = ? ";
+    public List<Long> getTagByTagName(String tags) {
+        String sql = "SELECT * FROM [dbo].[Tag] WHERE TagName = ? ";
         ConnectUtils db = ConnectUtils.getInstance();
+        List<String> Taglist = List.of(tags.split(","));
         List<Long> ids = new ArrayList<>();
-        int id=0;
         for(String name : Taglist) {
             try (Connection connection = db.openConnection();
                  PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -78,10 +74,9 @@ public class TagRepositoryImpl implements TagRepository {
                 try (ResultSet resultSet = statement.executeQuery()) {
                     if (resultSet.next()) {
                         Tag tag = new Tag();
-                        tag.setTagId(resultSet.getInt("TagID"));
-                        id = tag.getTagId();
+                        tag.setTagId(resultSet.getLong("TagID"));
+                        ids.add(tag.getTagId());
                     }
-//                    ids.add((id);
                 }
 
             } catch (Exception e) {

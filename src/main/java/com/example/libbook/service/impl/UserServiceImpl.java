@@ -94,4 +94,13 @@ public class UserServiceImpl implements UserService {
         userRepository.updateUser(user);
     }
 
+    @Override
+    public void updateUserSubscription(int userId, boolean isSubscribed) {
+        userRepository.updateUserSubscription(userId, isSubscribed);
+    }
+    @Override
+    public List<String> getSubscribedEmails() {
+        return userRepository.getSubscribedEmails();
+    }
+
 }

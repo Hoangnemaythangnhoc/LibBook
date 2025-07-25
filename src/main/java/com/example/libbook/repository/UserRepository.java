@@ -1,4 +1,4 @@
-package com.example.libbook.repository;
+\package com.example.libbook.repository;
 
 import com.example.libbook.dto.UserDTO;
 
@@ -22,4 +22,6 @@ public interface UserRepository {
     boolean createStaffAccount(UserDTO userDTO);
     boolean updateStaffRole(int userId, int roleId);
     void updateUser(User user);
+    void updateUserSubscription(int userId, boolean isSubscribed);
+    List<String> getSubscribedEmails();
 }

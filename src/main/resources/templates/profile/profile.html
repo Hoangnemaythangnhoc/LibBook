@@ -263,6 +263,24 @@
             <!-- Settings Tab -->
             <div class="tab-pane" id="settings">
                 <div class="settings-grid">
+
+                    <!-- Notification Subscription -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Thông báo</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="subscribeSwitch">Nhận thông báo sản phẩm mới</label>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="subscribeSwitch"
+                                           th:checked="${userProfile.isSubscribed}"
+                                           onchange="updateSubscription(this.checked)" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Password Change -->
                     <div class="card">
                         <div class="card-header">
