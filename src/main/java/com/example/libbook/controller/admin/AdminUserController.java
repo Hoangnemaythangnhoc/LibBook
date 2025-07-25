@@ -2,6 +2,8 @@ package com.example.libbook.controller.admin;
 
 import com.example.libbook.dto.DashboardData;
 import com.example.libbook.dto.MultiChartData;
+import com.example.libbook.entity.Product;
+import com.example.libbook.service.ProductService;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.ui.Model;
 import com.example.libbook.dto.UserDTO;
@@ -9,7 +11,7 @@ import com.example.libbook.service.DashboardService;
 import com.example.libbook.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +25,8 @@ public class AdminUserController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private ProductService productService;
 
     public AdminUserController(DashboardService dashboardService) {
         this.dashboardService = dashboardService;
@@ -67,7 +71,6 @@ public class AdminUserController {
         }
     }
 
-
     @GetMapping("/dashboard-data")
     public ResponseEntity<DashboardData> getDashboardData(
             @RequestParam(value = "timeType", defaultValue = "1month")
@@ -110,4 +113,18 @@ public class AdminUserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PostMapping("data")
+    public ResponseEntity<String> importDataFromExcel(@RequestBody List<Map<String, Object>> products) {
+        if (products == null || products.isEmpty()) {
+            return ResponseEntity.badRequest().body("No products provided in the request");
+        }
+        try {
+            int[] result = productService.importProducts(products);
+            return ResponseEntity.ok(String.format("Imported %d products successfully, %d failed", result[0], result[1]));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error importing products: " + e.getMessage());
+        }
+    }
 }
+

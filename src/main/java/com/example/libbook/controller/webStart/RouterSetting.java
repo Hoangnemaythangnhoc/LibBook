@@ -328,8 +328,39 @@ public class RouterSetting {
     }
 
     @GetMapping("/chat-widget")
+    public String chat(HttpSession session, HttpServletResponse response,Model model,HttpServletRequest request) {
+        if (session.getAttribute("USER") != null) {
+            User user = (User) session.getAttribute("USER");
+            model.addAttribute("USER", user);
+        } else {
+            System.out.println("User in session is null");
+        }
 
-    public String chat(HttpSession session, HttpServletResponse response) {
+
+        if (session.getAttribute("USER") == null) {
+            Cookie[] cookies = request.getCookies();
+            String email = null;
+            String password = null;
+
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if ("email".equals(cookie.getName())) {
+                        email = cookie.getValue();
+                    }
+                    if ("password".equals(cookie.getName())) {
+                        password = cookie.getValue();
+                    }
+                }
+            }
+
+            if (email != null && password != null) {
+                User user = userService.checkLogin(email, password);
+                if (user != null) {
+                    session.setAttribute("USER", user);
+                    return "redirect:/home";
+                }
+            }
+        }
         return "fragments/chat-widget";
     }
 
