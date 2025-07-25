@@ -1,5 +1,6 @@
 package com.example.libbook.repository.impl;
 
+import com.example.libbook.controller.Product.TagController;
 import com.example.libbook.entity.Tag;
 import com.example.libbook.repository.TagRepository;
 import com.example.libbook.utils.ConnectUtils;
@@ -8,11 +9,17 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-
+import java.util.List;
 
 
 @Repository
 public class TagRepositoryImpl implements TagRepository {
+    private final TagController tagController;
+
+    public TagRepositoryImpl(TagController tagController) {
+        this.tagController = tagController;
+    }
+
     @Override
     public ArrayList<Tag> getAllTags() {
         String sql = "SELECT * FROM Tag";
@@ -57,6 +64,31 @@ public class TagRepositoryImpl implements TagRepository {
         }
         return null;
 
+    }
+
+    @Override
+    public List<Long> getTagByTagName(List<String> Taglist) {String sql = "SELECT * FROM [dbo].[Tag] WHERE TagName = ? ";
+        ConnectUtils db = ConnectUtils.getInstance();
+        List<Long> ids = new ArrayList<>();
+        int id=0;
+        for(String name : Taglist) {
+            try (Connection connection = db.openConnection();
+                 PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setString(1, name);
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (resultSet.next()) {
+                        Tag tag = new Tag();
+                        tag.setTagId(resultSet.getInt("TagID"));
+                        id = tag.getTagId();
+                    }
+//                    ids.add((id);
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 
 }
