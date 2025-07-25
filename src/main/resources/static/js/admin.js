@@ -475,6 +475,106 @@ function updateStatus(orderId) {
       });
 }
 
+async function showDetails(orderId) {
+  try {
+    const response = await fetch(`/api/orders/${orderId}`);
+    if (!response.ok) throw new Error(`Failed to load order details: ${response.statusText}`);
+    const order = await response.json();
+    const details = order.orderDetails || [];
+    const tbody = document.getElementById('orderDetailsBody');
+    tbody.innerHTML = '';
+
+    let totalAmount = 0;
+    let totalQuantity = 0;
+    for (const detail of details) {
+      if (detail.price !== undefined && detail.quantity !== undefined) {
+        totalAmount += detail.price * detail.quantity;
+        totalQuantity += detail.quantity;
+      }
+    }
+
+    if (details.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="9">No details available</td></tr>';
+    } else {
+      for (const detail of details) {
+        let product = {
+          productName: 'N/A',
+          imageFile: '',
+          userId: 'N/A',
+          rating: 'N/A',
+          author: 'N/A',
+          discount: 'N/A'
+        };
+        try {
+          const productResponse = await fetch(`/api/products/${detail.productId}`);
+          if (productResponse.ok) {
+            product = await productResponse.json();
+          } else {
+            console.warn(`Product with id ${detail.productId} not found, status: ${productResponse.status}`);
+          }
+        } catch (productError) {
+          console.error(`Error loading product with id ${detail.productId}:`, productError);
+        }
+        const row = `
+                    <tr>
+                        <td>${detail.orderDetailId !== undefined ? detail.orderDetailId : 'N/A'}</td>
+                        <td><img src="${product.imageFile || ''}" alt="Product Image" class="product-image"></td>
+                        <td>${product.productName}</td>
+                        <td>${detail.price !== undefined ? '$' + (detail.price * ((100 - product.discount) / 100)).toFixed(2) : 'N/A'}</td>
+                        <td>${detail.quantity}</td>
+                        <td>${product.userId}</td>
+                        <td>${product.rating}</td>
+                        <td>${product.author}</td>
+                        <td>${product.discount !== undefined ? product.discount + '%' : 'N/A'}</td>
+                    </tr>
+                `;
+        tbody.insertAdjacentHTML('beforeend', row);
+      }
+    }
+
+    document.getElementById('orderTotal').textContent = `$${totalAmount.toFixed(2)}`;
+    document.getElementById('orderQuantity').textContent = totalQuantity;
+
+    const modalElement = document.getElementById('orderDetailsModal');
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
+  } catch (error) {
+    console.error('Error loading order details:', error);
+    const tbody = document.getElementById('orderDetailsBody');
+    tbody.innerHTML = '<tr><td colspan="9">Error loading details: ' + error.message + '</td></tr>';
+    document.getElementById('orderTotal').textContent = '$0.00';
+    document.getElementById('orderQuantity').textContent = '0';
+    new bootstrap.Modal(document.getElementById('orderDetailsModal')).show();
+  }
+}
+
+document.getElementById('searchInput').addEventListener('input', () => {
+  applyBookFiltersAndSort();
+  currentBookPage = 1;
+  renderBookPagination();
+});
+
+document.getElementById('sortSelect').addEventListener('change', () => {
+  applyBookFiltersAndSort();
+  currentBookPage = 1;
+  renderBookPagination();
+});
+
+document.getElementById('orderSearchInput').addEventListener('input', () => {
+  applyOrderFiltersAndSort();
+  currentOrderPage = 1;
+  renderOrderPagination();
+});
+
+document.getElementById('orderSortSelect').addEventListener('change', () => {
+  applyOrderFiltersAndSort();
+  currentOrderPage = 1;
+  renderOrderPagination();
+});
+
+document.getElementById('timeTypeSelect').addEventListener('change', updateDashboard);
+
+
 function exportTableToCSV() {
   const sections = document.querySelectorAll('.main-content section');
   if (sections.length === 0) {
@@ -522,7 +622,7 @@ function exportTableToCSV() {
     return;
   }
 
-  downloadedFiles[baseFileName] = { sheetCount: newSheetCounter };
+  downloadedFiles[baseFileName] = {sheetCount: newSheetCounter};
   localStorage.setItem('downloadedFiles', JSON.stringify(downloadedFiles));
 
   XLSX.writeFile(wb, baseFileName);
@@ -558,4 +658,67 @@ function extractTableData(table) {
     }
   }
   return data;
+}
+
+async function processExcel() {
+  const fileInput = document.getElementById('excelFile');
+  const outputDiv = document.getElementById('output');
+  const file = fileInput.files[0];
+
+  if (!file) {
+    alert('Please select an Excel file');
+    outputDiv.textContent = 'No file selected';
+    return;
+  }
+
+  try {
+    // Read Excel file
+    const arrayBuffer = await file.arrayBuffer();
+    const workbook = XLSX.read(arrayBuffer, {type: 'array'});
+
+    // Get first sheet
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+
+    // Convert sheet to JSON with header row as keys
+    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+    // Clean and format JSON data
+    const formattedData = jsonData.map(row => ({
+      BookName: row['Book Name'] || '',
+      Author: row['Author'] || '',
+      Publisher: row['Publisher'] || '',
+      Price: row['Price'] || null,
+      Discount: row['Discount'] || null,
+      AvailableQuantity: row['Available (Quantity)'] || null,
+      Tags: row['Tags'] || '',
+      Description: row['Description'] || '',
+      ImageFile: row['Image File'] || '',
+    }));
+
+    // Display JSON output for testing
+    console.log('Generated JSON:', formattedData);
+    outputDiv.textContent = JSON.stringify(formattedData, null, 2);
+
+    let userID = userInSession.userId;
+    // Send JSON to backend
+    const response = await fetch('http://localhost:8080/admin/import-data/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formattedData, userID)
+    });
+
+    if (response.ok) {
+      alert('Data sent successfully!');
+    } else {
+      alert('Error sending data to server');
+    }
+
+  } catch (error) {
+    console.error('Error:', error);
+    outputDiv.textContent = 'Error processing file: ' + error.message;
+    alert('Error processing file');
+  }
 }

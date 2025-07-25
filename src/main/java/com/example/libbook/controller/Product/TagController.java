@@ -2,6 +2,7 @@ package com.example.libbook.controller.Product;
 
 import com.example.libbook.entity.Tag;
 import com.example.libbook.repository.TagRepository;
+import com.example.libbook.service.TagService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +19,11 @@ import java.util.Map;
 public class TagController {
 
     @Autowired
-    TagRepository tagRepository;
+    TagService tagService;
 
     @GetMapping
     public ResponseEntity<List<Tag>> getTags() {
-        List<Tag> tags = tagRepository.getAllTags();
+        List<Tag> tags = tagService.getAllTags();
         if (tags.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -31,7 +32,7 @@ public class TagController {
 
     @GetMapping("{id}")
     public ResponseEntity<Tag> getTagById(@PathVariable int id) {
-        Tag tag = tagRepository.getTagById(id);
+        Tag tag = tagService.getTagById(id);
 
         if (tag == null) {
             return ResponseEntity.notFound().build();

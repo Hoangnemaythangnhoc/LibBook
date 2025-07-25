@@ -1,18 +1,18 @@
 package com.example.libbook.entity;
 
 public class Tag {
-    private int tagId;
+    private Long tagId;
     private String tagName;
 
     public Tag() {}
 
-    public Tag(int tagId, String tagName) {
+    public Tag(Long tagId, String tagName) {
         this.tagId = tagId;
         this.tagName = tagName;
     }
 
-    public int getTagId() { return tagId; }
-    public void setTagId(int tagID) { this.tagId = tagID; }
+    public Long getTagId() { return tagId; }
+    public void setTagId(Long tagID) { this.tagId = tagID; }
 
     public String getTagName() { return tagName; }
     public void setTagName(String tagName) { this.tagName = tagName; }
