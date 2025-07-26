@@ -476,7 +476,7 @@
         <header class="topbar">
             <h1>Shipper Dashboard</h1>
             <div class="staff-info">
-                <span th:if="${session.USER != null}" th:text="'xin chào' + ${session.USER.userName}"></span>
+                <span th:if="${session.USER != null}" th:text="'xin chào ' + ${session.USER.userName}"></span>
                 <div class="dropdown">
                     <img th:if="${session.USER != null}" th:src="${session.USER.profilePicture}" alt="Avatar" data-bs-toggle="dropdown" aria-expanded="false" id="avatarDropdown"/>
                     <ul class="dropdown-menu" aria-labelledby="avatarDropdown">
@@ -552,7 +552,7 @@
                 <div class="modal-dialog modal-xl">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
+                            <h5 class="modal-title" id="orderDetailsModalLabel">Chi tiết đơn hàng</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
@@ -726,7 +726,7 @@
                     </td>
                     <td>
                         <button class="btn-update" onclick="updateStatus(${order.orderId})" ${isLocked ? 'disabled' : ''}>Cập nhật</button>
-                        <button class="btn-details" onclick="showDetails(${order.orderId})">Xem chi tiết</button>
+                        <button class="btn-details" onclick="showDetails(${order.orderId})">Chi tiết</button>
                     </td>
                 </tr>
             `;
@@ -853,6 +853,7 @@
             for (const detail of details) {
                 if (detail.price !== undefined && detail.quantity !== undefined) {
                     totalAmount += detail.price * detail.quantity;
+                    console.log(detail.name+" - "+detail.price)
                     totalQuantity += detail.quantity;
                 }
             }

@@ -4,9 +4,12 @@ import com.example.libbook.dto.PagedResponse;
 import com.example.libbook.entity.Coupon;
 import com.example.libbook.service.CouponService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/coupon")
@@ -43,4 +46,23 @@ public class CouponController {
         return new PagedResponse<>(data, page, totalPages);
     }
 
+    @GetMapping("/coupon-check-code")
+    public ResponseEntity<Integer> checkCouponCode(@RequestParam Map<String, Object> promoCode) {
+        // Extract the coupon code from the map
+        String code = promoCode.get("code") != null ? promoCode.get("code").toString() : null;
+
+        // Validate input
+        if (code == null || code.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(0); // Return 400 Bad Request if code is missing or empty
+        }
+
+        try {
+            // Call the service method to check the coupon code
+            int discountPercent = couponService.checkCouponCode(code);
+            return ResponseEntity.ok(discountPercent); // Return 200 OK with the discount percentage
+        } catch (Exception e) {
+            // Handle any database or unexpected errors
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(0);
+        }
+    }
 }

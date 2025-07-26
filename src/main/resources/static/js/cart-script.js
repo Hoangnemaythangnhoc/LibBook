@@ -13,6 +13,8 @@ let cartData = {
   appliedPromo: null, // Track applied promo code
 };
 
+
+
 const description = userInSession.phoneNumber.slice(5,10);
 
 const MY_BANK = {
@@ -38,7 +40,15 @@ function initializeCartPage() {
 function initializePromoForm() {
   const promoForm = document.getElementById("promoForm");
   if (promoForm) {
-    promoForm.addEventListener("submit", applyPromoCode);
+    promoForm.addEventListener("submit", (event) => {
+      event.preventDefault(); // Prevent form submission
+      const promoCode = document.getElementById("promoCode").value.trim();
+      if (promoCode) {
+        applyPromoCode(promoCode);
+      } else {
+        showToast("Vui lòng nhập mã giảm giá", "error");
+      }
+    });
   }
 }
 
@@ -49,32 +59,39 @@ function initializeShippingForm() {
   }
 }
 
-function applyPromoCode(event) {
-  event.preventDefault();
-  const promoCode = document.getElementById("promoCode").value.trim().toUpperCase();
-  const appliedPromos = document.getElementById("appliedPromos");
+async function applyPromoCode(promoCode) {
+  try {
+    // Fetch discount percentage from the API
+    const response = await fetch(`/api/coupon/coupon-check-code?code=${encodeURIComponent(promoCode)}`);
 
-  if (!promoCode) {
-    showToast("Vui lòng nhập mã giảm giá", "warning");
-    return;
-  }
+    // Check if the response is successful
+    if (!response.ok) {
+      throw new Error('API request failed');
+    }
 
-  const validPromoCodes = {
-    "SAVE10": 0.1, // 10% discount
-    "SAVE20": 0.2, // 20% discount
-  };
+    const discountPercent = await response.json(); // Expecting an integer (e.g., 20 for 20%)
 
-  if (validPromoCodes[promoCode]) {
-    cartData.appliedPromo = { code: promoCode, discount: validPromoCodes[promoCode] };
-    appliedPromos.innerHTML = `<span class="promo-code">${promoCode} (${cartData.appliedPromo.discount * 100}%)</span>`;
-    calculateTotals();
-    showToast(`Mã ${promoCode} được áp dụng thành công!`, "success");
-    document.getElementById("promoCode").value = "";
-  } else {
-    showToast("Mã giảm giá không hợp lệ", "error");
+    // Validate the response
+    if (discountPercent > 0) {
+      // Apply the promo code
+      cartData.appliedPromo = { code: promoCode, discount: discountPercent / 100 }; // Convert to decimal (e.g., 0.2)
+      calculateTotals();
+      showToast(`Mã ${promoCode} được áp dụng thành công!`, "success");
+      document.getElementById("promoCode").value = "";
+    } else {
+      // Invalid promo code
+      showToast("Mã giảm giá không hợp lệ", "error");
+      appliedPromos.innerHTML = "";
+      cartData.appliedPromo = null;
+      calculateTotals();
+    }
+  } catch (error) {
+    // Handle fetch or network errors
+    showToast("Đã xảy ra lỗi khi kiểm tra mã giảm giá", "error");
     appliedPromos.innerHTML = "";
     cartData.appliedPromo = null;
     calculateTotals();
+    console.error('Error fetching promo code:', error);
   }
 }
 

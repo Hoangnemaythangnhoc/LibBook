@@ -3,6 +3,8 @@ package com.example.libbook.repository.impl;
 import com.example.libbook.entity.Product;
 import com.example.libbook.entity.Tag;
 import com.example.libbook.repository.ProductRepository;
+import com.example.libbook.service.NotificationService;
+import com.example.libbook.service.impl.NotificationServiceImpl;
 import com.example.libbook.utils.ImageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,6 +26,9 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     @Autowired
     private final ImageUtils imageUtils;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Autowired
     public ProductRepositoryImpl(DataSource dataSource, ImageUtils imageUtils, ImageUtils imageUtils1) {
@@ -159,6 +164,8 @@ public class ProductRepositoryImpl implements ProductRepository {
     public Long addProduct(Product product, List<Long> tagIds) throws IOException {
         byte[] baseImage = imageUtils.decodeBase64(product.getImageFile());
         String image = imageUtils.uploadAvatar(baseImage, 2);
+        product.setImageFile(image);
+        notificationService.sendNewProductNotification(product);
         String sql = "INSERT INTO product (productName, description, price, imageFile, buys, available, userId, status, rating, author, discount, publisher) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection connection = dataSource.getConnection();
@@ -182,8 +189,8 @@ public class ProductRepositoryImpl implements ProductRepository {
 
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    product.setProductId(generatedKeys.getLong(1));
-                    return generatedKeys.getLong(1);
+                     product.setProductId(generatedKeys.getLong(1));
+                     return generatedKeys.getLong(1);
 
                 }
             }
@@ -383,6 +390,23 @@ public class ProductRepositoryImpl implements ProductRepository {
             throw new RuntimeException("Error adding product", e);
         }
         return null;
+    }
+
+    @Override
+    public void updateQuantityProduct(int productID, int quantity) {
+        int quantityProduct = getProductById((long) productID).getAvailable();
+        String sql = "update product set [Available] = ? where [ProductId] = ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, quantityProduct - quantity);
+            statement.setInt(2, productID);
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) {
+                throw new RuntimeException("Failed to delete product, no rows affected.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
