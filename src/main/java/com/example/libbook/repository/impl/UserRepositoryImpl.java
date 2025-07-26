@@ -113,6 +113,11 @@ public class UserRepositoryImpl implements UserRepository {
                  password = resultSet.getString("Password");
                  userDTO.setProfilePicture(resultSet.getString("ProfilePicture"));
                  userDTO.setPhoneNumber(resultSet.getString("Phonenumber"));
+                userDTO.setUserName(resultSet.getString("UserName"));
+                userDTO.setUserId(resultSet.getInt("UserId"));
+                userDTO.setRoleId(resultSet.getInt("RoleId"));
+                password = resultSet.getString("Password");
+                userDTO.setProfilePicture(resultSet.getString("ProfilePicture"));
             }
             if (password.equals(hashPassword(pass)))
                 return userDTO;

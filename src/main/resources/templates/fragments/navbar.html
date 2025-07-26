@@ -6,6 +6,9 @@
     <title>LibBook - Online Bookstore</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet"/>
+
+
+
     <link rel="stylesheet" href="/css/home.css"/>
     <link rel="shortcut icon"
           href="https://rails-assets-us.bookshop.org/assets/favicon-63cb20989e2516343feeab429626798a43afdaa28eeaba777b7e0acde8a25dd2.png"/>
@@ -501,6 +504,7 @@
                     <div class="input-group">
                         <input class="form-control" type="search" placeholder="Tìm kiếm sách, tác giả..."
                                aria-label="Search"/>
+                        <input class="form-control" type="search" name="searchQuery" placeholder="Tìm kiếm sách, tác giả..." aria-label="Tìm kiếm" required/>
                         <button class="btn btn-outline-primary" type="submit">
                             <i class="ri-search-line"></i>
                         </button>
@@ -551,6 +555,73 @@
     </nav>
 
     <script src="/js/chat-script.js" defer></script>
+    <!-- Modal for Order Status -->
+    <div class="modal fade" id="orderStatusModal" tabindex="-1" aria-labelledby="orderStatusModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderStatusModalLabel">Order Progress</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="orderStatusContent">
+                        <!-- Order data will be loaded here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Order Details -->
+    <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <!--                            <th>Order Detail ID</th>-->
+                            <th>Product Image</th>
+                            <th>Product Name</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <!--                            <th>User ID</th>-->
+                            <th>Rating</th>
+                            <th>Author</th>
+                            <th>Discount</th>
+                        </tr>
+                        </thead>
+                        <tbody id="orderDetailsBody">
+                        </tbody>
+                    </table>
+                    <div class="order-summary mt-3">
+                        <p><strong>Total Amount:</strong> <span id="orderTotal" style="color: green">0.00 VND</span></p>
+                        <p><strong>Total Quantity:</strong> <span id="orderQuantity" style="color: red">0</span></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed top-0 end-0 pt-5 pe-5">
+        <div class="toast" id="notificationToast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-body" id="toastMessage"></div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
     <script th:inline="javascript">
         const user = [[${session.USER}]];
         const fetchContCart = async () => {
@@ -570,6 +641,21 @@
         };
         if (user && user.userId) {
             fetchContCart();
+        }
+
+
+
+        //TOAST MESSAGE
+        <!--    Message-->
+
+        function showToast(message, type = 'success') {
+            const toastEl = document.getElementById('notificationToast');
+            const toast = new bootstrap.Toast(toastEl, {delay: 5000});
+            const toastMessage = document.getElementById('toastMessage');
+            toastMessage.textContent = message;
+            toastEl.classList.remove('bg-light', 'bg-danger');
+            toastEl.classList.add(type === 'success' ? 'bg-light' : 'bg-danger');
+            toast.show();
         }
 
 
@@ -612,3 +698,4 @@
 </th:block>
 </body>
 </html>
+<body>

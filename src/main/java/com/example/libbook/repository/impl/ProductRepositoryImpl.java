@@ -156,7 +156,7 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public void addProduct(Product product, List<Long> tagIds) throws IOException {
+    public Long addProduct(Product product, List<Long> tagIds) throws IOException {
         byte[] baseImage = imageUtils.decodeBase64(product.getImageFile());
         String image = imageUtils.uploadAvatar(baseImage, 2);
         String sql = "INSERT INTO product (productName, description, price, imageFile, buys, available, userId, status, rating, author, discount, publisher) " +
@@ -183,6 +183,8 @@ public class ProductRepositoryImpl implements ProductRepository {
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     product.setProductId(generatedKeys.getLong(1));
+                    return generatedKeys.getLong(1);
+
                 }
             }
 
@@ -201,6 +203,7 @@ public class ProductRepositoryImpl implements ProductRepository {
             System.err.println("Error adding product: " + e.getMessage());
             throw new RuntimeException("Error adding product", e);
         }
+        return null;
     }
 
     @Override
@@ -333,6 +336,54 @@ public class ProductRepositoryImpl implements ProductRepository {
         return tags;
     }
 
+    @Override
+    public Long addProductFromCSV(Product product, List<Long> tagIds) {
+        String sql = "INSERT INTO product (productName, description, price, imageFile, buys, available, userId, status, rating, author, discount, publisher) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            statement.setString(1, product.getProductName());
+            statement.setString(2, product.getDescription());
+            statement.setDouble(3, product.getPrice());
+            statement.setString(4, product.getImageFile());
+            statement.setInt(5, product.getBuys());
+            statement.setInt(6, product.getAvailable());
+            statement.setLong(7, product.getUserId());
+            statement.setInt(8, product.getStatus());
+            statement.setDouble(9, product.getRating());
+            statement.setString(10, product.getAuthor());
+            statement.setInt(11, product.getDiscount());
+            statement.setString(12, product.getPublisher());
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) {
+                throw new RuntimeException("Failed to add product, no rows affected.");
+            }
+
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    product.setProductId(generatedKeys.getLong(1));
+                    return generatedKeys.getLong(1);
+
+                }
+            }
+
+            if (tagIds != null && !tagIds.isEmpty()) {
+                String insertTagSql = "INSERT INTO ProductTag (ProductId, TagId) VALUES (?, ?)";
+                try (PreparedStatement tagStatement = connection.prepareStatement(insertTagSql)) {
+                    for (Long tagId : tagIds) {
+                        tagStatement.setLong(1, product.getProductId());
+                        tagStatement.setLong(2, tagId);
+                        tagStatement.addBatch();
+                    }
+                    tagStatement.executeBatch();
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error adding product: " + e.getMessage());
+            throw new RuntimeException("Error adding product", e);
+        }
+        return null;
+    }
 
 
     @Override

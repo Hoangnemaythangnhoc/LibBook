@@ -20,8 +20,10 @@ public class User {
     private String profilePicture;
     private Double totalSpent;
     private Integer productPurchased;
+    private Boolean isSubscribed;
 
-    // Getters and Setters
+
+// Getters and Setters
 
     public Double getTotalSpent() {
         return totalSpent;
@@ -149,5 +151,13 @@ public class User {
 
     public void setProfilePicture(String profilePicture) {
         this.profilePicture = profilePicture;
+    }
+
+    public Boolean getIsSubscribed() {
+        return isSubscribed;
+    }
+
+    public void setIsSubscribed(Boolean subscribed) {
+        isSubscribed = subscribed;
     }
 }

@@ -21,7 +21,6 @@
             height: 400px;
             display: flex;
             flex-direction: column;
-
         }
 
         .new-arrivals .book-card img {
@@ -46,19 +45,20 @@
         }
 
         .top-badge {
-             position: absolute;
-             top: 10px;
-             left: 10px;
-             background: gold;
-             color: black;
-             padding: 5px 10px;
-             border-radius: 12px;
-             font-weight: bold;
-             box-shadow: 0 0 5px rgba(0,0,0,0.3);
-             z-index: 10;
-         }
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: gold;
+            color: black;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-weight: bold;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
 
     .combo-card {
+        .combo-card {
             background-color: #fff;
             border-radius: 12px;
             padding: 20px;
@@ -140,17 +140,20 @@
                             <div class="col-md-12">
                                 <input type="text" class="form-control" name="searchQuery"
                                        placeholder="Tìm kiếm theo tiêu đề hoặc tác giả"/>
+                                       placeholder="Tìm sách hoặc tác giả..."/>
                             </div>
                             <div class="col-md-9">
                                 <select class="form-select" name="selectedTag" id="categorySelect"
                                         onchange="redirectToCategory()">
                                     <option value="" selected>Tất Cả Danh Mục</option>
+                                    <option value="" selected>Tất cả thể loại</option>
                                     <option th:each="tag : ${tags}" th:value="${tag.tagName}"
                                             th:text="${tag.tagName}"></option>
                                 </select>
                             </div>
                             <div class="col-md-3">
                                 <button type="submit" class="btn btn-primary w-100">Tìm Kiếm</button>
+                                <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
                             </div>
                         </div>
                     </form>
@@ -169,6 +172,10 @@
 <section class="featured-categories py-5">
     <div class="container">
         <h2 class="text-center mb-5">Danh Mục Nổi Bật</h2>
+<!-- From Uiverse.io by vinodjangid07 -->
+<section class="featured-categories py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Thể Loại Nổi Bật</h2>
         <div class="row g-4">
             <div class="col-lg-3 col-md-6">
                 <div class="category-card text-center p-4 bg-white rounded shadow-sm h-100">
@@ -176,6 +183,8 @@
                     <h4><a th:href="@{/category/Fiction}" style="color: inherit; text-decoration: none;">Văn Học</a>
                     </h4>
                     <p class="text-muted">Khám phá những thế giới tưởng tượng</p>
+                    <h4><a th:href="@{/category/Fiction}" style="color: inherit; text-decoration: none;">Tiểu Thuyết</a></h4>
+                    <p class="text-muted">Khám phá thế giới tưởng tượng</p>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6">
@@ -198,6 +207,8 @@
                     <h4><a th:href="@{/category/Mystery}" style="color: inherit; text-decoration: none;">Bí Ẩn</a>
                     </h4>
                     <p class="text-muted">Khám phá những điều chưa biết</p>
+                    <h4><a th:href="@{/category/Mystery}" style="color: inherit; text-decoration: none;">Bí Ẩn</a></h4>
+                    <p class="text-muted">Khám phá điều chưa biết</p>
                 </div>
             </div>
         </div>

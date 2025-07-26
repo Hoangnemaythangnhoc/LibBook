@@ -16,5 +16,5 @@ public interface ProductService {
     List<Product> getTopSellingProducts(int limit);
     Map<String, List<Product>> getProductListByTag();
     Map<String, List<Product>> getProductCombosByRandomTags(int comboCount, int booksPerCombo);
-
+    int[] importProducts(List<Map<String, Object>> products);
 }

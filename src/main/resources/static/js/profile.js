@@ -1007,3 +1007,54 @@ form.addEventListener("submit", function (e) {
         confirmPassword.focus();
     }
 });
+
+//Notification
+
+function updateSubscription(isChecked) {
+    const userId = document.querySelector('input[name="userId"]').value; // Lấy userId từ hidden input
+    const loadingOverlay = document.getElementById('loadingOverlay');
+
+    // Hiển thị loading
+    loadingOverlay.style.display = 'flex';
+
+    fetch('/subscribe', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `userId=${userId}&isSubscribed=${isChecked}`
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Lỗi khi cập nhật trạng thái đăng ký');
+            }
+            return response.text();
+        })
+        .then(data => {
+            // Ẩn loading
+            loadingOverlay.style.display = 'none';
+
+            // Hiển thị thông báo thành công
+            Swal.fire({
+                icon: 'success',
+                title: data,
+                confirmButtonText: 'OK',
+                timer: 2000,
+                timerProgressBar: true
+            });
+        })
+        .catch(error => {
+            // Ẩn loading
+            loadingOverlay.style.display = 'none';
+
+            // Hiển thị thông báo lỗi
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: error.message,
+                confirmButtonText: 'OK'
+            });
+            // Khôi phục trạng thái switch nếu lỗi
+            document.getElementById('subscribeSwitch').checked = !isChecked;
+        });
+}
