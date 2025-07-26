@@ -78,7 +78,7 @@ public class RouterSetting {
         model.addAttribute("tags", tags);
         return "Mainpage/home";
     }
-    
+
 
     @GetMapping("/login")
     public String login(Model model) {
@@ -227,9 +227,13 @@ public class RouterSetting {
 
     @GetMapping("/admin")
     public String admin(Model model, HttpSession session) {
+        if (session.getAttribute("USER") == null) {
+            return "redirect:/login";
+        }
         List<Tag> tags = tagService.getAllTags();
         System.out.println("Tags for admin: " + (tags != null ? tags : "No tags fetched"));
         User user = (User) session.getAttribute("USER");
+        if (user.getRoleId() != 1) return "redirect:/home";
         model.addAttribute("USER", user);
         model.addAttribute("tags", tags);
         return "profile/admin";
@@ -259,6 +263,9 @@ public class RouterSetting {
 
     @GetMapping("/staff")
     public String staffPanel(Model model, HttpSession session) {
+        if (session.getAttribute("USER") == null) {
+            return "redirect:/login";
+        }
         if (session.getAttribute("staff") != null) {
             model.addAttribute("staffName", session.getAttribute("staff"));
             model.addAttribute("staffEmail", "staff@example.com");
@@ -267,14 +274,37 @@ public class RouterSetting {
         List<Product> products = productService.getAllProduct();
         List<Tag> tags = tagService.getAllTags();
         User user = (User) session.getAttribute("USER");
+        if (user.getRoleId() != 3) return "redirect:/home";
         model.addAttribute("USER", user);
         model.addAttribute("products", products);
         model.addAttribute("tags", tags);
         return "profile/staff";
     }
 
+    @GetMapping("/customer-care")
+    public String customerCarePanel(Model model, HttpSession session) {
+        if (session.getAttribute("USER") == null) {
+            return "redirect:/login";
+        }
+        if (session.getAttribute("customer-care") != null) {
+            model.addAttribute("customerCareName", session.getAttribute("customer-care"));
+            model.addAttribute("customerCareEmail", "customercare@example.com");
+            model.addAttribute("customerCarePhone", "0123456789");
+        }
+        List<Product> products = productService.getAllProduct();
+        List<Tag> tags = tagService.getAllTags();
+        User user = (User) session.getAttribute("USER");
+        if (user.getRoleId() != 4) return "redirect:/home";
+        model.addAttribute("products", products);
+        model.addAttribute("tags", tags);
+        return "profile/customer-care";
+    }
+
     @GetMapping("/shipper")
     public String shipperPanel(Model model, HttpSession session) {
+        if (session.getAttribute("USER") == null) {
+            return "redirect:/login";
+        }
         if (session.getAttribute("shipper") != null) {
             model.addAttribute("shipperName", session.getAttribute("shipper"));
             model.addAttribute("shipperEmail", "shipper@example.com");
@@ -284,8 +314,13 @@ public class RouterSetting {
         List<Tag> tags = tagService.getAllTags();
         model.addAttribute("products", products);
         model.addAttribute("tags", tags);
+        User user = (User) session.getAttribute("USER");
+        if (user.getRoleId() != 5) return "redirect:/home";
+        model.addAttribute("USER", user);
         return "profile/shipper";
     }
+
+
 
     @GetMapping("/admin/edit-book/{id}")
     public String editBookForAdmin(@PathVariable("id") Long id, Model model) {

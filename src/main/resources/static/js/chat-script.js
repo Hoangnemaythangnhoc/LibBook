@@ -156,8 +156,6 @@ function selectContact(contactId) {
 function updateChatHeader(contact) {
     document.getElementById('headerAvatar').src = contact.profilePicture;
     document.getElementById('headerName').textContent = `${contact.firstName} ${contact.lastName}`;
-    document.getElementById('headerStatus').textContent = contact.status === 'online' ? 'Đang hoạt động' : 'Không hoạt động';
-    document.getElementById('headerStatus').className = `status ${contact.status}`;
 }
 
 // Load tin nhắn
