@@ -42,10 +42,9 @@ public class DynamicHtml {
     public String handleGoogleCallback(@RequestParam("code") String code, HttpSession session) throws IOException {
         String accessToken = getAccessToken(code);
         GoogleUser user = getUserInfo(accessToken);
-        UserDTO userDTO = userRepository.getUserByEmail(user.getEmail());
-        if (userDTO != null) {
-            session.setAttribute("USER", userDTO);
-            return "redirect:/home";
+        User u = userRepository.getUserByEmail(user.getEmail());
+        if (u != null) {
+            session.setAttribute("USER", u);
         }else {
             UserDTO _u = new UserDTO();
             _u.setEmail(user.getEmail());
@@ -54,7 +53,12 @@ public class DynamicHtml {
             userRepository.createAccount(_u);
             session.setAttribute("USER", _u);
             return "redirect:/home";
+
         }
+        if (u.getRoleId() == 1) return "redirect:/admin";
+        if (u.getRoleId() == 3) return "redirect:/staff";
+        session.setAttribute("USER", u);
+        return "redirect:/home";
     }
 
     private String getAccessToken(String code) throws IOException {

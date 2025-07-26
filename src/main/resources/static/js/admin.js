@@ -674,7 +674,7 @@ async function processExcel() {
   try {
     // Read Excel file
     const arrayBuffer = await file.arrayBuffer();
-    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+    const workbook = XLSX.read(arrayBuffer, {type: 'array'});
 
     // Get first sheet
     const sheetName = workbook.SheetNames[0];
@@ -694,6 +694,7 @@ async function processExcel() {
       Tags: row['Tags'] || '',
       Description: row['Description'] || '',
       ImageFile: row['Image File'] || '',
+      userID: userInSession.userId
     }));
 
     // Display JSON output for testing
@@ -701,12 +702,12 @@ async function processExcel() {
     outputDiv.textContent = JSON.stringify(formattedData, null, 2);
 
     // Send JSON to backend
-    const response = await fetch('http://localhost:8080/admin/import-data/users', {
+    const response = await fetch('http://localhost:8080/admin/users/data', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(formattedData, userInSession.userId)
+      body: JSON.stringify(formattedData)
     });
 
     if (response.ok) {

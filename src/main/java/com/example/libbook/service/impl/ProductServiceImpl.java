@@ -1,7 +1,6 @@
 package com.example.libbook.service.impl;
 
 import com.example.libbook.entity.Product;
-import com.example.libbook.entity.Tag;
 import com.example.libbook.repository.ProductRepository;
 import com.example.libbook.repository.TagRepository;
 import com.example.libbook.service.ProductService;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,22 +96,21 @@ public class ProductServiceImpl implements ProductService {
                     failureCount++;
                     continue;
                 }
-
                 Product product = new Product();
-                product.setProductName((String) productData.getOrDefault("BookName", ""));
-                product.setDescription((String) productData.getOrDefault("Description", ""));
+                product.setProductName((String) productData.get("BookName"));
+                product.setDescription((String) productData.get("Description"));
                 product.setPrice(parseDouble(productData.get("Price")));
-                product.setImageFile((String) productData.getOrDefault("ImageFile", ""));
-                product.setAuthor((String) productData.getOrDefault("Author", ""));
+                product.setImageFile((String) productData.get("ImageFile"));
+                product.setAuthor((String) productData.get("Author"));
                 product.setDiscount(parseInt(productData.get("Discount")));
-                product.setPublisher((String) productData.getOrDefault("Publisher", ""));
+                product.setPublisher((String) productData.get("Publisher"));
                 product.setAvailable(parseInt(productData.get("AvailableQuantity")));
                 product.setBuys(0); // Default value
-                product.setUserId(1L); // Default userId, adjust as needed
+                product.setUserId(parseLong(productData.get("userID"))); // Default userId, adjust as needed
                 product.setStatus(1); // Default status (e.g., active)
                 product.setRating(0.0); // Default rating
-                List<Long> tags = tagRepository.getTagByTagName((List) productData.getOrDefault("Tags",""));
-                productRepository.addProduct(product,tags);
+                List<Long> tags = tagRepository.getTagByTagName((String) productData.getOrDefault("Tags",""));
+                productRepository.addProductFromCSV(product,tags);
                 successCount++;
             } catch (Exception e) {
                 failureCount++;
@@ -136,6 +133,15 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private int parseInt(Object value) {
+        if (value == null) return 0;
+        try {
+            return Integer.parseInt(value.toString());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    private long parseLong(Object value) {
         if (value == null) return 0;
         try {
             return Integer.parseInt(value.toString());
