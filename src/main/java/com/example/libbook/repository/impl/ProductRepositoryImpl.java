@@ -385,6 +385,23 @@ public class ProductRepositoryImpl implements ProductRepository {
         return null;
     }
 
+    @Override
+    public void updateQuantityProduct(int productID, int quantity) {
+        int quantityProduct = getProductById((long) productID).getAvailable();
+        String sql = "update product set [Available] = ? where [ProductId] = ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, quantityProduct - quantity);
+            statement.setInt(2, productID);
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) {
+                throw new RuntimeException("Failed to delete product, no rows affected.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @Override
     public List<Product> getAllDataChart() {

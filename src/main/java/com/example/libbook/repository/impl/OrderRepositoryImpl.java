@@ -93,16 +93,18 @@ public class OrderRepositoryImpl implements OrderRepository {
 
             pstmt.setInt(1, order.getUserId());
             pstmt.setDate(2, java.sql.Date.valueOf(order.getCreateDate().toLocalDate()));
-            pstmt.setInt(3, 1); // OrderStatusId mặc định là 1
+
             pstmt.setString(4, order.getAddress());
 
             if ("bank_transfer".equals(order.getPaymentMethod())) {
                 if (order.getTransCode() == null || order.getTransCode().isEmpty()) {
                     throw new IllegalArgumentException("transCode không được null hoặc rỗng cho thanh toán chuyển khoản");
                 }
+                pstmt.setInt(3, 2); // OrderStatusId mặc định là 1
                 pstmt.setInt(5, 1); // Paymentstatus = 1 (đã thanh toán)
                 pstmt.setString(6, order.getTransCode());
             } else {
+                pstmt.setInt(3, 1); // OrderStatusId mặc định là 1
                 pstmt.setInt(5, order.getPaymentStatus()); // Paymentstatus từ Order
                 pstmt.setNull(6, java.sql.Types.VARCHAR); // PaymentID = NULL cho cod
             }
@@ -125,6 +127,25 @@ public class OrderRepositoryImpl implements OrderRepository {
 
         return generatedId;
     }
+
+    @Override
+    public boolean cancelOrder(Order order) {
+        String sql = "Update [Order] set OrderStatusId = ? where OrderId ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, 4);
+            pstmt.setInt(2, order.getOrderId());
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected == 0) {
+                return false;
+            }
+            return true;
+        } catch (Exception e) {
+            System.err.println("OrderRepository: Error updating order status for id " + order.getOrderId() + ": " + e.getMessage());
+            throw new RuntimeException("Error updating order status", e);
+        }
+    }
+
 
     private Order mapResultSetToOrder(ResultSet rs) throws Exception {
         Order order = new Order();

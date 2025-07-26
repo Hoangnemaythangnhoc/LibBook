@@ -518,7 +518,10 @@ async function showDetails(orderId) {
         const row = `
                     <tr>
                         <td>${detail.orderDetailId !== undefined ? detail.orderDetailId : 'N/A'}</td>
-                        <td><img src="${product.imageFile || ''}" alt="Product Image" class="product-image"></td>
+                        <td>
+                            <img src="${product.imageFile || ''}" alt="Product Image" class="product-image" 
+                            style="max-width: 100px !important; max-height: 150px !important; object-fit: cover !important;">
+                        </td>                        
                         <td>${product.productName}</td>
                         <td>${detail.price !== undefined ? '$' + (detail.price * ((100 - product.discount) / 100)).toFixed(2) : 'N/A'}</td>
                         <td>${detail.quantity}</td>
@@ -575,12 +578,12 @@ document.getElementById('orderSortSelect').addEventListener('change', () => {
 document.getElementById('timeTypeSelect').addEventListener('change', updateDashboard);
 
 
-  function exportTableToCSV() {
+function exportTableToCSV() {
   const sections = document.querySelectorAll('.main-content section');
   if (sections.length === 0) {
-  alert('No sections found to export.');
-  return;
-}
+    alert('No sections found to export.');
+    return;
+  }
 
   const baseFileName = 'Admin_Data.xlsx';
   let downloadedFiles = JSON.parse(localStorage.getItem('downloadedFiles') || '{}');
@@ -590,37 +593,37 @@ document.getElementById('timeTypeSelect').addEventListener('change', updateDashb
   let newSheetCounter = sheetCounter;
 
   sections.forEach((section) => {
-  const tables = section.querySelectorAll('.dataTable');
-  tables.forEach((table, index) => {
-  // Ưu tiên lấy tiêu đề từ h2 hoặc h3
-  let sectionTitle = section.querySelector('h2')?.innerText
-  || section.querySelector('h3')?.innerText
-  || `Sheet_${index + 1}`;
+    const tables = section.querySelectorAll('.dataTable');
+    tables.forEach((table, index) => {
+      // Ưu tiên lấy tiêu đề từ h2 hoặc h3
+      let sectionTitle = section.querySelector('h2')?.innerText
+          || section.querySelector('h3')?.innerText
+          || `Sheet_${index + 1}`;
 
-  // Tên sheet: loại bỏ ký tự đặc biệt và rút gọn tối đa 28 ký tự
-  let sheetNameBase = sectionTitle.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 28);
-  let sheetName = (sheetCounter === 0)
-  ? sheetNameBase
-  : `${sheetNameBase}_${newSheetCounter + 1}`;
+      // Tên sheet: loại bỏ ký tự đặc biệt và rút gọn tối đa 28 ký tự
+      let sheetNameBase = sectionTitle.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 28);
+      let sheetName = (sheetCounter === 0)
+          ? sheetNameBase
+          : `${sheetNameBase}_${newSheetCounter + 1}`;
 
-  // Cắt ngắn nếu vượt quá 31 ký tự (phòng trường hợp vẫn lỗi)
-  if (sheetName.length > 31) {
-  sheetName = sheetName.substring(0, 31);
-}
+      // Cắt ngắn nếu vượt quá 31 ký tự (phòng trường hợp vẫn lỗi)
+      if (sheetName.length > 31) {
+        sheetName = sheetName.substring(0, 31);
+      }
 
-  const data = extractTableData(table);
-  if (data.length > 0) {
-  const ws = XLSX.utils.aoa_to_sheet(data);
-  XLSX.utils.book_append_sheet(wb, ws, sheetName);
-  newSheetCounter++;
-}
-});
-});
+      const data = extractTableData(table);
+      if (data.length > 0) {
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        newSheetCounter++;
+      }
+    });
+  });
 
   if (newSheetCounter === sheetCounter) {
-  alert('No tables found to export.');
-  return;
-}
+    alert('No tables found to export.');
+    return;
+  }
 
   downloadedFiles[baseFileName] = {sheetCount: newSheetCounter};
   localStorage.setItem('downloadedFiles', JSON.stringify(downloadedFiles));
@@ -628,35 +631,35 @@ document.getElementById('timeTypeSelect').addEventListener('change', updateDashb
   XLSX.writeFile(wb, baseFileName);
 }
 
-  function extractTableData(table) {
+function extractTableData(table) {
   const data = [];
   const rows = table.querySelectorAll('tr');
 
   for (let i = 0; i < rows.length; i++) {
-  const row = [];
-  const cols = rows[i].querySelectorAll('td, th');
+    const row = [];
+    const cols = rows[i].querySelectorAll('td, th');
 
-  for (let j = 0; j < cols.length; j++) {
-  // Bỏ qua cột chứa nút hoặc select
-  if (cols[j].querySelector('.btn') || cols[j].querySelector('.status-select')) {
-  continue;
-}
+    for (let j = 0; j < cols.length; j++) {
+      // Bỏ qua cột chứa nút hoặc select
+      if (cols[j].querySelector('.btn') || cols[j].querySelector('.status-select')) {
+        continue;
+      }
 
-  let cellData = '';
-  const img = cols[j].querySelector('img');
-  if (img) {
-  cellData = img.getAttribute('src') || '';
-} else {
-  cellData = cols[j].innerText.replace(/"/g, '""');
-}
+      let cellData = '';
+      const img = cols[j].querySelector('img');
+      if (img) {
+        cellData = img.getAttribute('src') || '';
+      } else {
+        cellData = cols[j].innerText.replace(/"/g, '""');
+      }
 
-  row.push(cellData);
-}
+      row.push(cellData);
+    }
 
-  if (row.length > 0) {
-  data.push(row);
-}
-}
+    if (row.length > 0) {
+      data.push(row);
+    }
+  }
   return data;
 }
 

@@ -10,4 +10,5 @@ public interface OrderRepository {
     Order getOrderById(Integer orderId);
     void updateOrderStatus(Integer orderId, Integer newStatusId);
     int addNewOrder(Order order);
+    boolean cancelOrder(Order order);
 }

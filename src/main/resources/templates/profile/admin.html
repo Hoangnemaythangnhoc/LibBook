@@ -261,7 +261,7 @@
         }
 
         /* Tables */
-        .recent-books, .manage-orders, .manage-users, .manage-staffs, .manage-comments, .manage-discounts, .settings {
+        .recent-books, .manage-orders, .manage-users, .manage-staffs, .manage-ratings, .manage-discounts, .settings {
             display: none; /* Ẩn mặc định, để JS hiển thị bằng display: block */
             background-color: #ffffff;
             padding: 1.5rem;
@@ -269,13 +269,13 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
 
-        .recent-books table, .manage-orders table, .manage-users table, .manage-staffs table, .manage-comments table {
+        .recent-books table, .manage-orders table, .manage-users table, .manage-staffs table, .manage-ratings table {
             width: 100%;
             border-collapse: collapse;
             background-color: #ffffff;
         }
 
-        .recent-books th, .manage-orders th, .manage-users th, .manage-staffs th, .manage-comments th {
+        .recent-books th, .manage-orders th, .manage-users th, .manage-staffs th, .manage-ratings th {
             background-color: #f1f5f9;
             padding: 0.75rem;
             font-weight: 600;
@@ -284,14 +284,14 @@
             color: #1e293b;
         }
 
-        .recent-books td, .manage-orders td, .manage-users td, .manage-staffs td, .manage-comments td {
+        .recent-books td, .manage-orders td, .manage-users td, .manage-staffs td, .manage-ratings td {
             padding: 0.75rem;
             border-bottom: 1px solid #e2e8f0;
             font-size: 0.875rem;
             color: #475569;
         }
 
-        .recent-books tr:hover, .manage-orders tr:hover, .manage-users tr:hover, .manage-staffs tr:hover, .manage-comments tr:hover {
+        .recent-books tr:hover, .manage-orders tr:hover, .manage-users tr:hover, .manage-staffs tr:hover, .manage-ratings tr:hover {
             background-color: #f8fafc;
         }
 
@@ -630,7 +630,7 @@
 
         /* Responsive Tables */
         @media (max-width: 576px) {
-            .recent-books table, .manage-orders table, .manage-users table, .manage-categories table, .manage-comments table {
+            .recent-books table, .manage-orders table, .manage-users table, .manage-categories table, .manage-ratings table {
                 display: block;
                 overflow-x: auto;
                 white-space: nowrap;
@@ -676,7 +676,6 @@
                 <li data-section="manage-staffs-section">🏷️ Quản lý Nhân viên</li>
                 <li data-section="manage-discounts-section">💸 Quản lý Khuyến mãi</li>
                 <li data-section="manage-ratings-section">💬 Quản lý đánh giá</li>
-                <li data-section="manage-comments-section">💬 Quản lý Bình luận</li>
                 <li data-section="settings-section">⚙️ Cài đặt</li>
             </ul>
         </nav>
@@ -701,8 +700,6 @@
                         </li>
                     </ul>
                 </div>
-                <span th:if="${session.USER != null}" th:text="'Hello ' + ${session.USER.userName}"></span>
-                <img th:if="${session.USER != null}" th:src="${session.USER.profilePicture}" alt="Avatar"/>
             </div>
         </header>
         <!-- Overview Section -->
@@ -710,14 +707,6 @@
             <h2>Statistics Chart</h2>
             <div class="time-filter d-flex justify-content-between align-items-center">
                 <div>
-                <select class="me-2" id="timeTypeSelect" onchange="updateDashboard()">
-                    <option value="1day" th:selected="${timeType == '1day'}">1 Day</option>
-                    <option value="1week" th:selected="${timeType == '1week'}">1 Week</option>
-                    <option value="1month" th:selected="${timeType == '1month'}">1 Month</option>
-                    <option value="3months" th:selected="${timeType == '3months'}">3 Months</option>
-                    <option value="7months" th:selected="${timeType == '7months'}">7 Months</option>
-                    <option value="lastyear" th:selected="${timeType == 'lastyear'}">Last Year</option>
-                </select>
                     <select class="me-2" id="timeTypeSelect" onchange="updateDashboard()">
                         <option value="1day" th:selected="${timeType == '1day'}">1 Day</option>
                         <option value="1week" th:selected="${timeType == '1week'}">1 Week</option>
@@ -824,7 +813,7 @@
                 <div class="modal-dialog modal-xl">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
+                            <h5 class="modal-title" id="orderDetailsModalLabel">Chi tiết đơn hàng</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
@@ -1036,10 +1025,22 @@
 
 
         <!-- Manage Comments Section -->
-        <section class="manage-ratings" style="display: none;" id="manage-comments-section">
-        <section class="manage-comments" style="display: none;" id="manage-comments-section">
-            <h2>Manage Comments</h2>
-            <table class="dataTable">
+        <section class="manage-ratings" style="display: none;" id="manage-ratings-section">
+            <h2>Quản lý đánh giá</h2>
+            <div class="search-sort-container">
+                <input type="text" id="ratingSearchInput" placeholder="Tìm kiếm theo ID xếp hạng, tên người dùng hoặc nội dung..."/>
+                <select id="ratingSortSelect">
+                    <option value="id-asc">Rating ID (Tăng dần)</option>
+                    <option value="id-desc">Rating ID (Giảm dần)</option>
+                    <option value="stars-asc">Sao (thấp đến cao)</option>
+                    <option value="stars-desc">Sao (cao đến thấp)</option>
+                    <option value="date-asc">Ngày tạo (Cũ nhất trước)</option>
+                    <option value="date-desc">Ngày tạo (Mới nhất trước)</option>
+                    <option value="username-asc">Tên người dùng (A-Z)</option>
+                    <option value="username-desc">Tên người dùng (Z-A)</option>
+                </select>
+            </div>
+            <table>
                 <thead>
                 <tr>
                     <th>Rating ID</th>
@@ -1061,7 +1062,6 @@
         <!-- Settings Section -->
         <section class="settings" style="display: none;" id="settings-section">
             <h2>Cài đặt</h2>
-            <h2>Settings</h2>
             <form>
                 <div class="mb-3">
                     <label for="site-name">Tên trang web</label>
@@ -1251,13 +1251,14 @@
                     <td><img src="${book.imageFile}" alt="${book.productName} Cover"/></td>
                     <td>${book.productName}</td>
                     <td>${book.author}</td>
-                    <td>${discountedPrice.toFixed(2)} VND</td>
+                    <td>${discountedPrice.toFixed(2)} ₫</td>
+                    <td>${book.available}</td>
                     <td>${book.publisher || 'N/A'}</td>
                     <td>${book.discount}%</td>
                     <td>${new Date(book.createAt).toLocaleDateString('en-US', {timeZone: 'Asia/Ho_Chi_Minh'})}</td>
                     <td>
-                        <a href="/admin/edit-book/${book.productId}" class="btn btn-sm btn-primary">Edit</a>
-                        <button class="btn btn-sm btn-danger delete-btn" data-product-id="${book.productId}">Delete</button>
+                        <a href="/admin/edit-book/${book.productId}" class="btn btn-sm btn-primary">Sửa</a>
+                        <button class="btn btn-sm btn-danger delete-btn" data-product-id="${book.productId}">Xóa</button>
                     </td>
                 </tr>
             `;
@@ -1927,14 +1928,6 @@
         $('#tags').val(null).trigger('change');
     });
 </script>
-<script th:inline="javascript">
-    let userInSession = /*[[${session.USER}]]*/ null;
-    console.log("User object từ session:", userInSession);
-</script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
 <script src="/js/admin-user.js"></script>
 <script src="/js/coupon-management.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

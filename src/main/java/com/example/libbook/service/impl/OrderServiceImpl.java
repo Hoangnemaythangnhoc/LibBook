@@ -2,6 +2,7 @@ package com.example.libbook.service.impl;
 
 import com.example.libbook.entity.Coupon;
 import com.example.libbook.repository.CouponRepository;
+import com.example.libbook.repository.ProductRepository;
 import com.example.libbook.utils.Converter;
 import com.example.libbook.dto.CartItemDTO;
 import com.example.libbook.dto.OrderDataDTO;
@@ -30,6 +31,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private CouponRepository couponRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
 
 
     @Override
@@ -71,8 +75,8 @@ public class OrderServiceImpl implements OrderService {
             if (code.equals("")){
                 orderDataDTO.setPromoCode(0);
             }else {
-            Coupon coupon = couponRepository.findByCode(code);
-            orderDataDTO.setPromoCode(coupon.getCouponId());
+                Coupon coupon = couponRepository.findByCode(code);
+                orderDataDTO.setPromoCode(coupon.getCouponId());
             }
             Converter converter = new Converter();
             Order order = converter.convertOrderDTOOrder(orderDataDTO);
@@ -81,6 +85,9 @@ public class OrderServiceImpl implements OrderService {
             if (orderID <= 0) {
                 System.err.println("Lỗi khi tạo order.");
                 return false;
+            }
+            for (CartItemDTO cart : order.getCartItemDTOS()) {
+                productRepository.updateQuantityProduct(Math.toIntExact(cart.getProductId()), cart.getQuantity());
             }
 
             boolean orderDetailCheck = orderDetailRepository.addNewOrderDetail(order, orderID);
@@ -91,4 +98,8 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
+    @Override
+    public boolean cancelOrder(Order order) {
+        return orderRepository.cancelOrder(order);
+    }
 }
