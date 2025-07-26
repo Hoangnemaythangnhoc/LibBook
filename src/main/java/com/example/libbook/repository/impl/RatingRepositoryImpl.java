@@ -80,15 +80,17 @@ public class RatingRepositoryImpl implements RatingRepository {
 
     @Override
     public boolean saveRating(Rating rating) {
-        String ratingSql = "INSERT INTO [Rating] (UserId, ProductId, Stars, Content, CreatedDate) VALUES (?, ?, ?, ?, ?)";
+        String ratingSql = "INSERT INTO [Rating] (UserId, ProductId, Stars, Content, CreatedDate, Status) VALUES (?, ?, ?, ?, ?, ?)";
+        String updateRatingSql = "UPDATE [Product] SET [Rating] = (SELECT AVG(CAST(Stars AS DECIMAL(18, 2))) FROM [Rating] WHERE ProductId = ?) WHERE ProductId = ?";
         ConnectUtils db = ConnectUtils.getInstance();
 
         Connection conn = null;
         PreparedStatement ratingStmt = null;
+        PreparedStatement updateStmt = null;
 
         try {
             conn = db.openConnection();
-            conn.setAutoCommit(false); // Start transaction
+            conn.setAutoCommit(false);
 
             ratingStmt = conn.prepareStatement(ratingSql);
             ratingStmt.setInt(1, rating.getUserId());
@@ -96,11 +98,22 @@ public class RatingRepositoryImpl implements RatingRepository {
             ratingStmt.setInt(3, rating.getStars());
             ratingStmt.setString(4, rating.getContent());
             ratingStmt.setObject(5, rating.getCreatedAt());
+            ratingStmt.setBoolean(6, true);
             int ratingRowsAffected = ratingStmt.executeUpdate();
 
             if (ratingRowsAffected > 0) {
-                conn.commit();
-                return true;
+                updateStmt = conn.prepareStatement(updateRatingSql);
+                updateStmt.setInt(1, rating.getProductId());
+                updateStmt.setInt(2, rating.getProductId());
+                int updateRowsAffected = updateStmt.executeUpdate();
+
+                if (updateRowsAffected >= 0) {
+                    conn.commit();
+                    return true;
+                } else {
+                    conn.rollback();
+                    return false;
+                }
             } else {
                 conn.rollback();
                 return false;
@@ -119,6 +132,7 @@ public class RatingRepositoryImpl implements RatingRepository {
         } finally {
             try {
                 if (ratingStmt != null) ratingStmt.close();
+                if (updateStmt != null) updateStmt.close();
                 if (conn != null) {
                     conn.setAutoCommit(true);
                     conn.close();
@@ -146,8 +160,4 @@ public class RatingRepositoryImpl implements RatingRepository {
             throw new RuntimeException(e);
         }
     }
-
 }
-
-}
-

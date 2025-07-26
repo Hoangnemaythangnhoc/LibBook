@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -484,12 +484,12 @@
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/home">Home</a>
+                        <a class="nav-link active" aria-current="page" href="/home">Trang chủ</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button"
                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Categories
+                            Thể loại
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="categoriesDropdown">
                             <li th:each="tag : ${tags}">
@@ -498,16 +498,12 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#new-arrivals">New Arrivals</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#about">About</a>
-                    </li>
                 </ul>
 
                 <form class="d-flex mx-auto" style="min-width: 300px" action="/category/search" method="get">
                     <div class="input-group">
+                        <input class="form-control" type="search" placeholder="Tìm kiếm sách, tác giả..."
+                               aria-label="Search"/>
                         <input class="form-control" type="search" name="searchQuery" placeholder="Tìm kiếm sách, tác giả..." aria-label="Tìm kiếm" required/>
                         <button class="btn btn-outline-primary" type="submit">
                             <i class="ri-search-line"></i>
@@ -542,22 +538,23 @@
                         </span>
                         </a>
                         <form th:action="@{/profile/{id}(id=${session.USER.getUserId()})}" method="get">
-                            <button class="btn btn-primary">Profile</button>
+                            <button class="btn btn-primary">Hồ sơ</button>
                         </form>
                         <form action="/custom-logout" method="post">
-                            <button class="btn btn-warning" type="submit">Logout</button>
+                            <button class="btn btn-warning" type="submit">Đăng xuất</button>
                         </form>
                     </th:block>
                     <!-- Nếu chưa đăng nhập -->
                     <th:block th:if="${session.USER == null}">
-                        <a href="/login" class="btn btn-outline-primary me-2">Sign In</a>
-                        <a href="/register" class="btn btn-primary">Sign Up</a>
+                        <a href="/login" class="btn btn-outline-primary me-2">Đăng nhập</a>
+                        <a href="/register" class="btn btn-primary">Đăng ký</a>
                     </th:block>
                 </div>
             </div>
         </div>
     </nav>
 
+    <script src="/js/chat-script.js" defer></script>
     <!-- Modal for Order Status -->
     <div class="modal fade" id="orderStatusModal" tabindex="-1" aria-labelledby="orderStatusModalLabel"
          aria-hidden="true">
@@ -642,125 +639,23 @@
                 console.error("Error fetching cart count:", error);
             }
         };
-        fetchContCart();
+        if (user && user.userId) {
+            fetchContCart();
+        }
 
-        // Fetch and display order status
-        document.getElementById('orderStatusBtn').addEventListener('click', async () => {
-            const orderStatusContent = document.getElementById('orderStatusContent');
-            if (user && user.userId) {
-                try {
-                    const response = await fetch('http://localhost:8080/api/orders');
-                    if (!response.ok) throw new Error('Failed to fetch orders');
-                    const orders = await response.json();
 
-                    // Filter orders by userId
-                    const userOrders = orders.filter(order => order.userId === user.userId);
 
-                    if (userOrders.length === 0) {
-                        orderStatusContent.innerHTML = '<p class="text-center text-muted">No Orders Found</p>';
-                    } else {
-                        orderStatusContent.innerHTML = `
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Order ID</th>
-                                        <th>Status</th>
-                                        <th>Create Date</th>
-                                        <th>Address</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${userOrders.map(order => `
-                                        <tr>
-                                            <td>${order.orderId}</td>
-                                            <td>${order.orderStatusId === 1 ? 'Pending' : order.orderStatusId === 2 ? 'Processing' : order.orderStatusId === 3 ? 'Delivered' : 'Cancelled'}</td>
-                                            <td>${new Date(order.createDate).toLocaleString('en-US', {timeZone: 'Asia/Ho_Chi_Minh'})}</td>
-                                            <td>${order.address || 'N/A'}</td>
-                                            <td><button class="btn btn-info btn-sm" onclick="showOrderDetails(${order.orderId})">Order Details</button></td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        `;
-                    }
-                } catch (error) {
-                    orderStatusContent.innerHTML = '<p class="text-center text-danger">Error loading orders. Please try again later.</p>';
-                    console.error('Error fetching orders:', error);
-                }
-            } else {
-                orderStatusContent.innerHTML = '<p class="text-center text-muted">Please log in to view your orders.</p>';
-            }
-        });
+        //TOAST MESSAGE
+        <!--    Message-->
 
-        // Function to show order details
-        async function showOrderDetails(orderId) {
-            try {
-                const response = await fetch(`http://localhost:8080/api/orders/${orderId}`);
-                if (!response.ok) throw new Error(`Failed to fetch order details: ${response.statusText}`);
-                const order = await response.json();
-                const details = order.orderDetails || [];
-                const tbody = document.getElementById('orderDetailsBody');
-                tbody.innerHTML = '';
-
-                let totalAmount = 0;
-                let totalQuantity = 0;
-
-                if (details.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="9">No details available</td></tr>';
-                } else {
-                    for (const detail of details) {
-                        let product = {
-                            productName: 'N/A',
-                            imageFile: '',
-                            userId: 'N/A',
-                            rating: 'N/A',
-                            author: 'N/A',
-                            discount: 'N/A'
-                        };
-                        try {
-                            const productResponse = await fetch(`http://localhost:8080/api/products/${detail.productId}`);
-                            if (productResponse.ok) {
-                                product = await productResponse.json();
-                            } else {
-                                console.warn(`Product with id ${detail.productId} not found, status: ${productResponse.status}`);
-                            }
-                        } catch (productError) {
-                            console.error(`Error fetching product with id ${detail.productId}:`, productError);
-                        }
-
-                        const discountedPrice = detail.price * ((100 - (product.discount || 0)) / 100);
-                        totalAmount += discountedPrice * detail.quantity;
-                        totalQuantity += detail.quantity;
-
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td><img src="${product.imageFile || ''}" alt="Product Image" class="product-image" style="width: 40px; height: 50px"></td>
-                            <td>${product.productName}</td>
-                            <td>${discountedPrice.toFixed(2)} VND</td>
-                            <td>${detail.quantity !== undefined ? detail.quantity : 'N/A'}</td>
-                            <td>${product.rating || 'N/A'}</td>
-                            <td>${product.author || 'N/A'}</td>
-                            <td>${product.discount !== undefined ? product.discount + '%' : 'N/A'}</td>
-                        `;
-                        tbody.appendChild(row);
-                    }
-                }
-
-                document.getElementById('orderTotal').textContent = `${totalAmount.toFixed(2)} VND`;
-                document.getElementById('orderQuantity').textContent = totalQuantity;
-
-                const modalElement = document.getElementById('orderDetailsModal');
-                const modal = new bootstrap.Modal(modalElement);
-                modal.show();
-            } catch (error) {
-                console.error('Error fetching order details:', error);
-                const tbody = document.getElementById('orderDetailsBody');
-                tbody.innerHTML = '<tr><td colspan="9">Error loading details: ' + error.message + '</td></tr>';
-                document.getElementById('orderTotal').textContent = '0.00 VND';
-                document.getElementById('orderQuantity').textContent = '0';
-                new bootstrap.Modal(document.getElementById('orderDetailsModal')).show();
-            }
+        function showToast(message, type = 'success') {
+            const toastEl = document.getElementById('notificationToast');
+            const toast = new bootstrap.Toast(toastEl, {delay: 5000});
+            const toastMessage = document.getElementById('toastMessage');
+            toastMessage.textContent = message;
+            toastEl.classList.remove('bg-light', 'bg-danger');
+            toastEl.classList.add(type === 'success' ? 'bg-light' : 'bg-danger');
+            toast.show();
         }
 
 
@@ -801,4 +696,6 @@
     </script>
 
 </th:block>
+</body>
+</html>
 <body>

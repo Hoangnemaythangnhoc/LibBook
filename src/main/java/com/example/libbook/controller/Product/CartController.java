@@ -6,6 +6,7 @@ import com.example.libbook.dto.UserDTO;
 import com.example.libbook.entity.CartItem;
 import com.example.libbook.entity.User;
 import com.example.libbook.service.CartService;
+import com.example.libbook.service.OrderService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,9 @@ public class CartController {
 
     @Autowired
     private CartService cartService;
+
+    @Autowired
+    private OrderService orderService;
 
     @GetMapping("/{id}")
     public ResponseEntity<Integer> cart(@PathVariable int id) {
@@ -151,25 +155,14 @@ public class CartController {
             HttpSession session) {
         Map<String, Object> response = new HashMap<>();
         try {
-            UserDTO user = (UserDTO) session.getAttribute("USER");
-            if (user == null) {
-                throw new RuntimeException("Vui lòng đăng nhập để tiếp tục");
-            }
-
-            @SuppressWarnings("unchecked")
-            List<Map<String, Object>> cart = (List<Map<String, Object>>) session.getAttribute("CART");
-            if (cart == null || cart.isEmpty()) {
-                throw new RuntimeException("Giỏ hàng trống");
-            }
 
             // Process order (mocked for now)
             String orderId = "ORD" + System.currentTimeMillis();
 
             session.removeAttribute("CART");
-
+            if (orderService.addOrder(orderData)){
             response.put("success", true);
-            response.put("orderId", orderId);
-            response.put("message", "Đặt hàng thành công!");
+            response.put("message", "Đặt hàng thành công!");}
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Có lỗi xảy ra: " + e.getMessage());

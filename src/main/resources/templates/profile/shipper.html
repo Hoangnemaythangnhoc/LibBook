@@ -38,7 +38,7 @@
         }
 
         .sidebar {
-            width: 250px;
+            width: 300px;
             background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
             color: #fff;
             padding: 20px;
@@ -88,7 +88,7 @@
             flex: 1;
             padding: 20px 30px;
             background-color: transparent;
-            margin-left: 250px;
+            margin-left: 300px;
             transition: margin-left 0.3s ease;
         }
 
@@ -444,6 +444,19 @@
                 flex-direction: column;
                 gap: 15px;
             }
+
+            .staff-info .dropdown-item {
+                font-size: 1rem;
+                color: var(--text-dark);
+                padding: 8px 15px;
+                transition: background 0.3s ease, color 0.3s ease;
+            }
+
+            .staff-info .dropdown-item:hover {
+                background: var(--secondary-color);
+                color: #fff;
+            }
+
         }
     </style>
 </head>
@@ -453,8 +466,8 @@
         <h2>🚚 Shipper Panel</h2>
         <nav>
             <ul>
-                <li data-section="profile-section">👤 Manage Profile</li>
-                <li data-section="manage-orders-section">🛒 Manage Orders</li>
+                <li data-section="profile-section">👤 Quản lý hồ sơ</li>
+                <li data-section="manage-orders-section">🛒 Quản lý đơn hàng</li>
             </ul>
         </nav>
     </aside>
@@ -463,62 +476,71 @@
         <header class="topbar">
             <h1>Shipper Dashboard</h1>
             <div class="staff-info">
-                <span th:text="'Hello, ' + ${shipperName ?: 'Shipper'}">Hello, Shipper</span>
-                <img src="https://i.pravatar.cc/40" alt="Avatar" id="shipper-avatar"/>
+                <span th:if="${session.USER != null}" th:text="'xin chào' + ${session.USER.userName}"></span>
+                <div class="dropdown">
+                    <img th:if="${session.USER != null}" th:src="${session.USER.profilePicture}" alt="Avatar" data-bs-toggle="dropdown" aria-expanded="false" id="avatarDropdown"/>
+                    <ul class="dropdown-menu" aria-labelledby="avatarDropdown">
+                        <li>
+                            <form action="/custom-logout" method="post" style="margin: 0;">
+                                <button type="submit" class="dropdown-item">Logout</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </header>
 
         <section class="profile-section" id="profile-section">
-            <h2>Manage Profile</h2>
+            <h2>Quản lý hồ sơ</h2>
             <form id="profileForm">
-                <label for="shipper-name">Shipper Name</label>
+                <label for="shipper-name">Tên</label>
                 <input type="text" id="shipper-name" value="Nguyen Van A"/>
 
                 <label for="shipper-email">Email</label>
                 <input type="email" id="shipper-email" value="shipper@example.com"/>
 
-                <label for="shipper-phone">Phone Number</label>
+                <label for="shipper-phone">Số điện thoại</label>
                 <input type="text" id="shipper-phone" value="0901234567"/>
 
-                <label for="shipper-avatar-input">Change Avatar</label>
+                <label for="shipper-avatar-input">Đổi ảnh đại diện</label>
                 <input type="file" id="shipper-avatar-input" accept="image/*" onchange="previewAvatar(event)"/>
                 <img id="avatar-preview" src="https://i.pravatar.cc/40" alt="Avatar Preview"
                      style="max-width: 100px; margin-top: 10px; display: block;"/>
 
-                <label for="current-password">Current Password</label>
+                <label for="current-password">Mật khẩu hiện tại</label>
                 <input type="password" id="current-password" value="password123"/>
 
-                <label for="new-password">New Password</label>
+                <label for="new-password">Mật khẩu mới</label>
                 <input type="password" id="new-password" value=""/>
 
-                <button type="submit">Update Profile</button>
+                <button type="submit">Cập nhật</button>
             </form>
         </section>
 
         <section class="manage-orders" id="manage-orders-section">
-            <h2>Order Management & Delivery Status</h2>
+            <h2>Quản lý đơn hàng & Trạng thái giao hàng</h2>
             <div class="search-sort-container">
-                <input type="text" id="orderSearchInput" placeholder="Search by order ID, user ID of Status"/>
+                <input type="text" id="orderSearchInput" placeholder="Tìm kiếm theo ID đơn hàng, ID người dùng của Trạng thái"/>
                 <select id="orderSortSelect">
-                    <option value="id-asc">Order ID (Asc)</option>
-                    <option value="id-desc">Order ID (Desc)</option>
-                    <option value="date-asc">Create Date (Oldest First)</option>
-                    <option value="date-desc">Create Date (Newest First)</option>
-                    <option value="status-asc">Status (A-Z)</option>
-                    <option value="status-desc">Status (Z-A)</option>
+                    <option value="id-asc">Mã đơn hàng (Tăng dần)</option>
+                    <option value="id-desc">Mã đơn hàng (Giảm dần)</option>
+                    <option value="date-asc">Ngày tạo (Cũ nhất trước)</option>
+                    <option value="date-desc">Ngày tạo (Mới nhất trước)</option>
+                    <option value="status-asc">Trạng thái (A-Z)</option>
+                    <option value="status-desc">Trạng thái (Z-A)</option>
                 </select>
             </div>
             <table>
                 <thead>
                 <tr>
-                    <th>Order ID</th>
-                    <th>Customer Name</th>
-                    <th>Phone</th>
-                    <th>Address</th>
-                    <th>Create Date</th>
-                    <th>Coupon ID</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th>Mã đơn hàng</th>
+                    <th>Tên khách hàng</th>
+                    <th>Số điện thoại</th>
+                    <th>Địa chỉ</th>
+                    <th>Ngày tạo</th>
+                    <th>Mã phiếu giảm giá</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
                 </tr>
                 </thead>
                 <tbody id="order-table-body-admin">
@@ -537,27 +559,27 @@
                             <table class="details-table">
                                 <thead>
                                 <tr>
-                                    <th>Order Detail ID</th>
-                                    <th>Product Image</th>
-                                    <th>Product Name</th>
-                                    <th>Price</th>
-                                    <th>Quantity</th>
-                                    <th>User ID</th>
-                                    <th>Rating</th>
-                                    <th>Author</th>
-                                    <th>Discount</th>
+                                    <th>Mã chi tiết đơn hàng</th>
+                                    <th>Hình ảnh sản phẩm</th>
+                                    <th>Tên sản phẩm</th>
+                                    <th>Giá</th>
+                                    <th>Số lượng</th>
+                                    <th>Mã người dùng</th>
+                                    <th>Đánh giá</th>
+                                    <th>Tác giả</th>
+                                    <th>Giảm giá</th>
                                 </tr>
                                 </thead>
                                 <tbody id="orderDetailsBody">
                                 </tbody>
                             </table>
                             <div class="order-summary mt-3">
-                                <p><strong>Total Amount:</strong> <span id="orderTotal">$0.00</span></p>
-                                <p><strong>Total Quantity:</strong> <span id="orderQuantity">0</span></p>
+                                <p><strong>Tổng số tiền:</strong> <span id="orderTotal">0.00 ₫</span></p>
+                                <p><strong>Tổng số lượng:</strong> <span id="orderQuantity">0</span></p>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
                         </div>
                     </div>
                 </div>
@@ -703,8 +725,8 @@
                         </select>
                     </td>
                     <td>
-                        <button class="btn-update" onclick="updateStatus(${order.orderId})" ${isLocked ? 'disabled' : ''}>Update</button>
-                        <button class="btn-details" onclick="showDetails(${order.orderId})">View Details</button>
+                        <button class="btn-update" onclick="updateStatus(${order.orderId})" ${isLocked ? 'disabled' : ''}>Cập nhật</button>
+                        <button class="btn-details" onclick="showDetails(${order.orderId})">Xem chi tiết</button>
                     </td>
                 </tr>
             `;
@@ -764,7 +786,7 @@
         const pagination = document.getElementById('order-pagination');
         pagination.innerHTML = '';
         const prevButton = document.createElement('button');
-        prevButton.textContent = 'Previous';
+        prevButton.textContent = 'Trước';
         prevButton.disabled = currentOrderPage === 1;
         prevButton.addEventListener('click', () => {
             if (currentOrderPage > 1) {
@@ -786,7 +808,7 @@
             pagination.appendChild(pageButton);
         }
         const nextButton = document.createElement('button');
-        nextButton.textContent = 'Next';
+        nextButton.textContent = 'Sau';
         nextButton.disabled = currentOrderPage === totalPages;
         nextButton.addEventListener('click', () => {
             if (currentOrderPage < totalPages) {
@@ -862,7 +884,7 @@
                     <td>${detail.orderDetailId !== undefined ? detail.orderDetailId : 'N/A'}</td>
                     <td><img src="${product.imageFile || ''}" alt="Product Image" class="product-image"></td>
                     <td>${product.productName}</td>
-                    <td>${detail.price !== undefined ? (detail.price * ((100 - product.discount) / 100)).toFixed(2) + " VND" : 'N/A'}</td>
+                    <td>${detail.price !== undefined ? (detail.price * ((100 - product.discount) / 100)).toFixed(2) + " ₫" : 'N/A'}</td>
                     <td>${detail.quantity !== undefined ? detail.quantity : 'N/A'}</td>
                     <td>${product.userId}</td>
                     <td>${product.rating}</td>
@@ -873,7 +895,7 @@
                 }
             }
 
-            document.getElementById('orderTotal').textContent = `${totalAmount.toFixed(2)} VND`;
+            document.getElementById('orderTotal').textContent = `${totalAmount.toFixed(2)} ₫`;
             document.getElementById('orderQuantity').textContent = totalQuantity;
 
             const modalElement = document.getElementById('orderDetailsModal');
@@ -883,7 +905,7 @@
             console.error('Error fetching order details:', error);
             const tbody = document.getElementById('orderDetailsBody');
             tbody.innerHTML = '<tr><td colspan="9">Error loading details: ' + error.message + '</td></tr>';
-            document.getElementById('orderTotal').textContent = '0.00 VND';
+            document.getElementById('orderTotal').textContent = '0.00 ₫';
             document.getElementById('orderQuantity').textContent = '0';
             new bootstrap.Modal(document.getElementById('orderDetailsModal')).show();
         }

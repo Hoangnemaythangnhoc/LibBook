@@ -39,7 +39,11 @@ public class DynamicHtml {
     }
 
     @GetMapping("/oauth2/callback")
-    public String handleGoogleCallback(@RequestParam("code") String code, HttpSession session) throws IOException {
+    public String handleGoogleCallback(        @RequestParam(value = "code", required = false) String code,
+                                               @RequestParam(value = "error", required = false) String error, HttpSession session) throws IOException {
+        if ("access_denied".equals(error)) {
+            return "redirect:/login?error=access_denied";
+        }
         String accessToken = getAccessToken(code);
         GoogleUser user = getUserInfo(accessToken);
         User u = userRepository.getUserByEmail(user.getEmail());
@@ -55,7 +59,12 @@ public class DynamicHtml {
             return "redirect:/home";
 
         }
+
         if (u.getRoleId() == 1) return "redirect:/admin";
+        if (u.getRoleId() == 2) return "redirect:/home";
+        if (u.getRoleId() == 3) return "redirect:/staff";
+        if (u.getRoleId() == 4) return "profile/customer-care";
+        if (u.getRoleId() == 5) return "redirect:/shipper";
         if (u.getRoleId() == 3) return "redirect:/staff";
         session.setAttribute("USER", u);
         return "redirect:/home";

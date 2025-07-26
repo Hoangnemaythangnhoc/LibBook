@@ -82,6 +82,7 @@ public class RatingServiceImpl implements RatingService {
             rating.setStars(ratingDTO.getStars());
             rating.setContent(ratingDTO.getContent());
             rating.setCreatedAt(LocalDateTime.now());
+            rating.setStatus(true);
             return ratingRepository.saveRating(rating);
         } catch (IllegalStateException e) {
             throw e; // Lỗi "You have already rated" hoặc "You have not purchased"
@@ -94,7 +95,4 @@ public class RatingServiceImpl implements RatingService {
     public boolean updateRatingStatus(int ratingId, boolean status) {
         return ratingRepository.updateRatingStatus(ratingId, status);
     }
-
-
 }
-

@@ -201,8 +201,8 @@
                             th:selected="${status.orderStatusId == order.orderStatusId}">
                     </option>
                 </select>
-                <button class="btn-update" th:onclick="'updateStatus(' + ${order.orderId} + ')'">Update</button>
-                <button class="btn-details" th:onclick="'showDetails(' + ${order.orderId} + ')'">View Details</button>
+                <button class="btn-update" th:onclick="'updateStatus(' + ${order.orderId} + ')'">Cập nhật</button>
+                <button class="btn-details" th:onclick="'showDetails(' + ${order.orderId} + ')'">Chi tiết</button>
             </td>
         </tr>
         </tbody>
@@ -307,7 +307,7 @@
                         <td>${detail.orderDetailId !== undefined ? detail.orderDetailId : 'N/A'}</td>
                         <td><img src="${product.imageFile !== undefined ? product.imageFile : ''}" alt="Product Image" class="product-image"></td>
                         <td>${product.productName !== undefined ? product.productName : 'N/A'}</td>
-                        <td>${isNaN(discountedPrice) ? 'N/A' : discountedPrice.toFixed(2)+' VND'}</td>
+                        <td>${isNaN(discountedPrice) ? 'N/A' : discountedPrice.toFixed(2)+' ₫'}</td>
                         <td>${detail.quantity !== undefined ? detail.quantity : 'N/A'}</td>
                         <td>${product.userId !== undefined ? product.userId : 'N/A'}</td>
                         <td>${product.status !== undefined ? product.status : 'N/A'}</td>

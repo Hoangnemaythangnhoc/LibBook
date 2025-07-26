@@ -26,6 +26,25 @@ body {
     overflow: hidden;
 }
 
+.staff-info .dropdown-menu {
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    border: none;
+    min-width: 120px;
+}
+
+.staff-info .dropdown-item {
+    font-size: 1rem;
+    color: var(--text-dark);
+    padding: 8px 15px;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.staff-info .dropdown-item:hover {
+    background: var(--secondary-color);
+    color: #fff;
+}
+
 .sidebar {
     width: 250px;
     background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);

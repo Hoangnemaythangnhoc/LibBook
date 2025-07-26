@@ -46,6 +46,7 @@ public class RatingController {
             HttpSession session) {
         try {
             User currentUser = (User) session.getAttribute("USER");
+            System.out.println("rating user: "+currentUser);
             if (currentUser == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Please log in to submit a rating.");
             }
@@ -79,8 +80,4 @@ public class RatingController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update rating status.");
         }
     }
-
 }
-
-}
-

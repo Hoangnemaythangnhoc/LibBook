@@ -133,6 +133,7 @@ public class UserController {
                 case 1: return "profile/admin";
                 case 2: return "redirect:/home";
                 case 3: return "profile/staff";
+                case 4: return  "profile/customer-care";
                 case 4: return  "";
                 case 5: return "profile/shipper";
             }

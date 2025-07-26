@@ -273,6 +273,20 @@ public class RouterSetting {
         return "profile/staff";
     }
 
+    @GetMapping("/customer-care")
+    public String customerCarePanel(Model model, HttpSession session) {
+        if (session.getAttribute("customer-care") != null) {
+            model.addAttribute("customerCareName", session.getAttribute("customer-care"));
+            model.addAttribute("customerCareEmail", "customercare@example.com");
+            model.addAttribute("customerCarePhone", "0123456789");
+        }
+        List<Product> products = productService.getAllProduct();
+        List<Tag> tags = tagService.getAllTags();
+        model.addAttribute("products", products);
+        model.addAttribute("tags", tags);
+        return "profile/customer-care";
+    }
+
     @GetMapping("/shipper")
     public String shipperPanel(Model model, HttpSession session) {
         if (session.getAttribute("shipper") != null) {
@@ -284,6 +298,8 @@ public class RouterSetting {
         List<Tag> tags = tagService.getAllTags();
         model.addAttribute("products", products);
         model.addAttribute("tags", tags);
+        User user = (User) session.getAttribute("USER");
+        model.addAttribute("USER", user);
         return "profile/shipper";
     }
 

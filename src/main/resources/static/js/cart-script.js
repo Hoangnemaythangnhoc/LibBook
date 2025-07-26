@@ -8,10 +8,12 @@ let cartData = {
   subtotal: 0,
   discount: 0,
   tax: 0,
-  shippingFee: 10000, // Default shipping fee
+  shippingFee: 30000, // Default shipping fee set to standard
   total: 0,
   appliedPromo: null, // Track applied promo code
 };
+
+const description = userInSession.phoneNumber.slice(5,10);
 
 const MY_BANK = {
   BANK_ID: "970422", // MB Bank
@@ -19,16 +21,18 @@ const MY_BANK = {
   TEMPLATE: "qr_only",
   ACCOUNT_NAME: "Nguyen Thanh Ha",
 };
-
+let lastTransCode = null; // Lưu mã giao dịch thành công
 let paymentInterval = null;
 let paymentSuccess = false;
+let startTime = null;
+const MAX_CHECK_DURATION = 5 * 60 * 1000;
 
 function initializeCartPage() {
   loadCartItems();
   calculateTotals();
   initializePaymentMethod();
   initializePromoForm();
-  initializeShippingForm(); // Added to initialize shippingForm event listener
+  initializeShippingForm();
 }
 
 function initializePromoForm() {
@@ -55,7 +59,6 @@ function applyPromoCode(event) {
     return;
   }
 
-  // Sample promo code validation (replace with actual backend API call)
   const validPromoCodes = {
     "SAVE10": 0.1, // 10% discount
     "SAVE20": 0.2, // 20% discount
@@ -82,12 +85,11 @@ function initializePaymentMethod() {
   paymentMethods.forEach((method) => {
     method.addEventListener("change", () => {
       if (method.value === "bank_transfer") {
-        bankTransferContainer.classList.add("active");
         bankTransferContainer.style.display = "block";
-        initializeBankTransfer();
+        bankTransferContainer.classList.add("active");
       } else {
-        bankTransferContainer.classList.remove("active");
         bankTransferContainer.style.display = "none";
+        bankTransferContainer.classList.remove("active");
         stopPaymentCheck();
       }
     });
@@ -95,16 +97,14 @@ function initializePaymentMethod() {
 }
 
 function initializeBankTransfer() {
-  if (!userInSession || !userInSession.userId ) {
+  if (!userInSession || !userInSession.userId) {
     showToast("Vui lòng đăng nhập để sử dụng thanh toán chuyển khoản", "error");
     document.getElementById("bankTransferContainer").classList.remove("active");
     document.getElementById("bankTransferContainer").style.display = "none";
     document.getElementById("cod").checked = true;
     return;
   }
-  let email = userInSession.email;
-  let customEmail = email.slice(0, email.length - 10)
-  console.log(customEmail);
+
   const qrCodeUrl =
       "https://img.vietqr.io/image/" +
       MY_BANK.BANK_ID +
@@ -116,14 +116,12 @@ function initializeBankTransfer() {
       "&amount=" + cartData.total +
       "&addInfo=" +
       userInSession.userId +
-      customEmail +
+      description +
       "&accountName=" +
       MY_BANK.ACCOUNT_NAME;
 
   document.getElementById("qrCode").src = qrCodeUrl;
-  document.getElementById("transferContent").textContent = userInSession.userId + userInSession.phoneNumber;
   document.getElementById("totalAmountQR").textContent = formatCurrency(cartData.total);
-
   startPaymentCheck();
 }
 
@@ -137,12 +135,19 @@ function copyToClipboard(text) {
 
 function startPaymentCheck() {
   if (paymentSuccess || !userInSession) return;
-
-  checkPaid();
-
+  startTime = Date.now();
+  console.log("⏳ Bắt đầu kiểm tra thanh toán...");
   paymentInterval = setInterval(() => {
+    if (Date.now() - startTime > MAX_CHECK_DURATION) {
+      stopPaymentCheck();
+      showToast("Hết thời gian chờ thanh toán. Vui lòng thử lại.", "error");
+      document.getElementById("bankTransferContainer").classList.add("failed");
+      document.getElementById("paymentTitle").classList.add("failed");
+      document.getElementById("paymentTitle").textContent = "Thanh toán thất bại!";
+      return;
+    }
     checkPaid();
-  }, 2000);
+  }, 5000);
 }
 
 function stopPaymentCheck() {
@@ -150,60 +155,98 @@ function stopPaymentCheck() {
     console.log("⏹️ Dừng kiểm tra thanh toán...");
     clearInterval(paymentInterval);
     paymentInterval = null;
+    startTime = null;
   }
 }
 
 async function checkPaid() {
   if (paymentSuccess || !userInSession) return;
 
-  const appScriptUrl = "https://script.google.com/macros/s/AKfycbw9z_wC_vFCS3D2886b3jOUZyaL644Nv2HuZotjeVqB-Pu2c16bQdf051LRlDCWu9O3/exec";
+  const appScriptUrl = "https://script.google.com/macros/s/AKfycbwTfULNVpgezDygzUXfdg-RFYAdbUAddmzlgvIRvdWzzwlvY7IROtuPjyfJLPfDIj6g/exec";
+  let retryCount = 0;
+  const maxRetries = 3;
 
   try {
-    showLoading(true);
-    const response = await fetch(appScriptUrl, {
-      method: "GET",
-      mode: "cors" // Đảm bảo CORS được xử lý
-    });
+    const response = await fetch(appScriptUrl, { method: "GET" });
     if (!response.ok) throw new Error("Không thể kiểm tra trạng thái thanh toán");
+
     const data = await response.json();
     const finalRes = data.data;
 
     for (const bankData of finalRes) {
       const lastPrice = bankData["Giá trị"];
       const lastContent = bankData["Mô tả"];
-      const lastTransCode = bankData["Mã GD"];
+      const lastTransCodeLocal = bankData["Mã GD"];
 
-      if (String(lastContent).trim().includes(`${userInSession.userId}${userInSession.phoneNumber}`)) {
+      console.log("Dữ liệu từ Google Apps Script:", { lastPrice, lastTransCode: lastTransCodeLocal, lastContent });
+
+      if (String(lastContent).trim().includes(`${userInSession.userId}${description}`)) {
+        if (isNaN(Number(lastPrice)) || Number(lastPrice) !== cartData.total) {
+          console.warn("Số tiền giao dịch không khớp:", { lastPrice, total: cartData.total });
+          continue;
+        }
+
         const paymentData = {
           amount: Number(lastPrice),
-          transCode: lastTransCode,
+          transCode: lastTransCodeLocal,
           userId: Number(userInSession.userId),
         };
 
-        const check = await postPayment(paymentData);
-        if (check.success) {
+        if (isNaN(paymentData.amount) || paymentData.amount <= 0 || !paymentData.transCode) {
+          console.error("Dữ liệu thanh toán không hợp lệ:", paymentData);
+          showToast("Dữ liệu thanh toán không hợp lệ. Vui lòng thử lại.", "error");
+          return;
+        }
+
+        console.log("paymentData gửi đi:", paymentData);
+        stopPaymentCheck();
+        const { ok, data } = await postPayment(paymentData);
+        console.log("Phản hồi từ postPayment:", { ok, data });
+
+        if (ok && data.success) {
           paymentSuccess = true;
-          stopPaymentCheck();
-          document.getElementById("bankTransferContainer").classList.add("success");
-          document.getElementById("bankTransferContainer").classList.remove("failed");
-          document.getElementById("paymentTitle").classList.add("success");
-          document.getElementById("paymentTitle").classList.remove("failed");
-          document.getElementById("paymentTitle").textContent = "Thanh toán thành công!";
+          lastTransCode = paymentData.transCode;
+          const bankTransferContainer = document.getElementById("bankTransferContainer");
+          const paymentTitle = document.getElementById("paymentTitle");
+
+          if (bankTransferContainer && paymentTitle) {
+            bankTransferContainer.classList.add("success");
+            bankTransferContainer.classList.remove("failed");
+            paymentTitle.classList.add("success");
+            paymentTitle.classList.remove("failed");
+            paymentTitle.textContent = "Thanh toán thành công!";
+          }
           showToast("Thanh toán thành công! Đang xử lý đơn hàng...", "success");
+
           const orderData = prepareOrderData();
           if (orderData) {
-            submitOrder(orderData);
+            await submitOrder(orderData);
+          } else {
+            showToast("Lỗi: Không thể chuẩn bị dữ liệu đơn hàng", "error");
+          }
+        } else {
+          retryCount++;
+          if (retryCount < maxRetries) {
+            showToast(`Thanh toán thất bại: ${data.error || "Lỗi không xác định"}. Đang thử lại...`, "warning");
+            startPaymentCheck();
+          } else {
+            const bankTransferContainer = document.getElementById("bankTransferContainer");
+            const paymentTitle = document.getElementById("paymentTitle");
+            if (bankTransferContainer && paymentTitle) {
+              bankTransferContainer.classList.add("failed");
+              bankTransferContainer.classList.remove("success");
+              paymentTitle.classList.add("failed");
+              paymentTitle.classList.remove("success");
+              paymentTitle.textContent = "Thanh toán thất bại!";
+            }
+            showToast(data.error || "Thanh toán thất bại sau nhiều lần thử. Vui lòng thử lại sau.", "error");
           }
         }
+        return;
       }
     }
   } catch (err) {
     console.error("Lỗi kiểm tra thanh toán:", err);
-    document.getElementById("bankTransferContainer").classList.add("failed");
-    document.getElementById("bankTransferContainer").classList.remove("success");
-    document.getElementById("paymentTitle").classList.add("failed");
-    document.getElementById("paymentTitle").classList.remove("success");
-    document.getElementById("paymentTitle").textContent = "Thanh toán chưa hoàn tất";
     showToast("Không thể xác minh thanh toán. Vui lòng thử lại.", "error");
   } finally {
     showLoading(false);
@@ -220,10 +263,9 @@ async function postPayment(paymentData) {
       },
       body: JSON.stringify(paymentData),
     });
-    return await response.json();
+    return { ok: response.ok, data: await response.json() };
   } catch (error) {
-    console.error("Lỗi khi gửi thanh toán:", error);
-    return { success: false, message: "Lỗi khi gửi thanh toán" };
+    return { ok: false, data: { success: false, error: "Lỗi kết nối mạng" } };
   }
 }
 
@@ -242,7 +284,7 @@ async function verifyTransaction() {
   try {
     showLoading(true);
     const response = await fetch(
-        "https://script.google.com/macros/s/AKfycby3Ebwe5g2hW5W0_3F2M1u7J2gE9b0T9L2W3u5J3K7h8g9i0k/exec"
+        "https://script.google.com/macros/s/AKfycbwTfULNVpgezDygzUXfdg-RFYAdbUAddmzlgvIRvdWzzwlvY7IROtuPjyfJLPfDIj6g/exec"
     );
     if (!response.ok) throw new Error("Không thể kiểm tra giao dịch");
     const data = await response.json();
@@ -345,8 +387,10 @@ function renderCartItems(items) {
               </div>
           </div>
           <div class="item-total">
-              <span class="total-price">${formatCurrency((item.price * (100 - item.discount) / 100) * item.quantity)}</span>
-          </div>
+               <span class="total-price">
+                 ${formatCurrency(parseFloat((parseFloat(item.price) * (100 - item.discount)) / 100 * item.quantity))}
+            </span>          
+           </div>
           <div class="item-actions">
               <button class="action-btn remove-btn" onclick="removeItem(${item.productId})" 
                       title="Xóa khỏi giỏ">
@@ -484,7 +528,6 @@ function calculateTotals() {
   document.getElementById("totalAmount").textContent = formatCurrency(total);
 
   cartData = { ...cartData, subtotal, discount, tax, total };
-  updateBankTransferQR();
 }
 
 function calculateDiscount(subtotal) {
@@ -493,10 +536,11 @@ function calculateDiscount(subtotal) {
   return 0;
 }
 
-function updateShippingFee() {
-  const shippingMethod = document.querySelector('input[name="shippingMethod"]:checked').value;
-  cartData.shippingFee = shippingMethod === "express" ? 30000 : 10000;
+function updateShippingFeeAndBill() {
+  const shippingMethod = document.querySelector('input[name="shippingMethod"]:checked');
+  cartData.shippingFee = parseInt(shippingMethod.value);
   calculateTotals();
+  updateBankTransferQR();
 }
 
 function proceedToCheckout() {
@@ -507,27 +551,32 @@ function proceedToCheckout() {
 
   const shippingSection = document.getElementById("shippingSection");
   if (!shippingSection) {
-    console.error("Shipping section not found");
+    console.error("Phần thông tin giao hàng không tìm thấy");
     showToast("Có lỗi xảy ra", "error");
     return;
   }
 
   shippingSection.style.display = "block";
   shippingSection.classList.add("active");
-  updateShippingFee(); // Initialize shipping fee based on default selection
+  updateShippingFeeAndBill();
 }
 
 function backToSummary() {
   const shippingSection = document.getElementById("shippingSection");
   shippingSection.classList.remove("active");
   shippingSection.style.display = "none";
-  cartData.shippingFee = 10000; // Reset to default
+  cartData.shippingFee = 30000; // Reset to default
   calculateTotals();
   stopPaymentCheck();
+  document.getElementById("bankTransferContainer").style.display = "none";
+  document.getElementById("bankTransferContainer").classList.remove("active");
 }
 
 function updateBankTransferQR() {
-  if (document.querySelector('input[name="paymentMethod"]:checked').value === "bank_transfer" && document.getElementById("bankTransferContainer").classList.contains("active")) {
+  if (
+      document.querySelector('input[name="paymentMethod"]:checked').value === "bank_transfer" &&
+      document.getElementById("bankTransferContainer").classList.contains("active")
+  ) {
     initializeBankTransfer();
   }
 }
@@ -547,13 +596,9 @@ function prepareOrderData() {
     return null;
   }
 
-  if (paymentMethod === "bank_transfer" && !paymentSuccess) {
-    showToast("Thanh toán chuyển khoản chưa được xác nhận", "warning");
-    return null;
-  }
-
-  return {
+  const orderData = {
     items: cartData.items,
+    userId: userInSession.userId,
     shipping: {
       fullName: formData.get("fullName"),
       phone: formData.get("phone"),
@@ -572,8 +617,14 @@ function prepareOrderData() {
       shipping: cartData.shippingFee,
       total: cartData.total,
     },
-    promoCode: cartData.appliedPromo ? cartData.appliedPromo.code : null,
+    promoCode: cartData.appliedPromo ? cartData.appliedPromo.code : "",
   };
+
+  if (paymentMethod === "bank_transfer") {
+    orderData.transCode = lastTransCode;
+  }
+
+  return orderData;
 }
 
 function confirmOrder(event) {
@@ -585,16 +636,25 @@ function confirmOrder(event) {
   showModal(
       "Xác nhận đặt hàng",
       `Tổng tiền: ${formatCurrency(cartData.total)}<br>
-     Phương thức thanh toán: ${orderData.payment === "cod" ? "Thanh toán khi nhận hàng" : orderData.payment === "vnpay" ? "VNPay" : "Chuyển khoản ngân hàng"}<br>
+     Phương thức thanh toán: ${orderData.payment === "cod" ? "Thanh toán khi nhận hàng" : "Chuyển khoản ngân hàng"}<br>
      ${orderData.promoCode ? `Mã giảm giá: ${orderData.promoCode}<br>` : ""}
      Bạn có chắc chắn muốn đặt hàng?`,
-      () => submitOrder(orderData)
+      () => {
+        if (orderData.payment === "cod") {
+          submitOrder(orderData);
+        } else if (orderData.payment === "bank_transfer") {
+          document.getElementById("bankTransferContainer").style.display = "block";
+          document.getElementById("bankTransferContainer").classList.add("active");
+          initializeBankTransfer();
+        }
+      }
   );
 }
 
 async function submitOrder(orderData) {
   try {
     showLoading(true);
+
     const response = await fetch("/cart/api/checkout", {
       method: "POST",
       headers: {
@@ -605,17 +665,34 @@ async function submitOrder(orderData) {
     });
 
     const result = await response.json();
+
     if (result.success) {
       showToast("Đặt hàng thành công!", "success");
       stopPaymentCheck();
-      setTimeout(() => {
-        window.location.href = `/orders/${result.orderId}`;
-      }, 1500);
+
+      setTimeout(async function () {
+        const deleteResponse = await fetch("/cart/api/delete/allItems", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        });
+
+        if (!deleteResponse.ok) {
+          throw new Error("Xóa giỏ hàng thất bại!");
+        }
+
+        const deleteResult = await deleteResponse.json();
+        console.log("Xóa giỏ hàng:", deleteResult);
+      }, 2000);
+
     } else {
       showToast(result.message || "Có lỗi xảy ra khi đặt hàng", "error");
     }
+
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Lỗi khi gửi đơn hàng:", error);
     showToast("Có lỗi xảy ra khi đặt hàng", "error");
   } finally {
     showLoading(false);
@@ -661,6 +738,6 @@ function showModal(title, message, onConfirm) {
 }
 
 function showLoading(show) {
-  const overlay = document.getElementById("loadingOverlay");
-  overlay.style.display = show ? "flex" : "none";
+  const loadingOverlay = document.getElementById("loadingOverlay");
+  loadingOverlay.style.display = show ? "flex" : "none";
 }
