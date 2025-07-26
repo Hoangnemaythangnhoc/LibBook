@@ -302,10 +302,10 @@
 <!-- Top Sale -->
 <section id="top-sale" class="new-arrivals py-5">
     <div class="container">
-        <h2 class="text-center mb-5">Top Sale</h2>
-        <div id="top-sale-content">
-            <!-- JavaScript sẽ render sách bán chạy tại đây -->
-        </div>
+        <h2 class="text-center mb-5">Bán chạy nhất/h2>
+            <div id="top-sale-content">
+                <!-- JavaScript sẽ render sách bán chạy tại đây -->
+            </div>
     </div>
 </section>
 
@@ -512,10 +512,10 @@
 
 
                     <th:block th:if="${session.USER != null}">
-<!--                        <button class="btn btn-link position-relative ms-2" id="orderStatusBtn" data-bs-toggle="modal"-->
-<!--                                data-bs-target="#orderStatusModal">-->
-<!--                            <i class="ri-file-list-3-line fs-5"></i> Your order-->
-<!--                        </button>-->
+                        <!--                        <button class="btn btn-link position-relative ms-2" id="orderStatusBtn" data-bs-toggle="modal"-->
+                        <!--                                data-bs-target="#orderStatusModal">-->
+                        <!--                            <i class="ri-file-list-3-line fs-5"></i> Your order-->
+                        <!--                        </button>-->
                         <a href="/chat-widget" class="btn btn-link position-relative ms-2 p-0 me-2" id="navbarChatBtn" style="height: 20px; width: 20px">
                             <i class="ri-chat-3-line fs-6"></i>
                             <span class="position-absolute top-45 start-100 translate-middle badge rounded-pill bg-danger"
@@ -537,12 +537,6 @@
                             <button class="btn btn-primary">Hồ sơ</button>
                         </form>
 
-                        <form th:if="${session.USER.roleId == 1}" action="/admin" method="get">
-                            <button class="btn btn-primary">Quản lý</button>
-                        </form>
-                        <form th:if="${session.USER.roleId == 3}" action="/staff" method="get">
-                            <button class="btn btn-primary">Quản lý</button>
-                        </form>
                         <form action="/custom-logout" method="post">
                             <button class="btn btn-warning" type="submit">Đăng xuất</button>
                         </form>

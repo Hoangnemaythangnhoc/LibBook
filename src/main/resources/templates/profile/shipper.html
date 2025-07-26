@@ -542,6 +542,7 @@
                     <th>Ngày tạo</th>
                     <th>Mã phiếu giảm giá</th>
                     <th>Trạng thái</th>
+                    <th>Phương thức thanh toán</th>
                     <th>Hành động</th>
                 </tr>
                 </thead>
@@ -726,9 +727,18 @@
                             `).join('')}
                         </select>
                     </td>
-                    <td>
-                        <button class="btn-update" onclick="updateStatus(${order.orderId})" ${isLocked ? 'disabled' : ''}>Cập nhật</button>
-                        <button class="btn-details" onclick="showDetails(${order.orderId})">Chi tiết</button>
+                    <td>${order.paymentStatus === 1 ? 'Chuyển khoản' : 'Ship COD'}</td>
+                    <td style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
+                        <button class="btn btn-primary btn-sm btn-update"
+                            onclick="updateStatus(${order.orderId})" ${isLocked ? 'disabled' : ''}
+                            style="width: 100px;">
+                            Cập nhật
+                    </button>
+                        <button class="btn btn-info btn-sm btn-details"
+                            onclick="showDetails(${order.orderId})"
+                            style="width: 100px;">
+                            Chi tiết
+                    </button>
                     </td>
                 </tr>
             `;

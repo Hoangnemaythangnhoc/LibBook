@@ -10,8 +10,4 @@ public interface RatingService {
     boolean saveRating(RatingDTO ratingDTO);
     List<Rating> getAllRatings();
     boolean updateRatingStatus(int ratingId, boolean status);
-
 }
-
-}
-

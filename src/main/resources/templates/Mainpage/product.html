@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -289,9 +288,6 @@
                         </div>
                         <!-- THÊM: Container để hiển thị tag động từ API -->
                         <div id="tagContainer"></div>
-                        <div class="badge bg-success" style="margin-top: 20px"
-                             th:text="'Còn Hàng: ' + ${product.available}">Còn Hàng
-                        </div>
                     </div>
 
                     <div class="mb-4">
@@ -340,15 +336,7 @@
                         </button>
                     </div>
                     <div class="row g-3">
-                        <div class="col-md-4">
-                            <div class="d-flex align-items-center">
-                                <i class="ri-truck-line fs-4 me-2 text-primary"></i>
-                                <div>
-                                    <h6 class="mb-0">Miễn Phí Vận Chuyển</h6>
-                                    <small class="text-muted">Cho đơn hàng trên 500.000 ₫</small>
-                                </div>
-                            </div>
-                        </div>
+
                         <div class="col-md-4">
                             <div class="d-flex align-items-center">
                                 <i class="ri-refresh-line fs-4 me-2 text-primary"></i>
@@ -631,13 +619,6 @@
             } catch (error) {
                 console.error('Lỗi khi fetch ảnh người dùng:', error);
                 return 'your_default_img_url_here';
-                    return 'your_default_img_url_here'; // Thay bằng URL ảnh mặc định của bạn
-                }
-                const userData = await response.json();
-                return userData.profilePicture || 'your_default_img_url_here'; // Trả về profilePicture hoặc ảnh mặc định
-            } catch (error) {
-                console.error('Lỗi khi fetch ảnh người dùng:', error);
-                return 'your_default_img_url_here'; // Trả về ảnh mặc định nếu có lỗi
             }
         }
 
@@ -673,7 +654,6 @@
                 const endIndex = startIndex + reviewsPerPage;
                 const paginatedReviews = data.slice(startIndex, endIndex);
 
-                // Tạo danh sách đánh giá với ảnh đại diện và liên kết đến trang cá nhân
                 const reviewHTML = await Promise.all(paginatedReviews.map(async review => {
                     const profilePicture = await fetchUserProfilePicture(review.userId);
                     return `
@@ -696,7 +676,6 @@
 
                 reviewList.innerHTML = reviewHTML.join('');
 
-                // Cập nhật phân trang
                 pagination.innerHTML = '';
                 for (let i = 1; i <= totalPages; i++) {
                     const button = document.createElement('button');

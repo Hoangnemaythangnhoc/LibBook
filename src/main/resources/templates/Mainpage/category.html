@@ -70,14 +70,6 @@
                                 <input type="text" class="form-control" id="searchQuery" name="searchQuery"
                                        placeholder="Tìm kiếm theo tiêu đề hoặc tác giả"/>
                             </div>
-<!--                            <div class="col-md-4">-->
-<!--                                <select class="form-select" name="selectedTag" id="categorySelect"-->
-<!--                                        onchange="redirectToCategory()">-->
-<!--                                    <option value="" selected>Tất Cả Danh Mục</option>-->
-<!--                                    <option th:each="tag : ${tags}" th:value="${tag.tagName}"-->
-<!--                                            th:text="${tag.tagName}"></option>-->
-<!--                                </select>-->
-<!--                            </div>-->
                             <div class="col-md-3">
                                 <button type="submit" class="btn btn-primary w-100">Tìm Kiếm</button>
                             </div>
@@ -128,8 +120,14 @@
 
         <h2 class="mb-4" th:text="${tagName} + ' Sách'"></h2>
 
+        <!-- Modified: Updated message when no products are found -->
         <div th:if="${products == null or products.isEmpty()}">
-            <p class="text-center text-muted">Không có sản phẩm nào trong danh mục này.</p>
+            <p class="text-center text-muted">Không có sản phẩm phù hợp</p>
+        </div>
+
+        <!-- Added: Div to show message when no products match the filter -->
+        <div id="noFilterResults" class="text-center text-muted d-none">
+            <p>Không có sản phẩm phù hợp</p>
         </div>
 
         <div th:unless="${products == null or products.isEmpty()}" class="row g-4" id="productList">
@@ -179,6 +177,8 @@
         const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
         const rating = parseInt(document.getElementById('rating').value) || 0;
         const errorMessage = document.getElementById('errorMessage');
+        // Added: Get the noFilterResults div
+        const noFilterResults = document.getElementById('noFilterResults');
 
         if (minPrice > maxPrice && maxPrice !== 0) {
             errorMessage.textContent = 'Giá tối thiểu không thể lớn hơn giá tối đa';
@@ -189,22 +189,31 @@
         }
 
         const products = document.querySelectorAll('#productList > div');
+        let visibleProducts = 0; // Added: Counter for visible products
 
         products.forEach(product => {
             const price = parseFloat(product.dataset.price);
-            const productRating = parseInt(product.dataset.rating) || 0;
+            const productRating = parseFloat(product.dataset.rating) || 0;
             const title = product.querySelector('.card-title').textContent.toLowerCase();
 
             const matchesSearch = searchQuery ? title.includes(searchQuery) : true;
             const matchesPrice = price >= minPrice && (maxPrice === Infinity || price <= maxPrice);
-            const matchesRating = rating === 0 || (rating === 5 ? productRating === 5 : productRating >= rating);
+            const matchesRating = rating === 0 || (productRating >= rating && productRating < (rating + 1));
 
             if (matchesSearch && matchesPrice && matchesRating) {
                 product.style.display = 'block';
+                visibleProducts++; // Added: Increment counter for visible products
             } else {
                 product.style.display = 'none';
             }
         });
+
+        // Added: Show or hide noFilterResults based on visible products
+        if (visibleProducts === 0) {
+            noFilterResults.classList.remove('d-none');
+        } else {
+            noFilterResults.classList.add('d-none');
+        }
     }
 </script>
 </body>

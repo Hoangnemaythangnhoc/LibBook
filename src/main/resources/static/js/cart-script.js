@@ -13,6 +13,12 @@ let cartData = {
   appliedPromo: null, // Track applied promo code
 };
 
+let shippingInform = {
+  userName : null,
+  phoneNumber : null,
+  email : null,
+  address: null,
+}
 
 
 const description = userInSession.phoneNumber.slice(5,10);
@@ -54,8 +60,34 @@ function initializePromoForm() {
 
 function initializeShippingForm() {
   const shippingForm = document.getElementById("shippingForm");
+  if (userInSession) {
+    shippingInform = {
+      userName: `${userInSession.firstName || ''} ${userInSession.lastName || ''}`.trim() ,
+      phoneNumber: userInSession.phoneNumber || '',
+      email: userInSession.email || '',
+      address: userInSession.address || '',
+    };
+  }
+
   if (shippingForm) {
+    // Pre-fill form if userInSession exists
+    if (userInSession) {
+      document.getElementById("fullName").value = shippingInform.userName || '';
+      document.getElementById("phone").value = shippingInform.phoneNumber || '';
+      document.getElementById("email").value = shippingInform.email || '';
+      document.getElementById("address").value = shippingInform.address || '';
+
+      // Province and district will be handled by address-handler.js
+    }
+
+    // Add event listener for form submission
     shippingForm.addEventListener("submit", confirmOrder);
+
+    // Initialize shipping method
+    const shippingMethods = document.querySelectorAll('input[name="shippingMethod"]');
+    shippingMethods.forEach(method => {
+      method.addEventListener("change", updateShippingFeeAndBill);
+    });
   }
 }
 

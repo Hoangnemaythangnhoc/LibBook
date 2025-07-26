@@ -4,7 +4,7 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Staff Panel - LibBook</title>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
@@ -450,6 +450,21 @@
                 width: 100%;
             }
         }
+        .export-btn, .import-btn {
+            border: 1px solid #ccc; /* viền xám nhạt, mỏng */
+            border-radius: 4px; /* bo tròn nhẹ */
+            width: 100px;
+            height: 40px;
+            background-color: white; /* nền trắng */
+            color: #333; /* chữ xám đậm */
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .export-btn, .import-btn:hover {
+            background-color: #f5f5f5; /* đổi màu nhẹ khi hover */
+            border-color: #999; /* viền đậm hơn khi hover */
+        }
     </style>
 </head>
 <body>
@@ -508,6 +523,11 @@
                     <option value="price-asc">Giá (thấp đến cao)</option>
                     <option value="price-desc">Giá (cao đến thấp)</option>
                 </select>
+                <div>
+                    <input type="file" id="excelFile" accept=".xlsx, .xls">
+                    <button class="import-btn" onclick="processExcel()">Thêm Excel</button>
+                    <input hidden="" id="output"/>
+                </div>
                 <button id="goToUploadButton" class="btn btn-primary">Thêm sách mới</button>
             </div>
             <table>
@@ -551,6 +571,10 @@
         </section>
     </main>
 </div>
+<script th:inline="javascript">
+    let userInSession = /*[[${session.USER}]]*/ null;
+    console.log("User object từ session:", userInSession);
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
@@ -924,6 +948,69 @@
         pagination.appendChild(nextButton);
 
         renderTable();
+    }
+
+    async function processExcel() {
+        const fileInput = document.getElementById('excelFile');
+        const outputDiv = document.getElementById('output');
+        const file = fileInput.files[0];
+
+        if (!file) {
+            alert('Please select an Excel file');
+            outputDiv.textContent = 'No file selected';
+            return;
+        }
+
+        try {
+            // Read Excel file
+            const arrayBuffer = await file.arrayBuffer();
+            const workbook = XLSX.read(arrayBuffer, {type: 'array'});
+
+            // Get first sheet
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+
+            // Convert sheet to JSON with header row as keys
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+            // Clean and format JSON data
+            const formattedData = jsonData.map(row => ({
+                BookName: row['Book Name'] || '',
+                Author: row['Author'] || '',
+                Publisher: row['Publisher'] || '',
+                Price: row['Price'] || null,
+                Discount: row['Discount'] || null,
+                AvailableQuantity: row['Available (Quantity)'] || null,
+                Tags: row['Tags'] || '',
+                Description: row['Description'] || '',
+                ImageFile: row['Image File'] || '',
+                userID: userInSession.userId
+            }));
+
+            // Display JSON output for testing
+            console.log('Generated JSON:', formattedData);
+            outputDiv.textContent = JSON.stringify(formattedData, null, 2);
+
+            // Send JSON to backend
+            const response = await fetch('http://localhost:8080/admin/users/data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formattedData)
+            });
+
+            if (response.ok) {
+                alert('Data sent successfully!');
+            } else {
+                alert('Error sending data to server');
+            }
+
+        } catch (error) {
+            console.error('Error:', error);
+            outputDiv.textContent = 'Error processing file: ' + error.message;
+            alert('Error processing file');
+        }
     }
 </script>
 </body>

@@ -42,6 +42,15 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <link rel="stylesheet" href="/css/cart-styles.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    /* Modified: Increase width of modal-lg for better data display */
+    .modal-lg .modal-dialog {
+      max-width: 1000px !important; /* Increased from default 800px */
+    }
+    #orderStatusModal .modal-xl .modal-dialog {
+      max-width: 1500px !important; /* Increased from default 1140px */
+    }
+  </style>
 </head>
 <body class="cart-content">
 <main class="wrapper">
@@ -88,10 +97,10 @@
             </div>
             <p class="vnd-coin">Số tiền: <span id="totalAmountQR"></span></p>
             <p class="content-transfer">
-              <!--              Nội dung chuyển khoản: <span id="transferContent"></span>-->
-              <!--              <button onclick="copyToClipboard(document.getElementById('transferContent').textContent)" class="btn btn-secondary">-->
-              <!--                <i class="ri-file-copy-line"></i> Sao chép-->
-              <!--              </button>-->
+              <!-- Nội dung chuyển khoản: <span id="transferContent"></span>-->
+              <!-- <button onclick="copyToClipboard(document.getElementById('transferContent').textContent)" class="btn btn-secondary">-->
+              <!--   <i class="ri-file-copy-line"></i> Sao chép-->
+              <!-- </button>-->
             </p>
             <p class="countdown-timer">Thời gian còn lại: <span id="paymentCountdown">30:00</span></p>
           </div>
@@ -128,7 +137,6 @@
                 <button type="submit" class="apply-btn">Áp dụng</button>
               </div>
             </form>
-            <div class="applied-promos" id="appliedPromos"></div>
             <button class="checkout-btn" onclick="proceedToCheckout()">
               <i class="ri-lock-line"></i>
               Tiến hành thanh toán
@@ -404,7 +412,7 @@
       <!-- Order Status Modal -->
       <div class="modal fade" id="orderStatusModal" tabindex="-1" aria-labelledby="orderStatusModalLabel"
            aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
           <div class="modal-content">
             <div class="modal-header">
               <h5 class="modal-title" id="orderStatusModalLabel">Đơn Hàng Của Bạn</h5>
@@ -740,7 +748,7 @@
     renderOrders(sortedOrders);
   });
 
-  // Render orders to table
+  // Modified: Added payment method column to the orders table
   function renderOrders(orders) {
     const orderStatusContent = document.getElementById('orderStatusContent');
     if (orders.length === 0) {
@@ -755,6 +763,8 @@
                         <th>Trạng Thái</th>
                         <th>Ngày Tạo</th>
                         <th>Địa Chỉ</th>
+                        <!-- Modified: Added column for payment method -->
+                        <th>Phương Thức Thanh Toán</th>
                         <th>Hành Động</th>
                     </tr>
                 </thead>
@@ -762,9 +772,11 @@
                     ${orders.map(order => `
                         <tr>
                             <td>${order.orderId}</td>
-                            <td>${order.orderStatusId === 1 ? 'Đang Chờ Xử Lý' : order.orderStatusId === 2 ? 'Đang Xử Lý' : order.orderStatusId === 3 ? 'Đã Giao' : 'Đã Hủy'}</td>
+                            <td>${order.orderStatusId === 1 ? 'Đang Chờ Xử Lý' : order.orderStatusId === 2 ? 'Đang Xử Lý' : order.orderStatusId === 3 ? 'Đang Giao' : 'Đã Hủy'}</td>
                             <td>${new Date(order.createDate).toLocaleString('vi-VN', {timeZone: 'Asia/Ho_Chi_Minh'})}</td>
                             <td>${order.address || 'N/A'}</td>
+                            <!-- Modified: Display payment method based on value -->
+                            <td>${order.paymentStatus === 1 ? 'Chuyển khoản' : 'Ship COD'}</td>
                             <td><button class="btn btn-info btn-sm" onclick="showOrderDetails(${order.orderId})">Chi Tiết</button></td>
                         </tr>
                     `).join('')}

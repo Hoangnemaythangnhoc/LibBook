@@ -8,6 +8,3 @@ import lombok.Setter;
 public class RatingStatusUpdateDTO {
     private boolean status;
 }
-
-}
-
