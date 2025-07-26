@@ -156,7 +156,7 @@ public class ProductApiController {
     }
 
     @GetMapping("/product/top-sale")
-    public ResponseEntity<List<Product>> getTopSellingProducts(@RequestParam(defaultValue = "12") int limit) {
+    public ResponseEntity<List<Product>> getTopSellingProducts(@RequestParam(defaultValue = "8") int limit) {
         List<Product> products = productService.getTopSellingProducts(limit);
         return products.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(products);
     }

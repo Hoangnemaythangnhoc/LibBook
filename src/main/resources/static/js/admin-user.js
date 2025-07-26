@@ -28,31 +28,44 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.target === modal) modal.style.display = "none";
     });
 
-    // Submit Create Staff
     const form = document.getElementById("staff-form");
+    const alertBox = document.getElementById("staff-alert");
+
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
+
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
         data.roleID = parseInt(data.roleID);
 
+        if (data.password.length < 8) {
+            alertBox.textContent = "Mật khẩu phải có ít nhất 8 ký tự.";
+            alertBox.classList.remove("d-none");
+            return;
+        } else {
+            alertBox.classList.add("d-none");
+        }
+
         try {
             const res = await fetch("/admin/users/create-staff", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {"Content-Type": "application/json"},
                 body: JSON.stringify(data)
             });
 
             if (!res.ok) throw new Error(await res.text());
 
+            alertBox.classList.add("d-none");
             alert("Tạo nhân viên thành công!");
             modal.style.display = "none";
             form.reset();
             loadStaff();
         } catch (err) {
-            alert("Lỗi: " + err.message);
+            alertBox.textContent = "Lỗi: " + err.message;
+            alertBox.classList.remove("d-none");
         }
     });
+
 });
 
 function showSection(sectionId) {
@@ -161,7 +174,7 @@ async function toggleStatus(userId, currentStatus) {
     const endpoint = `/admin/users/${userId}/${isActive ? "ban" : "unban"}`;
 
     try {
-        const res = await fetch(endpoint, { method: "POST" });
+        const res = await fetch(endpoint, {method: "POST"});
         if (!res.ok) throw new Error(await res.text());
 
         const currentSection = document.querySelector("section:not([style*='display: none'])").id;

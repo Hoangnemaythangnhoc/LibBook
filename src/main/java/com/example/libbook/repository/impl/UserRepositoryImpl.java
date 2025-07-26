@@ -107,17 +107,16 @@ public class UserRepositoryImpl implements UserRepository {
             while (resultSet.next()) {
                 userDTO = new User();
                 userDTO.setEmail(resultSet.getString("Email"));
-                 userDTO.setUserName(resultSet.getString("UserName"));
-                 userDTO.setUserId(resultSet.getInt("UserId"));
-                 userDTO.setRoleId(resultSet.getInt("RoleId"));
-                 password = resultSet.getString("Password");
-                 userDTO.setProfilePicture(resultSet.getString("ProfilePicture"));
-                 userDTO.setPhoneNumber(resultSet.getString("Phonenumber"));
                 userDTO.setUserName(resultSet.getString("UserName"));
                 userDTO.setUserId(resultSet.getInt("UserId"));
                 userDTO.setRoleId(resultSet.getInt("RoleId"));
                 password = resultSet.getString("Password");
                 userDTO.setProfilePicture(resultSet.getString("ProfilePicture"));
+                userDTO.setPhoneNumber(resultSet.getString("Phonenumber"));
+                userDTO.setAddress(resultSet.getString("Address"));
+                userDTO.setFirstName(resultSet.getString("FirstName"));
+                userDTO.setLastName(resultSet.getString("LastName"));
+
             }
             if (password.equals(hashPassword(pass)))
                 return userDTO;
@@ -145,6 +144,9 @@ public class UserRepositoryImpl implements UserRepository {
                 userDTO.setRoleId(resultSet.getInt("RoleId"));
                 userDTO.setProfilePicture(resultSet.getString("ProfilePicture"));
                 userDTO.setPhoneNumber(resultSet.getString("Phonenumber"));
+                userDTO.setAddress(resultSet.getString("Address"));
+                userDTO.setFirstName(resultSet.getString("FirstName"));
+                userDTO.setLastName(resultSet.getString("LastName"));
 
             }
             return userDTO;
@@ -229,10 +231,10 @@ public class UserRepositoryImpl implements UserRepository {
         String sql = "UPDATE [User] SET [Password] = ? WHERE [Email] = ? ";
         try (Connection connection = db.openConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
-                statement.setString(1, hashPass);
-                statement.setString(2, email);
-                int check = statement.executeUpdate();
-                return check > 0;
+            statement.setString(1, hashPass);
+            statement.setString(2, email);
+            int check = statement.executeUpdate();
+            return check > 0;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } catch (Exception e) {

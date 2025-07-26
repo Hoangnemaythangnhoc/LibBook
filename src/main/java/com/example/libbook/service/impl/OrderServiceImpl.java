@@ -1,16 +1,15 @@
 package com.example.libbook.service.impl;
 
 import com.example.libbook.entity.Coupon;
-import com.example.libbook.repository.CouponRepository;
-import com.example.libbook.repository.ProductRepository;
+import com.example.libbook.entity.OrderDetail;
+import com.example.libbook.repository.*;
+import com.example.libbook.repository.impl.CheckBuyRepositoryImpl;
 import com.example.libbook.utils.Converter;
 import com.example.libbook.dto.CartItemDTO;
 import com.example.libbook.dto.OrderDataDTO;
 import com.example.libbook.dto.ShippingFormDTO;
 import com.example.libbook.dto.TotalDTO;
 import com.example.libbook.entity.Order;
-import com.example.libbook.repository.OrderDetailRepository;
-import com.example.libbook.repository.OrderRepository;
 import com.example.libbook.service.OrderService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,6 +34,11 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private CheckBuyRepository checkBuyRepository;
+    @Autowired
+    private CheckBuyRepositoryImpl checkBuyRepositoryImpl;
+
 
     @Override
     public List<Order> getAllOrders() {
@@ -56,11 +60,19 @@ public class OrderServiceImpl implements OrderService {
     public void updateOrderStatus(Integer orderId, Integer newStatusId) {
         System.out.println("OrderService: Updating status for order id: " + orderId + " to status: " + newStatusId);
         orderRepository.updateOrderStatus(orderId, newStatusId);
+        Order order =orderRepository.getOrderById(orderId);
+        List<OrderDetail> orders = orderDetailRepository.findByOrderId(orderId);
+        if(newStatusId == 3) {
+            for(OrderDetail orderDetail : orders) {
+                checkBuyRepository.save(orderDetail.getProductId(), order.getUserId());
+            }
+        }
         System.out.println("OrderService: Updated status for order id: " + orderId);
     }
 
     @Override
     public boolean addOrder(Map<String, Object> orderData) {
+
         try {
             ObjectMapper mapper = new ObjectMapper();
 
@@ -72,10 +84,10 @@ public class OrderServiceImpl implements OrderService {
             orderDataDTO.setUserID((Integer) orderData.get("userId"));
             orderDataDTO.setTransCode( String.valueOf(orderData.get("transCode")));
             String code = (String)orderData.get("promoCode");
+            Coupon coupon = couponRepository.findByCode(code);
             if (code.equals("")){
                 orderDataDTO.setPromoCode(0);
             }else {
-                Coupon coupon = couponRepository.findByCode(code);
                 orderDataDTO.setPromoCode(coupon.getCouponId());
             }
             Converter converter = new Converter();
@@ -89,7 +101,7 @@ public class OrderServiceImpl implements OrderService {
             for (CartItemDTO cart : order.getCartItemDTOS()) {
                 productRepository.updateQuantityProduct(Math.toIntExact(cart.getProductId()), cart.getQuantity());
             }
-
+            couponRepository.updateAmountCoupon(coupon.getCouponId(),coupon.getQuantity());
             boolean orderDetailCheck = orderDetailRepository.addNewOrderDetail(order, orderID);
             return orderDetailCheck;
         } catch (Exception e) {

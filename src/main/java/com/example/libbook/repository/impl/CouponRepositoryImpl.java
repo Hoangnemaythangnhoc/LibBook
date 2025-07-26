@@ -3,6 +3,7 @@ package com.example.libbook.repository.impl;
 import com.example.libbook.entity.Coupon;
 import com.example.libbook.repository.CouponRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -47,9 +48,41 @@ public class CouponRepositoryImpl implements CouponRepository {
     }
 
     public Coupon findByCode(String code) {
-        String sql = "SELECT * FROM Coupon WHERE CouponId = ?";
+        String sql = "SELECT * FROM Coupon WHERE Code = ?";
         return jdbcTemplate.queryForObject(sql, new Object[]{code}, rowMapper);
     }
+
+
+
+    @Override
+    public int checkCouponCode(String code) {
+        String sql = "SELECT DiscountPercent FROM Coupon " +
+                "WHERE Code = ? " +
+                "AND IsActive = 1 " +
+                "AND Quantity > 0 " +
+                "AND StartDate <= CURRENT_TIMESTAMP " +
+                "AND EndDate >= CURRENT_TIMESTAMP";
+        try {
+            Integer discountPercent = jdbcTemplate.queryForObject(sql, new Object[]{code}, Integer.class);
+            return discountPercent != null ? discountPercent : 0;
+        } catch (EmptyResultDataAccessException e) {
+            return 0; // Return 0 if no valid coupon is found
+        }
+    }
+
+    @Override
+    public void updateAmountCoupon(int couponId, BigDecimal amount) {
+        String sql = "UPDATE Coupon SET Quantity = ? WHERE CouponId = ?";
+        double quantity = amount.subtract(BigDecimal.ONE).doubleValue();
+        try {
+            jdbcTemplate.update(sql, quantity, couponId);
+        } catch (Exception e) {
+            // Log the exception (recommended to use a proper logging framework like SLF4J)
+            System.err.println("Error updating coupon amount: " + e.getMessage());
+            throw new RuntimeException("Failed to update coupon amount", e);
+        }
+    }
+
 
     @Override
     public void save(Coupon coupon) {

@@ -302,10 +302,10 @@
 <!-- Top Sale -->
 <section id="top-sale" class="new-arrivals py-5">
     <div class="container">
-        <h2 class="text-center mb-5">Top Sale</h2>
-        <div id="top-sale-content">
-            <!-- JavaScript sẽ render sách bán chạy tại đây -->
-        </div>
+        <h2 class="text-center mb-5">Bán chạy nhất/h2>
+            <div id="top-sale-content">
+                <!-- JavaScript sẽ render sách bán chạy tại đây -->
+            </div>
     </div>
 </section>
 
@@ -536,6 +536,7 @@
                         <form th:action="@{/profile/{id}(id=${session.USER.getUserId()})}" method="get">
                             <button class="btn btn-primary">Hồ sơ</button>
                         </form>
+
                         <form action="/custom-logout" method="post">
                             <button class="btn btn-warning" type="submit">Đăng xuất</button>
                         </form>

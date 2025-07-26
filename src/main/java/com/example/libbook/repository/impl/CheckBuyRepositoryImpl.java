@@ -68,4 +68,22 @@ public class CheckBuyRepositoryImpl implements CheckBuyRepository {
             throw new RuntimeException(e);
         }
     }
+
+    public boolean save(int productID, int userID) {
+        String sql = "INSERT INTO [CheckBuy](UserID, ProductID, Status) VALUES (?, ?, ?)";
+        ConnectUtils db = ConnectUtils.getInstance();
+
+        try (Connection conn = db.openConnection();
+             PreparedStatement checkStmt = conn.prepareStatement(sql)) {
+            checkStmt.setInt(1, userID);
+            checkStmt.setInt(2, productID);
+            checkStmt.setInt(3, 0); // Giả sử Status = 0 là hủy, điều chỉnh theo logic của bạn
+            int rowsAffected = checkStmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi khi lưu vào CheckBuy: " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

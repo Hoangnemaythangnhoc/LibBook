@@ -101,16 +101,20 @@
                 width: 80px;
                 padding: 1rem;
             }
+
             .sidebar h3 {
                 font-size: 1.25rem;
             }
+
             .sidebar li {
                 font-size: 0.875rem;
                 justify-content: center;
             }
+
             .sidebar li span {
                 display: none;
             }
+
             .main-content {
                 margin-left: 80px;
             }
@@ -196,6 +200,11 @@
             border-color: #3b82f6;
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
             outline: none;
+        }
+
+        .product-image {
+            display: block;
+            width: 100px;
         }
 
         #loading {
@@ -550,7 +559,7 @@
             animation: slideIn 0.3s ease;
         }
 
-        .modal-content1{
+        .modal-content1 {
             margin: 100px auto;
             max-width: 500px;
             padding: 1.5rem;
@@ -603,13 +612,23 @@
 
         /* Animations */
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
 
         @keyframes slideIn {
-            from { transform: translateY(-20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         /* Select2 Overrides */
@@ -645,20 +664,20 @@
             margin-top: 5px;
         }
 
-        .export-btn,.import-btn {
-            border: 1px solid #ccc;          /* viền xám nhạt, mỏng */
-            border-radius: 4px;              /* bo tròn nhẹ */
+        .export-btn, .import-btn {
+            border: 1px solid #ccc; /* viền xám nhạt, mỏng */
+            border-radius: 4px; /* bo tròn nhẹ */
             width: 100px;
             height: 40px;
-            background-color: white;         /* nền trắng */
-            color: #333;                     /* chữ xám đậm */
+            background-color: white; /* nền trắng */
+            color: #333; /* chữ xám đậm */
             cursor: pointer;
             transition: all 0.2s ease-in-out;
         }
 
-        .export-btn,.import-btn:hover {
-            background-color: #f5f5f5;       /* đổi màu nhẹ khi hover */
-            border-color: #999;              /* viền đậm hơn khi hover */
+        .export-btn, .import-btn:hover {
+            background-color: #f5f5f5; /* đổi màu nhẹ khi hover */
+            border-color: #999; /* viền đậm hơn khi hover */
         }
 
     </style>
@@ -676,7 +695,6 @@
                 <li data-section="manage-staffs-section">🏷️ Quản lý Nhân viên</li>
                 <li data-section="manage-discounts-section">💸 Quản lý Khuyến mãi</li>
                 <li data-section="manage-ratings-section">💬 Quản lý đánh giá</li>
-                <li data-section="settings-section">⚙️ Cài đặt</li>
             </ul>
         </nav>
     </aside>
@@ -689,11 +707,15 @@
                     <i class="ri-chat-3-line fs-6"></i>
                 </a>
 
-                <span th:if="${session.USER != null}" th:text="'xin chào' + ${session.USER.userName}"></span>
+                <span th:if="${session.USER != null}" th:text="'xin chào ' + ${session.USER.userName}"></span>
                 <div class="dropdown">
-                    <img th:if="${session.USER != null}" th:src="${session.USER.profilePicture}" alt="Avatar" data-bs-toggle="dropdown" aria-expanded="false" id="avatarDropdown"/>
+                    <img th:if="${session.USER != null}" th:src="${session.USER.profilePicture}" alt="Avatar"
+                         data-bs-toggle="dropdown" aria-expanded="false" id="avatarDropdown"/>
                     <ul class="dropdown-menu" aria-labelledby="avatarDropdown">
                         <li>
+                            <form th:action="@{/profile/{id}(id=${session.USER.getUserId()})}" method="get">
+                                <button type="submit" class="dropdown-item">Hồ sơ</button>
+                            </form>
                             <form action="/custom-logout" method="post" style="margin: 0;">
                                 <button type="submit" class="dropdown-item">Logout</button>
                             </form>
@@ -708,38 +730,46 @@
             <div class="time-filter d-flex justify-content-between align-items-center">
                 <div>
                     <select class="me-2" id="timeTypeSelect" onchange="updateDashboard()">
-                        <option value="1day" th:selected="${timeType == '1day'}">1 Day</option>
-                        <option value="1week" th:selected="${timeType == '1week'}">1 Week</option>
-                        <option value="1month" th:selected="${timeType == '1month'}">1 Month</option>
-                        <option value="3months" th:selected="${timeType == '3months'}">3 Months</option>
-                        <option value="7months" th:selected="${timeType == '7months'}">7 Months</option>
-                        <option value="lastyear" th:selected="${timeType == 'lastyear'}">Last Year</option>
+                        <!--                    <option value="1day" th:selected="${timeType == '1day'}">1 Ngày</option>-->
+                        <option value="1week" th:selected="${timeType == '1week'}">1 Tuần</option>
+                        <option value="1month" th:selected="${timeType == '1month'}">1 Tháng</option>
+                        <option value="3months" th:selected="${timeType == '3months'}">3 Tháng</option>
+                        <option value="7months" th:selected="${timeType == '7months'}">7 Tháng</option>
+                        <option value="lastyear" th:selected="${timeType == 'lastyear'}">1 năm trước</option>
                     </select>
-                    <button class="export-btn" onclick="exportTableToCSV()">Export CSV</button>
+                    <button class="export-btn" onclick="exportTableToCSV()">Xuất CSV</button>
                 </div>
                 <div>
                     <input type="file" id="excelFile" accept=".xlsx, .xls">
-                    <button class="import-btn" onclick="processExcel()">Import Excel</button>
+                    <button class="import-btn" onclick="processExcel()">Thêm Excel</button>
                     <input hidden="" id="output"/>
                 </div>
             </div>
             <div id="loading">Loading...</div>
             <div style="display: flex; justify-content: space-around; flex-wrap: wrap;">
                 <div class="card">
-                    <h3>Revenue</h3>
-                    <p id="revenue" th:text="${dashboardData != null and dashboardData.revenue != null} ? ${#numbers.formatDecimal(dashboardData.revenue, 1, 2, 'COMMA')} + '₫' : '0₫'">0₫</p>
+                    <h3>Doanh Thu</h3>
+                    <p id="revenue"
+                       th:text="${dashboardData != null and dashboardData.revenue != null} ? ${#numbers.formatDecimal(dashboardData.revenue, 1, 2, 'COMMA')} + '₫' : '0₫'">
+                        0₫</p>
                 </div>
                 <div class="card">
-                    <h3>Orders</h3>
-                    <p id="orders" th:text="${dashboardData != null and dashboardData.orders != null} ? ${dashboardData.orders} : 0">0</p>
+                    <h3>Đặt Hàng</h3>
+                    <p id="orders"
+                       th:text="${dashboardData != null and dashboardData.orders != null} ? ${dashboardData.orders} : 0">
+                        0</p>
                 </div>
                 <div class="card">
-                    <h3>Top Book</h3>
-                    <p id="top-book" th:text="${dashboardData != null and dashboardData.topBook != null} ? ${dashboardData.topBook} : 'N/A'">N/A</p>
+                    <h3>Sách Thịnh Hành</h3>
+                    <p id="top-book"
+                       th:text="${dashboardData != null and dashboardData.topBook != null} ? ${dashboardData.topBook} : 'N/A'">
+                        N/A</p>
                 </div>
                 <div class="card">
-                    <h3>New Users</h3>
-                    <p id="users" th:text="${dashboardData != null and dashboardData.users != null} ? ${dashboardData.users} : 0">0</p>
+                    <h3>Người Dùng Mới</h3>
+                    <p id="users"
+                       th:text="${dashboardData != null and dashboardData.users != null} ? ${dashboardData.users} : 0">
+                        0</p>
                 </div>
             </div>
             <canvas id="Chart" class="Chart" style="max-width: 100%; max-height: 400px;"></canvas>
@@ -803,13 +833,15 @@
                     <th>Người dùng</th>
                     <th>Trạng thái</th>
                     <th>Địa chỉ</th>
+                    <th>Phương thức thanh toán</th>
                     <th>Hành động</th>
                 </tr>
                 </thead>
                 <tbody id="order-table-body"></tbody>
             </table>
             <div class="pagination" id="order-pagination"></div>
-            <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
+            <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel"
+                 aria-hidden="true">
                 <div class="modal-dialog modal-xl">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -850,7 +882,7 @@
         <section class="manage-users" style="display: none;" id="manage-users-section">
             <h2>Quản lý Khách hàng</h2>
             <div class="user-sections">
-                <table>
+                <table class="dataTable">
                     <thead>
                     <tr>
                         <th>#</th>
@@ -873,6 +905,7 @@
             <div class="modal-content1">
                 <span id="close-staff-modal" class="close">&times;</span>
                 <h4 class="mb-3">Tạo tài khoản Nhân viên</h4>
+                <div id="staff-alert" class="alert alert-danger d-none" role="alert"></div>
                 <form id="staff-form">
                     <div class="form-group mb-2">
                         <label>Email</label>
@@ -898,8 +931,9 @@
         <!-- Manage Staffs Section -->
         <section class="manage-staffs" style="display: none;" id="manage-staffs-section">
             <h2>Quản lý Nhân viên</h2>
-            <button id="create-staff-btn" class="btn btn-sm btn-success" style="margin-bottom: 15px;">+ Thêm Nhân viên</button>
-            <table>
+            <button id="create-staff-btn" class="btn btn-sm btn-success" style="margin-bottom: 15px;">+ Thêm Nhân viên
+            </button>
+            <table class="dataTable">
                 <thead>
                 <tr>
                     <th>#</th>
@@ -918,7 +952,8 @@
         </section>
 
         <!-- Edit Role Popup -->
-        <div id="edit-role-modal" class="modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+        <div id="edit-role-modal" class="modal"
+             style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
             <div style="background:#fff; padding:20px; margin:15% auto; width:300px; border-radius:8px; position:relative;">
                 <h5>Sửa vai trò Nhân viên</h5>
                 <select id="role-select" style="width:100%; margin-top:10px;">
@@ -944,7 +979,9 @@
                     <input type="text" id="couponSearchInput" class="form-control" placeholder="Nhập mã để tìm kiếm">
                 </div>
                 <div>
-                    <button id="addCouponBtn" class="btn btn-primary" onclick="openCreateCouponForm()"><i class="fa fa-plus"></i> Thêm mã giảm giá</button>
+                    <button id="addCouponBtn" class="btn btn-primary" onclick="openCreateCouponForm()"><i
+                            class="fa fa-plus"></i> Thêm mã giảm giá
+                    </button>
                 </div>
             </div>
 
@@ -989,7 +1026,8 @@
 
                             <div class="mb-3">
                                 <label for="discountPercent" class="form-label">Phần trăm giảm (%)</label>
-                                <input type="number" id="discountPercent" class="form-control" required min="0" max="100" step="0.01">
+                                <input type="number" id="discountPercent" class="form-control" required min="0"
+                                       max="100" step="0.01">
                             </div>
 
                             <div class="mb-3">
@@ -1028,7 +1066,8 @@
         <section class="manage-ratings" style="display: none;" id="manage-ratings-section">
             <h2>Quản lý đánh giá</h2>
             <div class="search-sort-container">
-                <input type="text" id="ratingSearchInput" placeholder="Tìm kiếm theo ID xếp hạng, tên người dùng hoặc nội dung..."/>
+                <input type="text" id="ratingSearchInput"
+                       placeholder="Tìm kiếm theo ID xếp hạng, tên người dùng hoặc nội dung..."/>
                 <select id="ratingSortSelect">
                     <option value="id-asc">Rating ID (Tăng dần)</option>
                     <option value="id-desc">Rating ID (Giảm dần)</option>
@@ -1040,7 +1079,7 @@
                     <option value="username-desc">Tên người dùng (Z-A)</option>
                 </select>
             </div>
-            <table>
+            <table class="dataTable">
                 <thead>
                 <tr>
                     <th>Rating ID</th>
@@ -1176,11 +1215,28 @@
     let currentBookPage = 1;
     let currentOrderPage = 1;
     let currentRatingPage = 1;
+    let chartInstance = null;
+
+
+    function showLoading() {
+        document.getElementById('loading').style.display = 'block';
+    }
+
+    function hideLoading() {
+        document.getElementById('loading').style.display = 'none';
+    }
+
+    function updateDashboard() {
+        const timeType = document.getElementById('timeTypeSelect').value;
+        fetchDashboardData({timeType});
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
         sections.forEach(section => section.style.display = 'none');
         document.getElementById('overview-section').style.display = 'grid';
         fetchBooks();
+        fetchOrders();
+        fetchDashboardData('1week');
         document.getElementById('goToUploadButton').addEventListener('click', () => {
             sidebarItems.forEach(li => li.classList.remove('active'));
             sections.forEach(section => section.style.display = 'none');
@@ -1219,6 +1275,113 @@
             activeSectionIndex = index;
         });
     });
+
+    function fetchDashboardData({timeType}) {
+        showLoading();
+        const url = `/admin/users/multi-chart-data?timeType=${timeType || '1month'}`;
+
+        fetch(url)
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to load chart data');
+                return response.json();
+            })
+            .then(data => {
+                // Update summary cards
+                const dashboardUrl = `/admin/users/dashboard-data?timeType=${timeType || '1month'}`;
+                fetch(dashboardUrl)
+                    .then(response => response.json())
+                    .then(dashboardData => {
+                        document.getElementById('revenue').textContent = dashboardData.revenue ? `${dashboardData.revenue.toFixed(2)}₫` : '0₫';
+                        document.getElementById('orders').textContent = dashboardData.orders || 0;
+                        document.getElementById('top-book').textContent = dashboardData.topBook || 'N/A';
+                        document.getElementById('users').textContent = dashboardData.users || 0;
+                    })
+                    .catch(error => {
+                        console.error('Error loading summary data:', error);
+                        document.getElementById('overview-section').insertAdjacentHTML('beforeend', '<p class="error">Error loading summary data</p>');
+                    });
+
+                // Destroy old chart to prevent memory leaks
+                if (chartInstance) {
+                    chartInstance.destroy();
+                }
+
+                const ctx = document.getElementById('Chart').getContext('2d');
+                const labelMap = {
+                    '1day': 'Last Day',
+                    '1week': 'Last Week',
+                    '1month': 'Last Month',
+                    '3months': 'Last 3 Months',
+                    '7months': 'Last 7 Months',
+                    'lastyear': 'Last Year'
+                };
+                const labels = [...new Set([
+                    // ...data.revenue.map(item => item.x),
+                    ...data.orders.map(item => item.x),
+                    ...data.users.map(item => item.x)
+                ])].sort();
+
+                const datasets = [
+                    // {
+                    //   label: 'Revenue',
+                    //   data: labels.map(label => {
+                    //     const item = data.revenue.find(d => d.x === label);
+                    //     return item ? item.y : 0;
+                    //   }),
+                    //   borderColor: '#2c3e50',
+                    //   backgroundColor: 'rgba(44, 62, 80, 0.2)',
+                    //   fill: false,
+                    //   tension: 0.4
+                    // },
+                    {
+                        label: 'Orders',
+                        data: labels.map(label => {
+                            const item = data.orders.find(d => d.x === label);
+                            return item ? item.y : 0;
+                        }),
+                        borderColor: '#4bc0c0',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        fill: false,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'New Users',
+                        data: labels.map(label => {
+                            const item = data.users.find(d => d.x === label);
+                            return item ? item.y : 0;
+                        }),
+                        borderColor: '#ff9f43',
+                        backgroundColor: 'rgba(255, 159, 67, 0.2)',
+                        fill: false,
+                        tension: 0.4
+                    }
+                ];
+
+                chartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {position: 'top'},
+                            title: {display: true, text: `Statistics - ${labelMap[timeType]}`}
+                        },
+                        scales: {
+                            y: {beginAtZero: true}
+                        }
+                    }
+                });
+                hideLoading();
+            })
+            .catch(error => {
+                console.error('Error loading chart data:', error);
+                document.getElementById('Chart').insertAdjacentHTML('afterend', '<p class="error">Error loading chart</p>');
+                hideLoading();
+            });
+    }
 
     function fetchBooks() {
         fetch('http://localhost:8080/api/products')
@@ -1423,9 +1586,10 @@
                         </select>
                     </td>
                     <td>${order.address ?? "Unknown"}</td>
+                    <td>${order.paymentStatus === 1 ? 'Chuyển khoản' : 'Ship COD'}</td>
                     <td>
                         <button class="btn-update" onclick="updateStatus(${order.orderId})" ${isLocked ? 'disabled' : ''}>Cập nhật</button>
-                        <button class="btn-details" onclick="showDetails(${order.orderId})">Xem chi tiết</button>
+                        <button class="btn-details" onclick="showDetails(${order.orderId})">Chi tiết</button>
                     </td>
                 </tr>
             `;
@@ -1927,6 +2091,156 @@
         document.getElementById('uploadBookForm').reset();
         $('#tags').val(null).trigger('change');
     });
+
+    function exportTableToCSV() {
+        const sections = document.querySelectorAll('.main-content section');
+        if (sections.length === 0) {
+            alert('No sections found to export.');
+            return;
+        }
+
+        const baseFileName = 'Admin_Data.xlsx';
+        let downloadedFiles = JSON.parse(localStorage.getItem('downloadedFiles') || '{}');
+        let sheetCounter = downloadedFiles[baseFileName]?.sheetCount || 0;
+
+        const wb = XLSX.utils.book_new();
+        let newSheetCounter = sheetCounter;
+
+        sections.forEach((section) => {
+            const tables = section.querySelectorAll('.dataTable');
+            tables.forEach((table, index) => {
+                // Ưu tiên lấy tiêu đề từ h2 hoặc h3
+                let sectionTitle = section.querySelector('h2')?.innerText
+                    || section.querySelector('h3')?.innerText
+                    || `Sheet_${index + 1}`;
+
+                // Tên sheet: loại bỏ ký tự đặc biệt và rút gọn tối đa 28 ký tự
+                let sheetNameBase = sectionTitle.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 28);
+                let sheetName = (sheetCounter === 0)
+                    ? sheetNameBase
+                    : `${sheetNameBase}_${newSheetCounter + 1}`;
+
+                // Cắt ngắn nếu vượt quá 31 ký tự (phòng trường hợp vẫn lỗi)
+                if (sheetName.length > 31) {
+                    sheetName = sheetName.substring(0, 31);
+                }
+
+                const data = extractTableData(table);
+                if (data.length > 0) {
+                    const ws = XLSX.utils.aoa_to_sheet(data);
+                    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+                    newSheetCounter++;
+                }
+            });
+        });
+
+        if (newSheetCounter === sheetCounter) {
+            alert('No tables found to export.');
+            return;
+        }
+
+        downloadedFiles[baseFileName] = {sheetCount: newSheetCounter};
+        localStorage.setItem('downloadedFiles', JSON.stringify(downloadedFiles));
+
+        XLSX.writeFile(wb, baseFileName);
+    }
+
+    function extractTableData(table) {
+        const data = [];
+        const rows = table.querySelectorAll('tr');
+
+        for (let i = 0; i < rows.length; i++) {
+            const row = [];
+            const cols = rows[i].querySelectorAll('td, th');
+
+            for (let j = 0; j < cols.length; j++) {
+                // Bỏ qua cột chứa nút hoặc select
+                if (cols[j].querySelector('.btn') || cols[j].querySelector('.status-select')) {
+                    continue;
+                }
+
+                let cellData = '';
+                const img = cols[j].querySelector('img');
+                if (img) {
+                    cellData = img.getAttribute('src') || '';
+                } else {
+                    cellData = cols[j].innerText.replace(/"/g, '""');
+                }
+
+                row.push(cellData);
+            }
+
+            if (row.length > 0) {
+                data.push(row);
+            }
+        }
+        return data;
+    }
+
+    async function processExcel() {
+        const fileInput = document.getElementById('excelFile');
+        const outputDiv = document.getElementById('output');
+        const file = fileInput.files[0];
+
+        if (!file) {
+            alert('Please select an Excel file');
+            outputDiv.textContent = 'No file selected';
+            return;
+        }
+
+        try {
+            // Read Excel file
+            const arrayBuffer = await file.arrayBuffer();
+            const workbook = XLSX.read(arrayBuffer, {type: 'array'});
+
+            // Get first sheet
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+
+            // Convert sheet to JSON with header row as keys
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+            // Clean and format JSON data
+            const formattedData = jsonData.map(row => ({
+                BookName: row['Book Name'] || '',
+                Author: row['Author'] || '',
+                Publisher: row['Publisher'] || '',
+                Price: row['Price'] || null,
+                Discount: row['Discount'] || null,
+                AvailableQuantity: row['Available (Quantity)'] || null,
+                Tags: row['Tags'] || '',
+                Description: row['Description'] || '',
+                ImageFile: row['Image File'] || '',
+                userID: userInSession.userId
+            }));
+
+            // Display JSON output for testing
+            console.log('Generated JSON:', formattedData);
+            outputDiv.textContent = JSON.stringify(formattedData, null, 2);
+
+            // Send JSON to backend
+            const response = await fetch('http://localhost:8080/admin/users/data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formattedData)
+            });
+
+            if (response.ok) {
+                alert('Data sent successfully!');
+            } else {
+                alert('Error sending data to server');
+            }
+
+        } catch (error) {
+            console.error('Error:', error);
+            outputDiv.textContent = 'Error processing file: ' + error.message;
+            alert('Error processing file');
+        }
+    }
+
+
 </script>
 <script src="/js/admin-user.js"></script>
 <script src="/js/coupon-management.js"></script>

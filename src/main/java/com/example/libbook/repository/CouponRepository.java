@@ -2,6 +2,7 @@ package com.example.libbook.repository;
 
 import com.example.libbook.entity.Coupon;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface CouponRepository {
@@ -12,4 +13,7 @@ public interface CouponRepository {
     List<Coupon> findAllPaged(String search, int offset, int size);
     int countAll(String search);
     Coupon findByCode(String code);
+
+    int checkCouponCode(String Code);
+    void updateAmountCoupon(int couponId, BigDecimal amount);
 }
