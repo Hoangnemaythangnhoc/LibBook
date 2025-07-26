@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loadStaff();
     }
 
-    // Modal handling (Create Staff)
+    // Modal Create Staff
     const modal = document.getElementById("staff-modal");
     const openBtn = document.getElementById("create-staff-btn");
     const closeBtn = document.getElementById("close-staff-modal");
@@ -45,12 +45,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!res.ok) throw new Error(await res.text());
 
-            alert("Staff created successfully!");
+            alert("Tạo nhân viên thành công!");
             modal.style.display = "none";
             form.reset();
             loadStaff();
         } catch (err) {
-            alert("Error: " + err.message);
+            alert("Lỗi: " + err.message);
         }
     });
 });
@@ -81,7 +81,7 @@ async function loadCustomers() {
             tbody.appendChild(createCustomerRow(user, index + 1));
         });
     } catch (err) {
-        console.error("Failed to load customers:", err);
+        console.error("Lỗi khi tải danh sách khách hàng:", err);
     }
 }
 
@@ -98,7 +98,7 @@ async function loadStaff() {
             tbody.appendChild(createStaffRow(user, index + 1));
         });
     } catch (err) {
-        console.error("Failed to load staff:", err);
+        console.error("Lỗi khi tải danh sách nhân viên:", err);
     }
 }
 
@@ -110,13 +110,13 @@ function createCustomerRow(user, index) {
         <td>${index}</td>
         <td>${user.userName}</td>
         <td>${user.email}</td>
-        <td>${user.phoneNumber || "N/A"}</td>
-        <td>${user.address || "N/A"}</td>
+        <td>${user.phoneNumber || "Chưa có thông tin"}</td>
+        <td>${user.address || "Chưa có thông tin"}</td>
         <td>${formatDate(user.createAt)}</td>
         <td>
             <button class="btn btn-sm ${isActive ? 'btn-danger' : 'btn-warning'}" style="min-width:70px"
                 onclick="toggleStatus(${user.userId}, ${user.status})">
-                ${isActive ? 'Ban' : 'Unban'}
+                ${isActive ? 'Khóa' : 'Mở khóa'}
             </button>
         </td>
     `;
@@ -131,17 +131,17 @@ function createStaffRow(user, index) {
         <td>${index}</td>
         <td>${user.userName}</td>
         <td>${user.email}</td>
-        <td>${user.phoneNumber || "N/A"}</td>
+        <td>${user.phoneNumber || "Chưa có thông tin"}</td>
         <td>${user.roleName}</td>
         <td>${formatDate(user.createAt)}</td>
         <td>
             <button class="btn btn-sm btn-secondary" style="min-width:70px"
                 onclick="openEditRolePopup(${user.userId}, '${user.roleName}')">
-                Edit Role
+                Sửa vai trò
             </button>
             <button class="btn btn-sm ${isActive ? 'btn-danger' : 'btn-warning'}" style="min-width:70px"
                 onclick="toggleStatus(${user.userId}, ${user.status})">
-                ${isActive ? 'Ban' : 'Unban'}
+                ${isActive ? 'Khóa' : 'Mở khóa'}
             </button>
         </td>
     `;
@@ -149,14 +149,14 @@ function createStaffRow(user, index) {
 }
 
 function formatDate(dateStr) {
-    if (!dateStr) return "N/A";
+    if (!dateStr) return "Chưa có thông tin";
     const d = new Date(dateStr);
-    return isNaN(d) ? "N/A" : d.toISOString().split("T")[0];
+    return isNaN(d) ? "Chưa có thông tin" : d.toISOString().split("T")[0];
 }
 
 async function toggleStatus(userId, currentStatus) {
     const isActive = currentStatus === true;
-    if (!confirm(isActive ? "Ban this user?" : "Unban this user?")) return;
+    if (!confirm(isActive ? "Bạn có chắc muốn khóa người dùng này?" : "Bạn có chắc muốn mở khóa người dùng này?")) return;
 
     const endpoint = `/admin/users/${userId}/${isActive ? "ban" : "unban"}`;
 
@@ -168,7 +168,7 @@ async function toggleStatus(userId, currentStatus) {
         if (currentSection === "manage-users-section") loadCustomers();
         else if (currentSection === "manage-staffs-section") loadStaff();
     } catch (err) {
-        alert("Error: " + err.message);
+        alert("Lỗi: " + err.message);
     }
 }
 
@@ -197,11 +197,11 @@ document.getElementById("save-role-btn").addEventListener("click", async () => {
 
         if (!res.ok) throw new Error(await res.text());
 
-        alert("Role updated successfully!");
+        alert("Cập nhật vai trò thành công!");
         document.getElementById("edit-role-modal").style.display = "none";
         loadStaff();
     } catch (err) {
-        alert("Error: " + err.message);
+        alert("Lỗi: " + err.message);
     }
 });
 

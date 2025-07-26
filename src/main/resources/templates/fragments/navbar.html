@@ -506,15 +506,15 @@
                     </li>
                 </ul>
 
-                <form class="d-flex mx-auto" style="min-width: 300px">
+                <form class="d-flex mx-auto" style="min-width: 300px" action="/category/search" method="get">
                     <div class="input-group">
-                        <input class="form-control" type="search" placeholder="Search books, authors..."
-                               aria-label="Search"/>
+                        <input class="form-control" type="search" name="searchQuery" placeholder="Tìm kiếm sách, tác giả..." aria-label="Tìm kiếm" required/>
                         <button class="btn btn-outline-primary" type="submit">
                             <i class="ri-search-line"></i>
                         </button>
                     </div>
                 </form>
+
 
                 <div class="d-flex align-items-center ms-auto" style="gap: 7px">
 

@@ -522,8 +522,8 @@
         <header class="topbar">
             <h1>Staff Dashboard</h1>
             <div class="staff-info">
-                <span th:text="'Hello, ' + ${staffName ?: 'Staff'}">Hello, Staff</span>
-                <img src="https://i.pravatar.cc/40" alt="Avatar"/>
+                <span th:if="${session.USER != null}" th:text="'Hello ' + ${session.USER.userName}"></span>
+                <img th:if="${session.USER != null}" th:src="${session.USER.profilePicture}" alt="Avatar"/>
             </div>
         </header>
 
@@ -838,7 +838,7 @@
         const reader = new FileReader();
         reader.onload = function (e) {
             const imgDataUrl = e.target.result;
-            console.log('base64: ' + imgDataUrl);
+
             const newBook = {
                 productName: name,
                 description: description,

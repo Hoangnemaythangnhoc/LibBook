@@ -247,7 +247,7 @@
         }
 
         /* Tables */
-        .recent-books, .manage-orders, .manage-users, .manage-categories, .manage-comments, .manage-discounts, .settings {
+        .recent-books, .manage-orders, .manage-users, .manage-staffs, .manage-comments, .manage-discounts, .settings {
             display: none; /* Ẩn mặc định, để JS hiển thị bằng display: block */
             background-color: #ffffff;
             padding: 1.5rem;
@@ -255,13 +255,13 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
 
-        .recent-books table, .manage-orders table, .manage-users table, .manage-categories table, .manage-comments table {
+        .recent-books table, .manage-orders table, .manage-users table, .manage-staffs table, .manage-comments table {
             width: 100%;
             border-collapse: collapse;
             background-color: #ffffff;
         }
 
-        .recent-books th, .manage-orders th, .manage-users th, .manage-categories th, .manage-comments th {
+        .recent-books th, .manage-orders th, .manage-users th, .manage-staffs th, .manage-comments th {
             background-color: #f1f5f9;
             padding: 0.75rem;
             font-weight: 600;
@@ -270,14 +270,14 @@
             color: #1e293b;
         }
 
-        .recent-books td, .manage-orders td, .manage-users td, .manage-categories td, .manage-comments td {
+        .recent-books td, .manage-orders td, .manage-users td, .manage-staffs td, .manage-comments td {
             padding: 0.75rem;
             border-bottom: 1px solid #e2e8f0;
             font-size: 0.875rem;
             color: #475569;
         }
 
-        .recent-books tr:hover, .manage-orders tr:hover, .manage-users tr:hover, .manage-categories tr:hover, .manage-comments tr:hover {
+        .recent-books tr:hover, .manage-orders tr:hover, .manage-users tr:hover, .manage-staffs tr:hover, .manage-comments tr:hover {
             background-color: #f8fafc;
         }
 
@@ -536,6 +536,18 @@
             animation: slideIn 0.3s ease;
         }
 
+        .modal-content1{
+            margin: 100px auto;
+            max-width: 500px;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            background-color: #ffffff;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+            justify-content: center;
+            align-items: center;
+        }
+
         .close {
             position: absolute;
             top: 1rem;
@@ -640,16 +652,17 @@
 <body>
 <div class="dashboard-container">
     <aside class="sidebar">
-        <h3>📚 Admin Panel</h3>
+        <h3>📚 Bảng điều khiển Admin</h3>
         <nav id="navbar-side">
             <ul>
-                <li data-section="overview-section" class="active">📊 Overview</li>
-                <li data-section="manage-books-section">📦 Manage Books</li>
-                <li data-section="manage-orders-section">🛒 Manage Orders</li>
-                <li data-section="manage-users-section">👥 Manage Users</li>
-                <li data-section="manage-discounts-section">💸 Manage Discounts & Promotions</li>
-                <li data-section="manage-comments-section">💬 Manage Comments</li>
-                <li data-section="settings-section">⚙️ Settings</li>
+                <li data-section="overview-section" class="active">📊 Tổng quan</li>
+                <li data-section="manage-books-section">📦 Quản lý Sách</li>
+                <li data-section="manage-orders-section">🛒 Quản lý Đơn hàng</li>
+                <li data-section="manage-users-section">👥 Quản lý Khách hàng</li>
+                <li data-section="manage-staffs-section">🏷️ Quản lý Nhân viên</li>
+                <li data-section="manage-discounts-section">💸 Quản lý Khuyến mãi</li>
+                <li data-section="manage-comments-section">💬 Quản lý Bình luận</li>
+                <li data-section="settings-section">⚙️ Cài đặt</li>
             </ul>
         </nav>
     </aside>
@@ -806,18 +819,18 @@
 
         <!-- Manage Customers Section -->
         <section class="manage-users" style="display: none;" id="manage-users-section">
-            <h2>Manage Customers</h2>
+            <h2>Quản lý Khách hàng</h2>
             <div class="user-sections">
                 <table>
                     <thead>
                     <tr>
                         <th>#</th>
-                        <th>Name</th>
+                        <th>Họ và Tên</th>
                         <th>Email</th>
-                        <th>Phone</th>
-                        <th>Address</th>
-                        <th>Joined Date</th>
-                        <th>Actions</th>
+                        <th>Số điện thoại</th>
+                        <th>Địa chỉ</th>
+                        <th>Ngày tham gia</th>
+                        <th>Hành động</th>
                     </tr>
                     </thead>
                     <tbody id="customer-body">
@@ -829,94 +842,45 @@
 
         <!-- Create Staff Modal -->
         <div id="staff-modal" class="modal-overlay" style="display: none;">
-            <div class="modal-content">
+            <div class="modal-content1">
                 <span id="close-staff-modal" class="close">&times;</span>
-                <h4 class="mb-3">Create Staff Account</h4>
+                <h4 class="mb-3">Tạo tài khoản Nhân viên</h4>
                 <form id="staff-form">
                     <div class="form-group mb-2">
                         <label>Email</label>
                         <input name="email" type="email" class="form-control" required>
                     </div>
                     <div class="form-group mb-2">
-                        <label>Password</label>
+                        <label>Mật khẩu</label>
                         <input name="password" type="password" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
-                        <label>Role</label>
+                        <label>Vai trò</label>
                         <select name="roleID" class="form-control" required>
-                            <option value="3">Warehouse Management</option>
-                            <option value="4">Customer Care</option>
-                            <option value="5">Shipper</option>
+                            <option value="3">Quản lý kho</option>
+                            <option value="4">Chăm sóc khách hàng</option>
+                            <option value="5">Nhân viên giao hàng</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Create</button>
-                </form>
-            </div>
-        </div>
-
-        <section class="manage-users" style="display: none;" id="manage-users-section">
-            <h2>Manage Customers</h2>
-            <div class="user-sections">
-                <table>
-                    <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Address</th>
-                        <th>Joined Date</th>
-                        <th>Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody id="customer-body">
-                    <!-- Đổ dữ liệu từ JS -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- Create Staff Modal -->
-        <div id="staff-modal" class="modal-overlay" style="display: none;">
-            <div class="modal-content">
-                <span id="close-staff-modal" class="close">&times;</span>
-                <h4 class="mb-3">Create Staff Account</h4>
-                <form id="staff-form">
-                    <div class="form-group mb-2">
-                        <label>Email</label>
-                        <input name="email" type="email" class="form-control" required>
-                    </div>
-                    <div class="form-group mb-2">
-                        <label>Password</label>
-                        <input name="password" type="password" class="form-control" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label>Role</label>
-                        <select name="roleID" class="form-control" required>
-                            <option value="3">Warehouse Management</option>
-                            <option value="4">Customer Care</option>
-                            <option value="5">Shipper</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Create</button>
+                    <button type="submit" class="btn btn-primary w-100">Tạo mới</button>
                 </form>
             </div>
         </div>
 
         <!-- Manage Staffs Section -->
         <section class="manage-staffs" style="display: none;" id="manage-staffs-section">
-            <h2>Manage Staffs</h2>
-            <button id="create-staff-btn" class="btn btn-sm btn-success" style="margin-bottom: 15px;">+ Create Staff</button>
+            <h2>Quản lý Nhân viên</h2>
+            <button id="create-staff-btn" class="btn btn-sm btn-success" style="margin-bottom: 15px;">+ Thêm Nhân viên</button>
             <table>
                 <thead>
                 <tr>
                     <th>#</th>
-                    <th>Name</th>
+                    <th>Họ và Tên</th>
                     <th>Email</th>
-                    <th>Phone</th>
-                    <th>Role</th>
-                    <th>Joined Date</th>
-                    <th>Actions</th>
+                    <th>Số điện thoại</th>
+                    <th>Vai trò</th>
+                    <th>Ngày tham gia</th>
+                    <th>Hành động</th>
                 </tr>
                 </thead>
                 <tbody id="staff-body">
@@ -925,54 +889,48 @@
             </table>
         </section>
 
-
         <!-- Edit Role Popup -->
         <div id="edit-role-modal" class="modal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
             <div style="background:#fff; padding:20px; margin:15% auto; width:300px; border-radius:8px; position:relative;">
-                <h5>Edit Staff Role</h5>
+                <h5>Sửa vai trò Nhân viên</h5>
                 <select id="role-select" style="width:100%; margin-top:10px;">
-                    <option value="3">Warehouse Management</option>
-                    <option value="4">Customer Care</option>
-                    <option value="5">Shipper</option>
+                    <option value="3">Quản lý kho</option>
+                    <option value="4">Chăm sóc khách hàng</option>
+                    <option value="5">Nhân viên giao hàng</option>
                 </select>
                 <div style="margin-top:15px; text-align:right;">
-                    <button id="save-role-btn" class="btn btn-sm btn-primary">Save</button>
-                    <button id="cancel-role-btn" class="btn btn-sm btn-secondary">Cancel</button>
+                    <button id="save-role-btn" class="btn btn-sm btn-primary">Lưu</button>
+                    <button id="cancel-role-btn" class="btn btn-sm btn-secondary">Hủy</button>
                 </div>
             </div>
         </div>
 
 
-
         <!-- Manage Discounts & Promotions Section -->
         <section class="manage-discounts" style="display: none;" id="manage-discounts-section">
-            <h2>Manage Discounts & Promotions</h2>
+            <h2>Quản lý Khuyến mãi & Mã giảm giá</h2>
             <br>
 
-            <!-- Search bar -->
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div class="w-50">
-                    <input type="text" id="couponSearchInput" class="form-control" placeholder="Enter code to search">
+                    <input type="text" id="couponSearchInput" class="form-control" placeholder="Nhập mã để tìm kiếm">
                 </div>
                 <div>
-                    <!--                    <button class="btn btn-primary me-2" id="btnSearchCoupon">Search</button>-->
-                    <button id="addCouponBtn" class="btn btn-primary" onclick="openCreateCouponForm()"><i class="fa fa-plus"></i> Add Coupon</button>
+                    <button id="addCouponBtn" class="btn btn-primary" onclick="openCreateCouponForm()"><i class="fa fa-plus"></i> Thêm mã giảm giá</button>
                 </div>
             </div>
 
-
-            <!-- Coupon Table -->
             <table class="table table-bordered table-hover">
                 <thead class="thead-gray">
                 <tr>
                     <th>ID</th>
-                    <th>Code</th>
-                    <th>Discount (%)</th>
-                    <th>Quantity</th>
-                    <th>Start Date</th>
-                    <th>End Date</th>
-                    <th>Status</th>
-                    <th>Action</th>
+                    <th>Mã</th>
+                    <th>Giảm (%)</th>
+                    <th>Số lượng</th>
+                    <th>Ngày bắt đầu</th>
+                    <th>Ngày kết thúc</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
                 </tr>
                 </thead>
                 <tbody id="couponTableBody">
@@ -982,54 +940,55 @@
             <ul class="pagination justify-content-center" id="couponPagination"></ul>
         </section>
 
+
         <!-- Modal Form Thêm/Sửa Coupon -->
         <div class="modal fade" id="couponModal" tabindex="-1" aria-labelledby="couponModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <form id="couponForm">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="couponModalLabel">Coupon Form</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <h5 class="modal-title" id="couponModalLabel">Form Mã giảm giá</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                         </div>
 
                         <div class="modal-body">
                             <input type="hidden" id="couponId">
 
                             <div class="mb-3">
-                                <label for="code" class="form-label">Code</label>
+                                <label for="code" class="form-label">Mã</label>
                                 <input type="text" id="code" class="form-control" required>
                             </div>
 
                             <div class="mb-3">
-                                <label for="discountPercent" class="form-label">Discount Percent (%)</label>
+                                <label for="discountPercent" class="form-label">Phần trăm giảm (%)</label>
                                 <input type="number" id="discountPercent" class="form-control" required min="0" max="100" step="0.01">
                             </div>
 
                             <div class="mb-3">
-                                <label for="quantity" class="form-label">Quantity</label>
+                                <label for="quantity" class="form-label">Số lượng</label>
                                 <input type="number" id="quantity" class="form-control" required min="0" step="1">
                             </div>
 
                             <div class="mb-3">
-                                <label for="startDate" class="form-label">Start Date</label>
+                                <label for="startDate" class="form-label">Ngày bắt đầu</label>
                                 <input type="date" id="startDate" class="form-control">
                             </div>
 
                             <div class="mb-3">
-                                <label for="endDate" class="form-label">End Date</label>
+                                <label for="endDate" class="form-label">Ngày kết thúc</label>
                                 <input type="date" id="endDate" class="form-control">
                             </div>
 
                             <div class="form-check mb-3">
                                 <input type="checkbox" class="form-check-input" id="isActive" checked>
-                                <label class="form-check-label" for="isActive">Active</label>
+                                <label class="form-check-label" for="isActive">Kích hoạt</label>
                             </div>
 
                         </div>
 
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary" id="btnSaveCoupon">Save</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                            <button type="button" class="btn btn-primary" id="btnSaveCoupon">Lưu</button>
                         </div>
                     </form>
                 </div>
