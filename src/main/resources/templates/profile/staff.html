@@ -460,7 +460,6 @@
             <ul>
                 <li data-section="overview-section" class="active">📊 Tổng quan</li>
                 <li data-section="manage-books-section">📦 Quản lí sách</li>
-                <li data-section="manage-profile-section">👤 Quản lí thông tin</li>
             </ul>
         </nav>
     </aside>
@@ -469,17 +468,20 @@
         <header class="topbar">
             <h1>Staff Dashboard</h1>
             <div class="staff-info">
-                    <span th:if="${session.USER != null}" th:text="'xin chào ' + ${session.USER.userName}"></span>
-                    <div class="dropdown">
-                        <img th:if="${session.USER != null}" th:src="${session.USER.profilePicture}" alt="Avatar" data-bs-toggle="dropdown" aria-expanded="false" id="avatarDropdown"/>
-                        <ul class="dropdown-menu" aria-labelledby="avatarDropdown">
-                            <li>
-                                <form action="/custom-logout" method="post" style="margin: 0;">
-                                    <button type="submit" class="dropdown-item">Logout</button>
-                                </form>
-                            </li>
-                        </ul>
-                    </div>
+                <span th:if="${session.USER != null}" th:text="'xin chào ' + ${session.USER.userName}"></span>
+                <div class="dropdown">
+                    <img th:if="${session.USER != null}" th:src="${session.USER.profilePicture}" alt="Avatar" data-bs-toggle="dropdown" aria-expanded="false" id="avatarDropdown"/>
+                    <ul class="dropdown-menu" aria-labelledby="avatarDropdown">
+                        <li>
+                            <form th:action="@{/profile/{id}(id=${session.USER.getUserId()})}" method="get">
+                                <button type="submit" class="dropdown-item">Hồ sơ</button>
+                            </form>
+                            <form action="/custom-logout" method="post" style="margin: 0;">
+                                <button type="submit" class="dropdown-item">Thoát</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </header>
 

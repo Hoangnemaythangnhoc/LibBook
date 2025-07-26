@@ -695,7 +695,6 @@
                 <li data-section="manage-staffs-section">🏷️ Quản lý Nhân viên</li>
                 <li data-section="manage-discounts-section">💸 Quản lý Khuyến mãi</li>
                 <li data-section="manage-ratings-section">💬 Quản lý đánh giá</li>
-                <li data-section="settings-section">⚙️ Cài đặt</li>
             </ul>
         </nav>
     </aside>
@@ -714,6 +713,9 @@
                          data-bs-toggle="dropdown" aria-expanded="false" id="avatarDropdown"/>
                     <ul class="dropdown-menu" aria-labelledby="avatarDropdown">
                         <li>
+                            <form th:action="@{/profile/{id}(id=${session.USER.getUserId()})}" method="get">
+                                <button type="submit" class="dropdown-item">Hồ sơ</button>
+                            </form>
                             <form action="/custom-logout" method="post" style="margin: 0;">
                                 <button type="submit" class="dropdown-item">Logout</button>
                             </form>
@@ -1064,9 +1066,6 @@
             <div class="search-sort-container">
                 <input type="text" id="ratingSearchInput"
                        placeholder="Tìm kiếm theo ID xếp hạng, tên người dùng hoặc nội dung..."/>
-
-                <input type="text" id="ratingSearchInput" placeholder="Tìm kiếm theo ID xếp hạng, tên người dùng hoặc nội dung..."/>
-
                 <select id="ratingSortSelect">
                     <option value="id-asc">Rating ID (Tăng dần)</option>
                     <option value="id-desc">Rating ID (Giảm dần)</option>
@@ -1079,8 +1078,6 @@
                 </select>
             </div>
             <table class="dataTable">
-
-            <table>
                 <thead>
                 <tr>
                     <th>Rating ID</th>
