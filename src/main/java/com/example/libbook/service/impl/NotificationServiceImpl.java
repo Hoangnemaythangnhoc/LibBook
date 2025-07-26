@@ -1,5 +1,6 @@
 package com.example.libbook.service.impl;
 
+import com.example.libbook.entity.Coupon;
 import com.example.libbook.entity.Product;
 import com.example.libbook.service.NotificationService;
 import com.example.libbook.service.UserService;
@@ -47,6 +48,7 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
+
     private void sendHtmlEmail(String toEmail, String subject, String body) throws MessagingException {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -84,7 +86,7 @@ public class NotificationServiceImpl implements NotificationService {
                 "<p class='product-name'>" + productName + "</p>" +
                 "<p><b>Mô tả:</b> " + description + "</p>" +
                 "<p><b>Giá:</b> $" + price + "</p>" +
-                "<p>Hãy xem ngay trên <a href='http://localhost:8080/product/"+ productid +"'>website của chúng tôi</a>!</p>" +
+                "<p>Hãy xem ngay trên <a href='http://localhost:8080/product/" + productid + "'>website của chúng tôi</a>!</p>" +
                 "<div class='footer'>" +
                 "<p>Follow us on:</p>" +
                 "<div class='social-icons'>" +
@@ -95,4 +97,70 @@ public class NotificationServiceImpl implements NotificationService {
                 "</body>" +
                 "</html>";
     }
+
+
+    @Override
+    public void sendNewVoucherNotification(Coupon coupon) {
+        List<String> emails = userService.getSubscribedEmails();
+        if (emails.isEmpty()) {
+            logger.info("Không có email nào đăng ký nhận thông báo voucher.");
+            return;
+        }
+
+        logger.info("Gửi thông báo voucher mới tới {} email", emails.size());
+        String subject = "Voucher Mới: " + (coupon.getCode() != null ? coupon.getCode() : "Voucher đặc biệt");
+        String body = buildVoucherEmailContent(coupon);
+
+        for (String email : emails) {
+            try {
+                sendHtmlEmail(email, subject, body);
+                logger.info("Đã gửi email voucher tới {}", email);
+            } catch (MessagingException e) {
+                logger.error("Lỗi gửi email voucher tới {}: {}", email, e.getMessage(), e);
+            }
+        }
+    }
+
+    private String buildVoucherEmailContent(Coupon coupon) {
+        String code = coupon.getCode() != null ? coupon.getCode() : "Không xác định";
+        String discount = coupon.getDiscountPercent() != null ? coupon.getDiscountPercent().toString() + "%" : "0%";
+        String quantity = coupon.getQuantity() != null ? coupon.getQuantity().toString() : "Không giới hạn";
+        String startDate = coupon.getStartDate() != null ? coupon.getStartDate().toLocalDate().toString() : "Chưa rõ";
+        String endDate = coupon.getEndDate() != null ? coupon.getEndDate().toLocalDate().toString() : "Không có hạn";
+        String isActive = Boolean.TRUE.equals(coupon.getIsActive()) ? "Đang hoạt động" : "Không hoạt động";
+
+        return "<html>" +
+                "<head>" +
+                "<style>" +
+                "body { font-family: Arial, sans-serif; text-align: center; }" +
+                ".container { padding: 20px; max-width: 500px; margin: auto; border: 1px solid #ddd; border-radius: 10px; }" +
+                ".logo { width: 100px; }" +
+                ".voucher-code { font-size: 24px; font-weight: bold; color: #5cb85c; }" +
+                ".footer { margin-top: 20px; font-size: 12px; color: #666; }" +
+                ".social-icons img { width: 30px; margin: 5px; }" +
+                "</style>" +
+                "</head>" +
+                "<body>" +
+                "<div class='container'>" +
+                "<img src='https://res.cloudinary.com/dbz1uew0a/image/upload/v1751220681/black_text_logo_cskmy0.jpg' class='logo' alt='Logo'>" +
+                "<h2>🎉 Voucher Mới Đã Ra Mắt!</h2>" +
+                "<p>Chúng tôi vừa thêm một mã giảm giá mới dành cho bạn:</p>" +
+                "<p class='voucher-code'>" + code + "</p>" +
+                "<p><b>Giảm giá:</b> " + discount + "</p>" +
+                "<p><b>Số lượng:</b> " + quantity + "</p>" +
+                "<p><b>Thời gian áp dụng:</b> " + startDate + " đến " + endDate + "</p>" +
+                "<p><b>Trạng thái:</b> " + isActive + "</p>" +
+                "<p>Hãy sử dụng mã giảm giá này ngay tại <a href='http://localhost:8080'>trang của chúng tôi</a>!</p>" +
+                "<div class='footer'>" +
+                "<p>Theo dõi chúng tôi tại:</p>" +
+                "<div class='social-icons'>" +
+                "<a href=''><img src='https://upload.wikimedia.org/wikipedia/commons/c/cd/Facebook_logo_%28square%29.png' alt='Facebook'></a>" +
+                "<a href=''><img src='https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png' alt='Instagram'></a>" +
+                "</div>" +
+                "</div>" +
+                "</div>" +
+                "</body>" +
+                "</html>";
+    }
+
 }

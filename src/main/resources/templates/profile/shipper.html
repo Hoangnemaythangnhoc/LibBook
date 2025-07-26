@@ -466,7 +466,6 @@
         <h2>🚚 Shipper Panel</h2>
         <nav>
             <ul>
-                <li data-section="profile-section">👤 Quản lý hồ sơ</li>
                 <li data-section="manage-orders-section">🛒 Quản lý đơn hàng</li>
             </ul>
         </nav>
@@ -481,6 +480,9 @@
                     <img th:if="${session.USER != null}" th:src="${session.USER.profilePicture}" alt="Avatar" data-bs-toggle="dropdown" aria-expanded="false" id="avatarDropdown"/>
                     <ul class="dropdown-menu" aria-labelledby="avatarDropdown">
                         <li>
+                            <form th:action="@{/profile/{id}(id=${session.USER.getUserId()})}" method="get">
+                                <button type="submit" class="dropdown-item">Hồ sơ</button>
+                            </form>
                             <form action="/custom-logout" method="post" style="margin: 0;">
                                 <button type="submit" class="dropdown-item">Logout</button>
                             </form>
@@ -601,7 +603,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         sections.forEach(section => section.style.display = 'none');
-        document.getElementById('profile-section').style.display = 'block';
+        document.getElementById('manage-orders-section').style.display = 'block';
     });
 
     sidebarItems.forEach((item, index) => {

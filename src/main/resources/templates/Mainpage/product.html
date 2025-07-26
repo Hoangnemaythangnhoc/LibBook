@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -234,6 +235,12 @@
             right: 20px;
             z-index: 1050;
         }
+
+        /* NEW: Added CSS for tag badges to match original styling and add spacing */
+        .tag-badge {
+            margin-right: 5px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -243,7 +250,8 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a th:href="@{/home}">Trang Chủ</a></li>
-                <li class="breadcrumb-item active" aria-current="page" th:text="${product.productName}">Tên Sản Phẩm</li>
+                <li class="breadcrumb-item active" aria-current="page" th:text="${product.productName}">Tên Sản Phẩm
+                </li>
             </ol>
         </nav>
         <div class="row g-4">
@@ -252,7 +260,8 @@
                     <img th:src="${product.imageFile}" alt="Bìa sách" class="img-fluid rounded shadow"/>
                     <div class="row g-2 mt-2">
                         <div class="col-3">
-                            <img th:src="${product.imageFile}" alt="Hình thu nhỏ 1" class="img-fluid rounded cursor-pointer border"/>
+                            <img th:src="${product.imageFile}" alt="Hình thu nhỏ 1"
+                                 class="img-fluid rounded cursor-pointer border"/>
                         </div>
                     </div>
                 </div>
@@ -267,7 +276,7 @@
                             <span style="font-size: 18px; color: red;" th:if="${product.discount > 0}"
                                   class="h5 mb-0 text-decoration-line-through ms-2"
                                   th:text="${#numbers.formatDecimal(product.price, 2, 2)} + ' ₫'">
-                            </span>
+                             </span>
                             <span style="font-size: 18px; color: red; margin-right: 20px"
                                   th:if="${product.discount > 0}"
                                   class="h5 mb-0 text-decoration ms-2"
@@ -278,8 +287,8 @@
                                   th:text="${#numbers.formatDecimal(discountedPrice, 2, 2)}+' ₫'">
                             </span>
                         </div>
-                        <div class="badge bg-success" style="margin-top: 20px"
-                             th:text="'Còn Hàng: ' + ${product.available}">Còn Hàng</div>
+                        <!-- THÊM: Container để hiển thị tag động từ API -->
+                        <div id="tagContainer"></div>
                     </div>
 
                     <div class="mb-4">
@@ -304,7 +313,8 @@
                                     <tr>
                                         <td>Giá:</td>
                                         <td th:with="discountedPrice=${product.discount > 0 ? product.price * (100 - product.discount) / 100 : product.price}"
-                                            th:text="${#numbers.formatDecimal(discountedPrice, 2, 2)}+' ₫'">0.00 ₫</td>
+                                            th:text="${#numbers.formatDecimal(discountedPrice, 2, 2)}+' ₫'">0.00 ₫
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>Đánh Giá:</td>
@@ -413,29 +423,6 @@
         </div>
     </div>
 </section>
-
-<!-- Related Books -->
-<!--<section class="related-books py-5 bg-light">-->
-<!--    <div class="container">-->
-<!--        <h3 class="mb-4">Có Thể Bạn Sẽ Thích</h3>-->
-<!--        <div class="row g-4">-->
-<!--            <div class="col-lg-3 col-md-6" th:each="relatedProduct : ${relatedProjects}">-->
-<!--                <div class="book-card bg-white rounded shadow-sm h-100">-->
-<!--                    <img th:src="${relatedProduct.imageFile}" class="card-img-top" alt="Sách Liên Quan"/>-->
-<!--                    <div class="card-body">-->
-<!--                        <p class="text-primary mb-1">Sách</p>-->
-<!--                        <h5 class="card-title" th:text="${relatedProduct.productName}">Sản Phẩm Liên Quan</h5>-->
-<!--                        <p class="card-text text-muted">Tác Giả Không Có</p>-->
-<!--                        <div class="d-flex justify-content-between align-items-center">-->
-<!--                            <span class="h5 mb-0" th:text="${#numbers.formatDecimal(relatedProduct.price, 2, 2)+' ₫'}">0.00 ₫</span>-->
-<!--                            <a th:href="@{/product/{id}(id=${relatedProduct.productId})}" class="btn btn-outline-primary">Xem Chi Tiết</a>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</section>-->
 
 <!-- Footer Placeholder -->
 <div th:insert="~{fragments/footer :: footer}"></div>
@@ -564,6 +551,7 @@
         const productId = document.querySelector('input[name="productId"]').value;
         let currentPage = 1;
         const reviewsPerPage = 5;
+
         stars.forEach(star => {
             star.addEventListener('click', () => {
                 const value = parseInt(star.getAttribute('data-value'));
@@ -591,6 +579,7 @@
                 stars.forEach(s => s.classList.remove('hover'));
             });
         });
+
         reviewForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             const stars = document.getElementById('ratingValue').value;
@@ -622,64 +611,123 @@
             }
         });
 
-        function fetchReviews() {
-            console.log('Đang tải đánh giá cho productId:', productId);
-            fetch(`/ratings/${productId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (!data || data.length === 0) {
-                        averageRatingDiv.innerHTML = '<p class="text-muted">Chưa có đánh giá</p>';
-                        reviewList.innerHTML = '';
-                        pagination.innerHTML = '';
-                        return;
+        async function fetchUserProfilePicture(userId) {
+            try {
+                const response = await fetch(`http://localhost:8080/${userId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
                     }
-                    data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                    const totalStars = data.reduce((sum, review) => sum + review.stars, 0);
-                    const averageRating = totalStars / data.length || 0;
-                    averageRatingDiv.innerHTML = `
-                            <div class="d-flex align-items-center mb-2">
-                                <h5 class="me-2 mb-0">${averageRating.toFixed(1)} / 5</h5>
-                                <div class="star-rating">
-                                    ${'<i class="ri-star-fill text-warning"></i>'.repeat(Math.floor(averageRating)) +
-                    '<i class="ri-star-fill text-muted"></i>'.repeat(5 - Math.floor(averageRating))}
-                                </div>
-                                <span class="ms-2 text-muted">(${data.length} đánh giá)</span>
-                            </div>
-                        `;
-                    const totalPages = Math.ceil(data.length / reviewsPerPage);
-                    const startIndex = (currentPage - 1) * reviewsPerPage;
-                    const endIndex = startIndex + reviewsPerPage;
-                    const paginatedReviews = data.slice(startIndex, endIndex);
-                    reviewList.innerHTML = paginatedReviews.map(review => `
-                            <div class="card p-3 mb-2">
-                                <div class="d-flex align-items-center mb-2">
-                                    <img src="https://i.pravatar.cc/40?img=${review.userId}" alt="Ảnh đại diện" class="rounded-circle me-2" style="width: 40px; height: 40px;"/>
-                                    <div>
-                                        <strong>${review.userName}</strong>
-                                        <div class="star-rating">
-                                            ${'<i class="ri-star-fill text-warning"></i>'.repeat(review.stars) +
-                    '<i class="ri-star-fill text-muted"></i>'.repeat(5 - review.stars)}
-                                        </div>
-                                    </div>
-                                </div>
-                                <p class="text-muted">${review.content}</p>
-                                <small class="text-muted">Đăng vào ${new Date(review.createdAt).toLocaleString('vi-VN')}</small>
-                            </div>
-                        `).join('');
-                    pagination.innerHTML = '';
-                    for (let i = 1; i <= totalPages; i++) {
-                        const button = document.createElement('button');
-                        button.textContent = i;
-                        button.className = i === currentPage ? 'active' : '';
-                        button.addEventListener('click', () => {
-                            currentPage = i;
-                            fetchReviews();
-                        });
-                        pagination.appendChild(button);
-                    }
-                })
-                .catch(error => console.error('Lỗi khi tải đánh giá:', error));
+                });
+                if (!response.ok) {
+                    console.error('Lỗi khi lấy ảnh đại diện:', response.statusText);
+                    return 'your_default_img_url_here';
+                }
+                const userData = await response.json();
+                return userData.profilePicture || 'your_default_img_url_here';
+            } catch (error) {
+                console.error('Lỗi khi fetch ảnh người dùng:', error);
+                return 'your_default_img_url_here';
+            }
         }
+
+        async function fetchReviews() {
+            console.log('Đang tải đánh giá cho productId:', productId);
+            try {
+                const response = await fetch(`/ratings/${productId}`);
+                const data = await response.json();
+
+                if (!data || data.length === 0) {
+                    averageRatingDiv.innerHTML = '<p class="text-muted">Chưa có đánh giá</p>';
+                    reviewList.innerHTML = '';
+                    pagination.innerHTML = '';
+                    return;
+                }
+
+                data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                const totalStars = data.reduce((sum, review) => sum + review.stars, 0);
+                const averageRating = totalStars / data.length || 0;
+                averageRatingDiv.innerHTML = `
+            <div class="d-flex align-items-center mb-2">
+                <h5 class="me-2 mb-0">${averageRating.toFixed(1)} / 5</h5>
+                <div class="star-rating">
+                    ${'<i class="ri-star-fill text-warning"></i>'.repeat(Math.floor(averageRating)) +
+                '<i class="ri-star-fill text-muted"></i>'.repeat(5 - Math.floor(averageRating))}
+                </div>
+                <span class="ms-2 text-muted">(${data.length} đánh giá)</span>
+            </div>
+        `;
+
+                const totalPages = Math.ceil(data.length / reviewsPerPage);
+                const startIndex = (currentPage - 1) * reviewsPerPage;
+                const endIndex = startIndex + reviewsPerPage;
+                const paginatedReviews = data.slice(startIndex, endIndex);
+
+                const reviewHTML = await Promise.all(paginatedReviews.map(async review => {
+                    const profilePicture = await fetchUserProfilePicture(review.userId);
+                    return `
+                <div class="card p-3 mb-2">
+                    <div class="d-flex align-items-center mb-2">
+                        <img src="${profilePicture}" alt="Ảnh đại diện" class="rounded-circle me-2" style="width: 40px; height: 40px;"/>
+                        <div>
+                            <a href="/profile/${review.userId}" class="text-decoration-none text-dark"><strong>${review.userName}</strong></a>
+                            <div class="star-rating">
+                                ${'<i class="ri-star-fill text-warning"></i>'.repeat(review.stars) +
+                    '<i class="ri-star-fill text-muted"></i>'.repeat(5 - review.stars)}
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-muted">${review.content}</p>
+                    <small class="text-muted">Đăng vào ${new Date(review.createdAt).toLocaleString('vi-VN')}</small>
+                </div>
+            `;
+                }));
+
+                reviewList.innerHTML = reviewHTML.join('');
+
+                pagination.innerHTML = '';
+                for (let i = 1; i <= totalPages; i++) {
+                    const button = document.createElement('button');
+                    button.textContent = i;
+                    button.className = i === currentPage ? 'active' : '';
+                    button.addEventListener('click', () => {
+                        currentPage = i;
+                        fetchReviews();
+                    });
+                    pagination.appendChild(button);
+                }
+            } catch (error) {
+                console.error('Lỗi khi tải đánh giá:', error);
+            }
+        }
+
+        // THÊM: Fetch tag từ API và hiển thị badge
+        async function fetchTags() {
+            const productId = getProductIdFromURL();
+            try {
+                const response = await fetch(`http://localhost:8080/api/Tag/product/${productId}`);
+                if (!response.ok) {
+                    console.error('Lỗi khi lấy tag:', response.statusText);
+                    document.getElementById('tagContainer').innerHTML = '<div class="badge bg-secondary tag-badge">Không có tag</div>';
+                    return;
+                }
+                const tags = await response.json();
+                const tagContainer = document.getElementById('tagContainer');
+                if (tags.length === 0) {
+                    tagContainer.innerHTML = '<div class="badge bg-secondary tag-badge">Không có tag</div>';
+                } else {
+                    const colors = ['bg-success', 'bg-primary', 'bg-info', 'bg-warning', 'bg-danger'];
+                    tagContainer.innerHTML = tags.map((tag, index) => `
+                <div class="badge ${colors[index % colors.length]} tag-badge">${tag.tagName}</div>
+            `).join('');
+                }
+            } catch (error) {
+                console.error('Lỗi khi fetch tag:', error);
+                document.getElementById('tagContainer').innerHTML = '<div class="badge bg-secondary tag-badge">Không có tag</div>';
+            }
+        }
+
+        fetchTags();
 
         fetchReviews();
     });

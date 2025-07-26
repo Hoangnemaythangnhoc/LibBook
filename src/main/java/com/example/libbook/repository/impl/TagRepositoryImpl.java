@@ -86,4 +86,29 @@ public class TagRepositoryImpl implements TagRepository {
         return ids;
     }
 
+    @Override
+    public List<Tag> getTagsByProductId(Long productId) {
+        String sql = "SELECT t.TagId, t.TagName FROM [dbo].[Tag] t " +
+                "INNER JOIN [dbo].[ProductTag] pt ON t.TagId = pt.TagId " +
+                "WHERE pt.ProductId = ?";
+        List<Tag> tags = new ArrayList<>();
+        ConnectUtils db = ConnectUtils.getInstance();
+
+        try (Connection connection = db.openConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, productId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Tag tag = new Tag();
+                    tag.setTagId(resultSet.getLong("TagId"));
+                    tag.setTagName(resultSet.getString("TagName"));
+                    tags.add(tag);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return tags;
+    }
+
 }

@@ -10,5 +10,5 @@ public interface TagRepository  {
     ArrayList<Tag> getAllTags();
     Tag getTagById(int id);
     List<Long> getTagByTagName(String tags);
-
+    List<Tag> getTagsByProductId(Long productId);
 }

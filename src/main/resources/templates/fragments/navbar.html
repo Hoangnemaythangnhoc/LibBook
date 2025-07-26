@@ -512,10 +512,10 @@
 
 
                     <th:block th:if="${session.USER != null}">
-                        <!--                        <button class="btn btn-link position-relative ms-2" id="orderStatusBtn" data-bs-toggle="modal"-->
-                        <!--                                data-bs-target="#orderStatusModal">-->
-                        <!--                            <i class="ri-file-list-3-line fs-5"></i> Your order-->
-                        <!--                        </button>-->
+<!--                        <button class="btn btn-link position-relative ms-2" id="orderStatusBtn" data-bs-toggle="modal"-->
+<!--                                data-bs-target="#orderStatusModal">-->
+<!--                            <i class="ri-file-list-3-line fs-5"></i> Your order-->
+<!--                        </button>-->
                         <a href="/chat-widget" class="btn btn-link position-relative ms-2 p-0 me-2" id="navbarChatBtn" style="height: 20px; width: 20px">
                             <i class="ri-chat-3-line fs-6"></i>
                             <span class="position-absolute top-45 start-100 translate-middle badge rounded-pill bg-danger"
@@ -536,6 +536,7 @@
                         <form th:action="@{/profile/{id}(id=${session.USER.getUserId()})}" method="get">
                             <button class="btn btn-primary">Hồ sơ</button>
                         </form>
+
                         <form action="/custom-logout" method="post">
                             <button class="btn btn-warning" type="submit">Đăng xuất</button>
                         </form>
