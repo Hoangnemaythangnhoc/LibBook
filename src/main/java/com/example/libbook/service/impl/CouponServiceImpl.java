@@ -3,6 +3,7 @@ package com.example.libbook.service.impl;
 import com.example.libbook.entity.Coupon;
 import com.example.libbook.repository.CouponRepository;
 import com.example.libbook.service.CouponService;
+import com.example.libbook.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,9 @@ public class CouponServiceImpl implements CouponService {
     @Autowired
     private CouponRepository couponRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @Override
     public List<Coupon> getAllCoupons(String search) {
         return couponRepository.findAll(search);
@@ -22,6 +26,7 @@ public class CouponServiceImpl implements CouponService {
     @Override
     public void createCoupon(Coupon coupon) {
         couponRepository.save(coupon);
+        notificationService.sendNewVoucherNotification(coupon);
     }
 
     @Override

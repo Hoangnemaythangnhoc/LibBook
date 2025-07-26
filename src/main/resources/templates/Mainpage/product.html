@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -234,6 +235,12 @@
             right: 20px;
             z-index: 1050;
         }
+
+        /* NEW: Added CSS for tag badges to match original styling and add spacing */
+        .tag-badge {
+            margin-right: 5px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -269,7 +276,7 @@
                             <span style="font-size: 18px; color: red;" th:if="${product.discount > 0}"
                                   class="h5 mb-0 text-decoration-line-through ms-2"
                                   th:text="${#numbers.formatDecimal(product.price, 2, 2)} + ' ₫'">
-                            </span>
+                             </span>
                             <span style="font-size: 18px; color: red; margin-right: 20px"
                                   th:if="${product.discount > 0}"
                                   class="h5 mb-0 text-decoration ms-2"
@@ -280,6 +287,8 @@
                                   th:text="${#numbers.formatDecimal(discountedPrice, 2, 2)}+' ₫'">
                             </span>
                         </div>
+                        <!-- THÊM: Container để hiển thị tag động từ API -->
+                        <div id="tagContainer"></div>
                         <div class="badge bg-success" style="margin-top: 20px"
                              th:text="'Còn Hàng: ' + ${product.available}">Còn Hàng
                         </div>
@@ -615,6 +624,13 @@
                 });
                 if (!response.ok) {
                     console.error('Lỗi khi lấy ảnh đại diện:', response.statusText);
+                    return 'your_default_img_url_here';
+                }
+                const userData = await response.json();
+                return userData.profilePicture || 'your_default_img_url_here';
+            } catch (error) {
+                console.error('Lỗi khi fetch ảnh người dùng:', error);
+                return 'your_default_img_url_here';
                     return 'your_default_img_url_here'; // Thay bằng URL ảnh mặc định của bạn
                 }
                 const userData = await response.json();
@@ -696,6 +712,34 @@
                 console.error('Lỗi khi tải đánh giá:', error);
             }
         }
+
+        // THÊM: Fetch tag từ API và hiển thị badge
+        async function fetchTags() {
+            const productId = getProductIdFromURL();
+            try {
+                const response = await fetch(`http://localhost:8080/api/Tag/product/${productId}`);
+                if (!response.ok) {
+                    console.error('Lỗi khi lấy tag:', response.statusText);
+                    document.getElementById('tagContainer').innerHTML = '<div class="badge bg-secondary tag-badge">Không có tag</div>';
+                    return;
+                }
+                const tags = await response.json();
+                const tagContainer = document.getElementById('tagContainer');
+                if (tags.length === 0) {
+                    tagContainer.innerHTML = '<div class="badge bg-secondary tag-badge">Không có tag</div>';
+                } else {
+                    const colors = ['bg-success', 'bg-primary', 'bg-info', 'bg-warning', 'bg-danger'];
+                    tagContainer.innerHTML = tags.map((tag, index) => `
+                <div class="badge ${colors[index % colors.length]} tag-badge">${tag.tagName}</div>
+            `).join('');
+                }
+            } catch (error) {
+                console.error('Lỗi khi fetch tag:', error);
+                document.getElementById('tagContainer').innerHTML = '<div class="badge bg-secondary tag-badge">Không có tag</div>';
+            }
+        }
+
+        fetchTags();
 
         fetchReviews();
     });

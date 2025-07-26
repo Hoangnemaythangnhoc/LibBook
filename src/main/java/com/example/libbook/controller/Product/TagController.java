@@ -42,4 +42,13 @@ public class TagController {
     }
 
     // Other methods...
+
+    @GetMapping("product/{productId}")
+    public ResponseEntity<List<Tag>> getTagsByProductId(@PathVariable Long productId) {
+        List<Tag> tags = tagService.getTagsByProductId(productId);
+        if (tags.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(tags);
+    }
 }

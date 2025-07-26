@@ -382,7 +382,6 @@
         <h2>👩‍💼 Customer Care</h2>
         <nav>
             <ul>
-                <li data-section="manage-profile-section" class="active">👤 Quản lý Hồ sơ</li>
                 <li data-section="manage-ratings-section">💬 Quản lý đánh giá</li>
             </ul>
         </nav>
@@ -397,6 +396,9 @@
                     <img th:if="${session.USER != null}" th:src="${session.USER.profilePicture}" alt="Avatar" data-bs-toggle="dropdown" aria-expanded="false" id="avatarDropdown"/>
                     <ul class="dropdown-menu" aria-labelledby="avatarDropdown">
                         <li>
+                            <form th:action="@{/profile/{id}(id=${session.USER.getUserId()})}" method="get">
+                                <button type="submit" class="dropdown-item">Hồ sơ</button>
+                            </form>
                             <form action="/custom-logout" method="post" style="margin: 0;">
                                 <button type="submit" class="dropdown-item">Logout</button>
                             </form>
@@ -502,7 +504,7 @@
 
         // Initialize: Show Manage Profile section by default
         sections.forEach(section => section.style.display = 'none');
-        document.getElementById('manage-profile-section').style.display = 'block';
+        document.getElementById('manage-ratings-section').style.display = 'block';
         sidebarItems[0].classList.add('active');
 
         // Load ratings from API
