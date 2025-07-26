@@ -1,15 +1,14 @@
 package com.example.libbook.service.impl;
 
 import com.example.libbook.entity.Coupon;
-import com.example.libbook.repository.CouponRepository;
+import com.example.libbook.repository.*;
+import com.example.libbook.repository.impl.CheckBuyRepositoryImpl;
 import com.example.libbook.utils.Converter;
 import com.example.libbook.dto.CartItemDTO;
 import com.example.libbook.dto.OrderDataDTO;
 import com.example.libbook.dto.ShippingFormDTO;
 import com.example.libbook.dto.TotalDTO;
 import com.example.libbook.entity.Order;
-import com.example.libbook.repository.OrderDetailRepository;
-import com.example.libbook.repository.OrderRepository;
 import com.example.libbook.service.OrderService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,6 +29,14 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private CouponRepository couponRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private CheckBuyRepository checkBuyRepository;
+    @Autowired
+    private CheckBuyRepositoryImpl checkBuyRepositoryImpl;
 
 
     @Override
@@ -52,6 +59,9 @@ public class OrderServiceImpl implements OrderService {
     public void updateOrderStatus(Integer orderId, Integer newStatusId) {
         System.out.println("OrderService: Updating status for order id: " + orderId + " to status: " + newStatusId);
         orderRepository.updateOrderStatus(orderId, newStatusId);
+        if(newStatusId == 4) {
+            checkBuyRepository.save(orderId, orderRepository.getOrderById(orderId).getUserId());
+        }
         System.out.println("OrderService: Updated status for order id: " + orderId);
     }
 
@@ -71,8 +81,8 @@ public class OrderServiceImpl implements OrderService {
             if (code.equals("")){
                 orderDataDTO.setPromoCode(0);
             }else {
-            Coupon coupon = couponRepository.findByCode(code);
-            orderDataDTO.setPromoCode(coupon.getCouponId());
+                Coupon coupon = couponRepository.findByCode(code);
+                orderDataDTO.setPromoCode(coupon.getCouponId());
             }
             Converter converter = new Converter();
             Order order = converter.convertOrderDTOOrder(orderDataDTO);
@@ -82,6 +92,9 @@ public class OrderServiceImpl implements OrderService {
                 System.err.println("Lỗi khi tạo order.");
                 return false;
             }
+            for (CartItemDTO cart : order.getCartItemDTOS()) {
+                productRepository.updateQuantityProduct(Math.toIntExact(cart.getProductId()), cart.getQuantity());
+            }
 
             boolean orderDetailCheck = orderDetailRepository.addNewOrderDetail(order, orderID);
             return orderDetailCheck;
@@ -90,5 +103,12 @@ public class OrderServiceImpl implements OrderService {
             return false;
         }
     }
+
+    @Override
+    public boolean cancelOrder(Order order) {
+        return orderRepository.cancelOrder(order);
+    }
+
+
 
 }

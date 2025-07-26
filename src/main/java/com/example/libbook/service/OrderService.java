@@ -10,4 +10,5 @@ public interface OrderService {
     Order getOrderById(Integer orderId);
     void updateOrderStatus(Integer orderId, Integer newStatusId);
     boolean addOrder(Map<String, Object> orderData);
+    boolean cancelOrder(Order order);
 }

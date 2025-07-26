@@ -18,4 +18,5 @@ public interface ProductRepository {
     List<Product> getAllDataChart();
     List<String> getAllTags();
     Long addProductFromCSV(Product product, List<Long> tagIds);
+    void updateQuantityProduct(int productID,int quantity);
 }

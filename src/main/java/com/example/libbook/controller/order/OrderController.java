@@ -1,10 +1,12 @@
 package com.example.libbook.controller.order;
 
+import com.example.libbook.dto.OrderDataDTO;
 import com.example.libbook.entity.Order;
 import com.example.libbook.entity.OrderStatus;
 import com.example.libbook.service.OrderService;
 import com.example.libbook.service.OrderStatusService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.projection.CollectionAwareProjectionFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -80,6 +82,31 @@ public class OrderController {
         } catch (Exception e) {
             System.err.println("OrderController: Error fetching order statuses: " + e.getMessage());
             return ResponseEntity.status(500).build();
+        }
+    }
+
+    @PatchMapping("/cancel")
+    public ResponseEntity<?> cancelOrder(@RequestBody Map<String, Integer> request) {
+        try {
+            int orderId = request.get("orderId");
+            int userId = request.get("userId");
+            Order order = orderService.getOrderById(orderId);
+            if (order.getUserId() != userId) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("success", false, "message", "Không có quyền hủy đơn hàng"));
+            }
+            if (order.getOrderStatusId() > 2) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("success", false, "message", "Đơn hàng không thể hủy"));
+            }
+            if (orderService.cancelOrder(order)) {
+                return ResponseEntity.ok(Map.of("success", true));
+            }
+            return ResponseEntity.badRequest()
+                    .body(Map.of("success", false, "message", "Hủy đơn hàng thất bại"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("success", false, "message", e.getMessage()));
         }
     }
 }
