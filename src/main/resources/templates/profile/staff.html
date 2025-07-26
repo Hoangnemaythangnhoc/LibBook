@@ -314,6 +314,8 @@
             transition: all 0.3s ease;
         }
 
+        .profile-section button:hover, .uploadzelfde
+
         .profile-section button:hover, .upload-section button:hover, .manage-ratings button:hover {
             background: linear-gradient(90deg, #2980b9 0%, #1e6b9f 100%);
             transform: translateY(-2px);
@@ -404,58 +406,6 @@
             outline: none;
         }
 
-        .status-select {
-            padding: 0.375rem 0.75rem;
-            border-radius: 0.375rem;
-            border: 1px solid #ced4da;
-            background-color: #ffffff;
-            font-size: 0.875rem;
-            transition: border-color 0.2s ease;
-        }
-
-        .status-select:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-        }
-
-        .btn-update {
-            background-color: #0d6efd;
-            color: #ffffff;
-            border: none;
-            padding: 0.375rem 0.75rem;
-            border-radius: 0.375rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: background-color 0.2s ease;
-            margin-left: 0.5rem;
-        }
-
-        .btn-update:hover {
-            background-color: #0b5ed7;
-        }
-
-        .btn-update:disabled {
-            background-color: #6c757d;
-            cursor: not-allowed;
-        }
-
-        .status-active {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .status-inactive {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1050;
-        }
-
         @media (max-width: 768px) {
             .sidebar {
                 width: 200px;
@@ -508,10 +458,9 @@
         <h2>👩‍💼 Staff Panel</h2>
         <nav>
             <ul>
-                <li data-section="overview-section">📊 Overview</li>
-                <li data-section="manage-books-section">📦 Manage Books</li>
-                <li data-section="manage-ratings-section">💬 Manage Ratings</li>
-                <li data-section="manage-profile-section">👤 Manage Profile</li>
+                <li data-section="overview-section" class="active">📊 Tổng quan</li>
+                <li data-section="manage-books-section">📦 Quản lí sách</li>
+                <li data-section="manage-profile-section">👤 Quản lí thông tin</li>
             </ul>
         </nav>
     </aside>
@@ -520,47 +469,57 @@
         <header class="topbar">
             <h1>Staff Dashboard</h1>
             <div class="staff-info">
-                <span th:text="'Hello, ' + ${staffName ?: 'Staff'}">Hello, Staff</span>
-                <img src="https://i.pravatar.cc/40" alt="Avatar"/>
+                    <span th:if="${session.USER != null}" th:text="'xin chào' + ${session.USER.userName}"></span>
+                    <div class="dropdown">
+                        <img th:if="${session.USER != null}" th:src="${session.USER.profilePicture}" alt="Avatar" data-bs-toggle="dropdown" aria-expanded="false" id="avatarDropdown"/>
+                        <ul class="dropdown-menu" aria-labelledby="avatarDropdown">
+                            <li>
+                                <form action="/custom-logout" method="post" style="margin: 0;">
+                                    <button type="submit" class="dropdown-item">Logout</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
             </div>
         </header>
 
-        <section class="overview" id="overview-section">
+        <section class="overview" id="overview-section" style="display: block;">
             <div style="display: flex; justify-content: space-between">
                 <div class="card" style="width: 50%">
-                    <h3>Books Added</h3>
+                    <h3>Sách đã đăng</h3>
                     <p id="books-added">0</p>
                 </div>
                 <div class="card" style="width: 50%">
-                    <h3>Profile Status</h3>
-                    <p id="profile-status">Updated</p>
+                    <h3>Trạng thái trang cá nhân</h3>
+                    <p id="profile-status">Đã cập nhật</p>
                 </div>
             </div>
         </section>
 
         <section class="recent-books" id="manage-books-section">
-            <h2>Manage Books</h2>
+            <h2>Quản lí sách</h2>
             <div class="search-sort-container">
-                <input type="text" id="searchInput" placeholder="Search by book name or author..."/>
+                <input type="text" id="searchInput" placeholder="Tìm kiếm theo tên sách hoặc tác giả..."/>
                 <select id="sortSelect">
-                    <option value="name-asc">Name (A-Z)</option>
-                    <option value="name-desc">Name (Z-A)</option>
-                    <option value="price-asc">Price (Low to High)</option>
-                    <option value="price-desc">Price (High to Low)</option>
+                    <option value="name-asc">Tên (A-Z)</option>
+                    <option value="name-desc">Tên (Z-A)</option>
+                    <option value="price-asc">Giá (thấp đến cao)</option>
+                    <option value="price-desc">Giá (cao đến thấp)</option>
                 </select>
-                <button id="goToUploadButton" class="btn btn-primary">Add New Book</button>
+                <button id="goToUploadButton" class="btn btn-primary">Thêm sách mới</button>
             </div>
             <table>
                 <thead>
                 <tr>
-                    <th>Image</th>
-                    <th>Book Name</th>
-                    <th>Author</th>
-                    <th>Publisher</th>
-                    <th>Price</th>
-                    <th>Discount</th>
-                    <th>Updated Date</th>
-                    <th>Actions</th>
+                    <th>Ảnh</th>
+                    <th>Tên sách</th>
+                    <th>Tác giả</th>
+                    <th>Nhà xuất bản</th>
+                    <th>Giá</th>
+                    <th>Số lượng</th>
+                    <th>Giảm giá</th>
+                    <th>Ngày cập nhật</th>
+                    <th>Hành động</th>
                 </tr>
                 </thead>
                 <tbody id="book-table-body">
@@ -569,109 +528,26 @@
             <div class="pagination" id="pagination"></div>
         </section>
 
-        <section class="manage-ratings" id="manage-ratings-section">
-            <h2>Manage Ratings</h2>
-            <div class="search-sort-container">
-                <input type="text" id="ratingSearchInput" placeholder="Search by rating ID, user name, or content..."/>
-                <select id="ratingSortSelect">
-                    <option value="id-asc">Rating ID (Asc)</option>
-                    <option value="id-desc">Rating ID (Desc)</option>
-                    <option value="stars-asc">Stars (Low to High)</option>
-                    <option value="stars-desc">Stars (High to Low)</option>
-                    <option value="date-asc">Created Date (Oldest First)</option>
-                    <option value="date-desc">Created Date (Newest First)</option>
-                    <option value="username-asc">User Name (A-Z)</option>
-                    <option value="username-desc">User Name (Z-A)</option>
-                </select>
-            </div>
-            <table>
-                <thead>
-                <tr>
-                    <th>Rating ID</th>
-                    <th>Product Name</th>
-                    <th>User Name</th>
-                    <th>Stars</th>
-                    <th>Created Date</th>
-                    <th>Content</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody id="rating-table-body">
-                </tbody>
-            </table>
-            <div class="pagination" id="rating-pagination"></div>
-        </section>
-
         <section class="profile-section" id="manage-profile-section">
-            <h2>Manage Profile</h2>
+            <h2>Quản lí thông tin</h2>
             <form>
-                <label for="staff-name">Staff Name</label>
+                <label for="staff-name">Tên</label>
                 <input type="text" id="staff-name" th:value="${staffName ?: 'Staff'}"/>
 
                 <label for="staff-email">Email</label>
                 <input type="email" id="staff-email" th:value="${staffEmail ?: 'email@example.com'}"/>
 
-                <label for="staff-phone">Phone Number</label>
+                <label for="staff-phone">Số điện thoại</label>
                 <input type="text" id="staff-phone" th:value="${staffPhone ?: '0123456789'}"/>
 
-                <button type="submit">Update</button>
+                <button type="submit">Cập nhật</button>
             </form>
         </section>
 
         <section class="upload-section" id="upload-book-section">
             <div th:replace="~{fragments/upload-book :: uploadBookFragment}"></div>
         </section>
-
-        <section class="orders-table" id="view-orders-section">
-            <h2>View Orders</h2>
-            <table>
-                <thead>
-                <tr>
-                    <th>Order ID</th>
-                    <th>Customer Name</th>
-                    <th>Book Name</th>
-                    <th>Price</th>
-                    <th>Address</th>
-                    <th>Order Date</th>
-                    <th>Status</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>#001</td>
-                    <td>John Doe</td>
-                    <td>The Universe Explained</td>
-                    <td>$25.99</td>
-                    <td>123 FPTU, Hoa Hai, Ngu Hanh Son, Da Nang</td>
-                    <td>2025-06-01</td>
-                    <td><span class="badge bg-success">Delivered</span></td>
-                </tr>
-                <tr>
-                    <td>#002</td>
-                    <td>Jane Smith</td>
-                    <td>The Mystery of Time</td>
-                    <td>$15.99</td>
-                    <td>123 FPTU, Khu CNC Hoa Lac, Ha Noi</td>
-                    <td>2025-06-02</td>
-                    <td><span class="badge bg-warning">Pending</span></td>
-                </tr>
-                </tbody>
-            </table>
-        </section>
     </main>
-</div>
-
-<div class="toast-container position-fixed top-0 end-0 p-3">
-    <div id="statusToast" class="toast bg-success text-white" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <strong class="me-auto">Notification</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-            Rating status updated successfully!
-        </div>
-    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -684,17 +560,24 @@
     let activeSectionIndex = -1;
     let originalAllBooks = [];
     let allBooks = [];
-    let originalAllRatings = [];
-    let allRatings = [];
     const itemsPerPage = 10;
     let currentPage = 1;
-    let currentRatingPage = 1;
+
+    function debounce(func, wait) {
+        let timeout;
+        return function (...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
+        console.log('DOMContentLoaded triggered');
         sections.forEach(section => section.style.display = 'none');
         document.getElementById('overview-section').style.display = 'block';
         fetchBooks();
         document.getElementById('goToUploadButton').addEventListener('click', () => {
+            console.log('Go to Upload Book clicked');
             sidebarItems.forEach(li => li.classList.remove('active'));
             sections.forEach(section => section.style.display = 'none');
             const uploadSection = document.getElementById('upload-book-section');
@@ -706,11 +589,34 @@
             }
             activeSectionIndex = Array.from(sidebarItems).findIndex(item => item.getAttribute('data-section') === 'upload-book-section');
         });
+
+        // Kiểm tra xem searchInput và sortSelect có tồn tại không
+        const searchInput = document.getElementById('searchInput');
+        const sortSelect = document.getElementById('sortSelect');
+        if (!searchInput || !sortSelect) {
+            console.error('searchInput or sortSelect not found');
+            return;
+        }
+
+        searchInput.addEventListener('input', () => {
+            console.log('Search input changed:', searchInput.value);
+            applyFiltersAndSort();
+            currentPage = 1;
+            renderPagination();
+        });
+
+        sortSelect.addEventListener('change', () => {
+            console.log('Sort option changed:', sortSelect.value);
+            applyFiltersAndSort();
+            currentPage = 1;
+            renderPagination();
+        });
     });
 
     sidebarItems.forEach((item, index) => {
         item.addEventListener('click', () => {
             const sectionId = item.getAttribute('data-section');
+            console.log('Sidebar item clicked:', sectionId);
             const currentSection = document.getElementById(sectionId);
 
             if (activeSectionIndex === index && currentSection.style.display === 'block') {
@@ -718,7 +624,6 @@
             }
 
             sidebarItems.forEach(li => li.classList.remove('active'));
-
             sections.forEach(section => section.style.display = 'none');
 
             if (currentSection) {
@@ -729,8 +634,6 @@
                     fetchBooks();
                 } else if (sectionId === 'upload-book-section') {
                     initializeUploadForm();
-                } else if (sectionId === 'manage-ratings-section') {
-                    fetchRatings();
                 }
             }
 
@@ -739,6 +642,7 @@
     });
 
     function initializeUploadForm() {
+        console.log('Initializing upload form');
         const select = $('#tags');
         if (select.data('select2')) {
             select.select2('destroy');
@@ -762,19 +666,20 @@
             });
     }
 
-    document.getElementById('uploadBookForm').addEventListener('submit', function (e) {
+    document.getElementById('uploadBookForm')?.addEventListener('submit', function (e) {
         e.preventDefault();
+        console.log('Upload book form submitted');
 
-        const name = document.getElementById('name').value;
-        const description = document.getElementById('description').value;
-        const price = parseFloat(document.getElementById('price').value);
-        const available = parseInt(document.getElementById('available').value);
-        const author = document.getElementById('author').value;
-        let publisher = document.getElementById('publisher').value.trim();
-        const discount = parseInt(document.getElementById('discount').value) || 0;
+        const name = document.getElementById('name')?.value;
+        const description = document.getElementById('description')?.value;
+        const price = parseFloat(document.getElementById('price')?.value);
+        const available = parseInt(document.getElementById('available')?.value);
+        const author = document.getElementById('author')?.value;
+        let publisher = document.getElementById('publisher')?.value.trim();
+        const discount = parseInt(document.getElementById('discount')?.value) || 0;
         const tagIds = $('#tags').val() || [];
         const imgInput = document.getElementById('img');
-        const file = imgInput.files[0];
+        const file = imgInput?.files[0];
 
         if (!file) {
             alert('Please select an image file!');
@@ -803,7 +708,7 @@
         const reader = new FileReader();
         reader.onload = function (e) {
             const imgDataUrl = e.target.result;
-            console.log('base64: ' + imgDataUrl);
+
             const newBook = {
                 productName: name,
                 description: description,
@@ -847,33 +752,33 @@
         reader.readAsDataURL(file);
     });
 
-    document.getElementById('cancel-upload-btn').addEventListener('click', function () {
+    document.getElementById('cancel-upload-btn')?.addEventListener('click', function () {
         document.getElementById('uploadBookForm').reset();
         $('#tags').val(null).trigger('change');
     });
 
-    function fetchBooks() {
-        fetch('http://localhost:8080/api/products')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok ' + response.statusText);
-                }
-                return response.json();
-            })
-            .then(data => {
-                originalAllBooks = data.filter(book => book.status === 1);
-                allBooks = [...originalAllBooks];
-                applyFiltersAndSort();
-                renderPagination();
-                document.getElementById('books-added').textContent = allBooks.length;
-            })
-            .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
-                alert('Failed to load books. Check the console for details.');
-            });
+    async function fetchBooks() {
+        console.log('Fetching books...');
+        try {
+            const response = await fetch('http://localhost:8080/api/products');
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            const data = await response.json();
+            console.log('Books fetched:', data);
+            originalAllBooks = data.filter(book => book.status === 1);
+            allBooks = [...originalAllBooks];
+            document.getElementById('books-added').textContent = allBooks.length;
+            applyFiltersAndSort();
+            renderPagination();
+        } catch (error) {
+            console.error('Error fetching books:', error);
+            alert('Failed to load books. Check the console for details.');
+        }
     }
 
     function renderTable() {
+        console.log('Rendering table with books:', allBooks);
         const tableBody = document.getElementById('book-table-body');
         tableBody.innerHTML = '';
 
@@ -881,20 +786,26 @@
         const endIndex = startIndex + itemsPerPage;
         const paginatedBooks = allBooks.slice(startIndex, endIndex);
 
+        if (paginatedBooks.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="8">No books found</td></tr>';
+            return;
+        }
+
         paginatedBooks.forEach(book => {
             const discountedPrice = book.price * ((100 - book.discount) / 100);
             const row = `
                 <tr>
-                    <td><img src="${book.imageFile}" alt="${book.productName} Cover"/></td>
-                    <td>${book.productName}</td>
-                    <td>${book.author}</td>
-                    <td>${book.publisher ?? 'Unknown'}</td>
-                    <td>${discountedPrice.toFixed(2) + " VND"}</td>
-                    <td>${book.discount}%</td>
+                    <td><img src="${book.imageFile || 'https://via.placeholder.com/50'}" alt="${book.productName || 'No Title'} Cover"/></td>
+                    <td>${book.productName || 'No Title'}</td>
+                    <td>${book.author || 'Unknown'}</td>
+                    <td>${book.publisher || 'Unknown'}</td>
+                    <td>${discountedPrice.toFixed(2)} ₫</td>
+                    <td>${book.available}</td>
+                    <td>${book.discount || 0}%</td>
                     <td>${new Date().toISOString().split('T')[0]}</td>
                     <td>
-                        <a href="/staff/edit-book/${book.productId}" class="btn btn-sm btn-primary">Edit</a>
-                        <button class="btn btn-sm btn-danger delete-btn" data-product-id="${book.productId}">Delete</button>
+                        <a href="/staff/edit-book/${book.productId}" class="btn btn-sm btn-primary">Sửa</a>
+                        <button class="btn btn-sm btn-danger delete-btn" data-product-id="${book.productId}">Xóa</button>
                     </td>
                 </tr>
             `;
@@ -913,75 +824,69 @@
         document.getElementById('books-added').textContent = allBooks.length;
     }
 
-    function softDeleteBook(productId) {
-        fetch(`http://localhost:8080/api/products/${productId}/soft-delete`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({status: 0})
-        })
-            .then(response => {
-                if (!response.ok) throw new Error('Failed to delete book');
-                return fetchBooks();
-            })
-            .then(() => {
-                alert('Book deleted successfully!');
-            })
-            .catch(error => {
-                console.error('Error deleting book:', error);
-                alert('Failed to delete book. Check console for details.');
+    async function softDeleteBook(productId) {
+        console.log('Deleting book with ID:', productId);
+        try {
+            const response = await fetch(`http://localhost:8080/api/products/${productId}/soft-delete`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({status: 0})
             });
+            if (!response.ok) throw new Error('Failed to delete book');
+            await fetchBooks();
+            alert('Book deleted successfully!');
+        } catch (error) {
+            console.error('Error deleting book:', error);
+            alert('Failed to delete book. Check console for details.');
+        }
     }
 
     function applyFiltersAndSort() {
+        console.log('Applying filters and sort...');
         const searchTerm = document.getElementById('searchInput').value.toLowerCase();
         const sortOption = document.getElementById('sortSelect').value;
 
+        console.log('Original books:', allBooks);
         allBooks = [...originalAllBooks];
 
         if (searchTerm) {
-            allBooks = allBooks.filter(book =>
-                book.productName.toLowerCase().includes(searchTerm) ||
-                book.author.toLowerCase().includes(searchTerm)
-            );
+            allBooks = allBooks.filter(book => {
+                const productName = book.productName ? book.productName.toLowerCase() : '';
+                const author = book.author ? book.author.toLowerCase() : '';
+                return productName.includes(searchTerm) || author.includes(searchTerm);
+            });
         }
 
         allBooks.sort((a, b) => {
+            const aPrice = a.price * ((100 - (a.discount || 0)) / 100);
+            const bPrice = b.price * ((100 - (b.discount || 0)) / 100);
             switch (sortOption) {
                 case 'name-asc':
-                    return a.productName.localeCompare(b.productName);
+                    return (a.productName || '').localeCompare(b.productName || '');
                 case 'name-desc':
-                    return b.productName.localeCompare(a.productName);
+                    return (b.productName || '').localeCompare(a.productName || '');
                 case 'price-asc':
-                    return a.price * ((100 - a.discount) / 100) - b.price * ((100 - b.discount) / 100);
+                    return aPrice - bPrice;
                 case 'price-desc':
-                    return b.price * ((100 - b.discount) / 100) - a.price * ((100 - a.discount) / 100);
+                    return bPrice - aPrice;
                 default:
                     return 0;
             }
         });
+
+        console.log('Filtered and sorted books:', allBooks);
     }
 
-    document.getElementById('searchInput').addEventListener('input', () => {
-        applyFiltersAndSort();
-        currentPage = 1;
-        renderPagination();
-    });
-
-    document.getElementById('sortSelect').addEventListener('change', () => {
-        applyFiltersAndSort();
-        currentPage = 1;
-        renderPagination();
-    });
-
     function renderPagination() {
+        console.log('Rendering pagination...');
         const totalPages = Math.ceil(allBooks.length / itemsPerPage);
         const pagination = document.getElementById('pagination');
         pagination.innerHTML = '';
 
         const prevButton = document.createElement('button');
-        prevButton.textContent = 'Previous';
+        prevButton.textContent = 'Trước';
         prevButton.disabled = currentPage === 1;
         prevButton.addEventListener('click', () => {
             if (currentPage > 1) {
@@ -1005,7 +910,7 @@
         }
 
         const nextButton = document.createElement('button');
-        nextButton.textContent = 'Next';
+        nextButton.textContent = 'Sau';
         nextButton.disabled = currentPage === totalPages;
         nextButton.addEventListener('click', () => {
             if (currentPage < totalPages) {
@@ -1018,183 +923,6 @@
 
         renderTable();
     }
-
-    async function fetchRatings() {
-        try {
-            const response = await fetch('http://localhost:8080/ratings');
-            if (!response.ok) throw new Error('Failed to load ratings: ' + response.statusText);
-            originalAllRatings = await response.json();
-            allRatings = [...originalAllRatings];
-
-            const productPromises = allRatings.map(async rating => {
-                try {
-                    const productResponse = await fetch(`http://localhost:8080/api/products/${rating.productId}`);
-                    if (productResponse.ok) {
-                        const product = await productResponse.json();
-                        rating.productName = product.productName || 'Unknown';
-                    } else {
-                        rating.productName = 'Unknown';
-                        console.warn(`Product ${rating.productId} not found, status: ${productResponse.status}`);
-                    }
-                } catch (error) {
-                    console.error(`Error fetching product ${rating.productId}:`, error);
-                    rating.productName = 'Unknown';
-                }
-            });
-            await Promise.all(productPromises);
-
-            applyRatingFiltersAndSort();
-            renderRatingPagination();
-        } catch (error) {
-            console.error('Error fetching ratings:', error);
-            alert('Failed to load ratings. Check the console for details.');
-        }
-    }
-
-    function renderRatingTable() {
-        const tableBody = document.getElementById('rating-table-body');
-        tableBody.innerHTML = '';
-        const startIndex = (currentRatingPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        const paginatedRatings = allRatings.slice(startIndex, endIndex);
-        paginatedRatings.forEach(rating => {
-            const statusClass = rating.status ? 'status-active' : 'status-inactive';
-            const row = `
-                <tr>
-                    <td>${rating.ratingId}</td>
-                    <td>${rating.productName || 'Unknown'}</td>
-                    <td>${rating.userName}</td>
-                    <td>${rating.stars}</td>
-                    <td>${new Date(rating.createdAt).toLocaleString('sv-SE', {timeZone: 'Asia/Ho_Chi_Minh'}).slice(0, 19).replace('T', ' ')}</td>
-                    <td>${rating.content}</td>
-                    <td>
-                        <select class="status-select ${statusClass}" id="status-${rating.ratingId}" onchange="updateRatingStatusColor(this, ${rating.ratingId})">
-                            <option value="1" ${rating.status ? 'selected' : ''}>Active</option>
-                            <option value="0" ${!rating.status ? 'selected' : ''}>Inactive</option>
-                        </select>
-                    </td>
-                    <td>
-                        <button class="btn-update" onclick="updateRatingStatus(${rating.ratingId})">Update</button>
-                    </td>
-                </tr>
-            `;
-            tableBody.innerHTML += row;
-        });
-    }
-
-    function updateRatingStatusColor(selectElement, ratingId) {
-        const newStatus = parseInt(selectElement.value);
-        selectElement.classList.remove('status-active', 'status-inactive');
-        selectElement.classList.add(newStatus === 1 ? 'status-active' : 'status-inactive');
-    }
-
-    async function updateRatingStatus(ratingId) {
-        const selectElement = document.getElementById(`status-${ratingId}`);
-        const newStatus = parseInt(selectElement.value) === 1;
-        try {
-            const response = await fetch(`http://localhost:8080/ratings/${ratingId}/status`, {
-                method: 'PATCH',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({status: newStatus})
-            });
-            if (!response.ok) throw new Error('Failed to update rating status: ' + response.statusText);
-            const toast = new bootstrap.Toast(document.getElementById('statusToast'), {delay: 3000});
-            toast.show();
-            await fetchRatings();
-        } catch (error) {
-            console.error('Error updating rating status:', error);
-            alert('Failed to update rating status. Check console for details.');
-            await fetchRatings();
-        }
-    }
-
-    function applyRatingFiltersAndSort() {
-        const searchTerm = document.getElementById('ratingSearchInput').value.toLowerCase();
-        const sortOption = document.getElementById('ratingSortSelect').value;
-        allRatings = [...originalAllRatings];
-        if (searchTerm) {
-            allRatings = allRatings.filter(rating =>
-                rating.ratingId.toString().includes(searchTerm) ||
-                rating.userName.toLowerCase().includes(searchTerm) ||
-                rating.content.toLowerCase().includes(searchTerm) ||
-                (rating.productName && rating.productName.toLowerCase().includes(searchTerm))
-            );
-        }
-        allRatings.sort((a, b) => {
-            switch (sortOption) {
-                case 'id-asc':
-                    return a.ratingId - b.ratingId;
-                case 'id-desc':
-                    return b.ratingId - a.ratingId;
-                case 'stars-asc':
-                    return a.stars - b.stars;
-                case 'stars-desc':
-                    return b.stars - a.stars;
-                case 'date-asc':
-                    return new Date(a.createdAt) - new Date(b.createdAt);
-                case 'date-desc':
-                    return new Date(b.createdAt) - new Date(a.createdAt);
-                case 'username-asc':
-                    return a.userName.localeCompare(b.userName);
-                case 'username-desc':
-                    return b.userName.localeCompare(a.userName);
-                default:
-                    return 0;
-            }
-        });
-    }
-
-    function renderRatingPagination() {
-        const totalPages = Math.ceil(allRatings.length / itemsPerPage);
-        const pagination = document.getElementById('rating-pagination');
-        pagination.innerHTML = '';
-        const prevButton = document.createElement('button');
-        prevButton.textContent = 'Previous';
-        prevButton.disabled = currentRatingPage === 1;
-        prevButton.addEventListener('click', () => {
-            if (currentRatingPage > 1) {
-                currentRatingPage--;
-                renderRatingTable();
-                renderRatingPagination();
-            }
-        });
-        pagination.appendChild(prevButton);
-        for (let i = 1; i <= totalPages; i++) {
-            const pageButton = document.createElement('button');
-            pageButton.textContent = i;
-            pageButton.disabled = i === currentRatingPage;
-            pageButton.addEventListener('click', () => {
-                currentRatingPage = i;
-                renderRatingTable();
-                renderRatingPagination();
-            });
-            pagination.appendChild(pageButton);
-        }
-        const nextButton = document.createElement('button');
-        nextButton.textContent = 'Next';
-        nextButton.disabled = currentRatingPage === totalPages;
-        nextButton.addEventListener('click', () => {
-            if (currentRatingPage < totalPages) {
-                currentRatingPage++;
-                renderRatingTable();
-                renderRatingPagination();
-            }
-        });
-        pagination.appendChild(nextButton);
-        renderRatingTable();
-    }
-
-    document.getElementById('ratingSearchInput')?.addEventListener('input', () => {
-        applyRatingFiltersAndSort();
-        currentRatingPage = 1;
-        renderRatingPagination();
-    });
-
-    document.getElementById('ratingSortSelect')?.addEventListener('change', () => {
-        applyRatingFiltersAndSort();
-        currentRatingPage = 1;
-        renderRatingPagination();
-    });
 </script>
 </body>
 </html>

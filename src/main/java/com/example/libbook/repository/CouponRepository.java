@@ -11,5 +11,5 @@ public interface CouponRepository {
     Coupon findById(Integer id);
     List<Coupon> findAllPaged(String search, int offset, int size);
     int countAll(String search);
-
+    Coupon findByCode(String code);
 }

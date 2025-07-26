@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title th:text="${product.productName} + ' - Books Haven'">Product - Books Haven</title>
+    <title th:text="${product.productName} + ' - LibBook'">Sản Phẩm - LibBook</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
@@ -243,34 +242,31 @@
     <div class="container">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a th:href="@{/home}">Home</a></li>
-                <li class="breadcrumb-item"><a href="#">Fiction</a></li>
-                <li class="breadcrumb-item active" aria-current="page" th:text="${product.productName}">Product Name
-                </li>
+                <li class="breadcrumb-item"><a th:href="@{/home}">Trang Chủ</a></li>
+                <li class="breadcrumb-item active" aria-current="page" th:text="${product.productName}">Tên Sản Phẩm</li>
             </ol>
         </nav>
         <div class="row g-4">
             <div class="col-lg-5">
                 <div class="product-gallery">
-                    <img th:src="${product.imageFile}" alt="Book cover" class="img-fluid rounded shadow"/>
+                    <img th:src="${product.imageFile}" alt="Bìa sách" class="img-fluid rounded shadow"/>
                     <div class="row g-2 mt-2">
                         <div class="col-3">
-                            <img th:src="${product.imageFile}" alt="Thumbnail 1"
-                                 class="img-fluid rounded cursor-pointer border"/>
+                            <img th:src="${product.imageFile}" alt="Hình thu nhỏ 1" class="img-fluid rounded cursor-pointer border"/>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-lg-7">
                 <div class="product-info">
-                    <span class="badge bg-primary mb-2">Book</span>
-                    <h1 class="mb-2" th:text="${product.productName}">Product Name</h1>
-                    <h5 class="text-muted mb-4" th:text="${product.author}">Author Not Available</h5>
+                    <span class="badge bg-primary mb-2">Sách</span>
+                    <h1 class="mb-2" th:text="${product.productName}">Tên Sản Phẩm</h1>
+                    <h5 class="text-muted mb-4" th:text="${product.author}">Tác Giả Không Có</h5>
                     <div class="align-items-center mb-4">
                         <div class="d-flex-start justify-content-between align-items-center">
                             <span style="font-size: 18px; color: red;" th:if="${product.discount > 0}"
                                   class="h5 mb-0 text-decoration-line-through ms-2"
-                                  th:text="${#numbers.formatDecimal(product.price, 2, 2)} + ' VND'">
+                                  th:text="${#numbers.formatDecimal(product.price, 2, 2)} + ' ₫'">
                             </span>
                             <span style="font-size: 18px; color: red; margin-right: 20px"
                                   th:if="${product.discount > 0}"
@@ -279,41 +275,39 @@
                             </span>
                             <span style="font-size: 22px;font-weight: bold; margin-right: 20px"
                                   th:with="discountedPrice=${product.discount > 0 ? product.price * (100 - product.discount) / 100 : product.price}"
-                                  th:text="${#numbers.formatDecimal(discountedPrice, 2, 2)}+' VND'">
+                                  th:text="${#numbers.formatDecimal(discountedPrice, 2, 2)}+' ₫'">
                             </span>
                         </div>
                         <div class="badge bg-success" style="margin-top: 20px"
-                             th:text="'In Stock: ' + ${product.available}">In Stock
-                        </div>
+                             th:text="'Còn Hàng: ' + ${product.available}">Còn Hàng</div>
                     </div>
 
                     <div class="mb-4">
-                        <h4>Description</h4>
-                        <p th:text="${product.description}">Description Not Available</p>
+                        <h4>Mô Tả</h4>
+                        <p th:text="${product.description}">Mô Tả Không Có</p>
                     </div>
 
                     <div class="mb-4">
                         <div class="row">
                             <div class="col-md-6">
-                                <h5>Book Details</h5>
+                                <h5>Thông Tin Sách</h5>
                                 <table class="table">
                                     <tbody>
                                     <tr>
-                                        <td>Buys:</td>
+                                        <td>Lượt Mua:</td>
                                         <td th:text="${product.buys}">0</td>
                                     </tr>
                                     <tr>
-                                        <td>Available:</td>
+                                        <td>Còn Hàng:</td>
                                         <td th:text="${product.available}">0</td>
                                     </tr>
                                     <tr>
-                                        <td>Price:</td>
+                                        <td>Giá:</td>
                                         <td th:with="discountedPrice=${product.discount > 0 ? product.price * (100 - product.discount) / 100 : product.price}"
-                                            th:text="${#numbers.formatDecimal(discountedPrice, 2, 2)}+' VND'">0.00 VND
-                                        </td>
+                                            th:text="${#numbers.formatDecimal(discountedPrice, 2, 2)}+' ₫'">0.00 ₫</td>
                                     </tr>
                                     <tr>
-                                        <td>Rating:</td>
+                                        <td>Đánh Giá:</td>
                                         <td th:text="${product.rating}">0.0</td>
                                     </tr>
                                     </tbody>
@@ -329,7 +323,7 @@
                         </div>
                         <button class="btn btn-primary btn-lg" onclick="addToCart(product)">
                             <i class="ri-shopping-cart-line me-2"></i>
-                            Add to Cart
+                            Thêm Vào Giỏ Hàng
                         </button>
                     </div>
                     <div class="row g-3">
@@ -337,8 +331,8 @@
                             <div class="d-flex align-items-center">
                                 <i class="ri-truck-line fs-4 me-2 text-primary"></i>
                                 <div>
-                                    <h6 class="mb-0">Free Shipping</h6>
-                                    <small class="text-muted">On orders over $35</small>
+                                    <h6 class="mb-0">Miễn Phí Vận Chuyển</h6>
+                                    <small class="text-muted">Cho đơn hàng trên 500.000 ₫</small>
                                 </div>
                             </div>
                         </div>
@@ -346,8 +340,8 @@
                             <div class="d-flex align-items-center">
                                 <i class="ri-refresh-line fs-4 me-2 text-primary"></i>
                                 <div>
-                                    <h6 class="mb-0">Easy Returns</h6>
-                                    <small class="text-muted">30 days return policy</small>
+                                    <h6 class="mb-0">Đổi Trả Dễ Dàng</h6>
+                                    <small class="text-muted">Chính sách đổi trả 30 ngày</small>
                                 </div>
                             </div>
                         </div>
@@ -355,8 +349,8 @@
                             <div class="d-flex align-items-center">
                                 <i class="ri-shield-check-line fs-4 me-2 text-primary"></i>
                                 <div>
-                                    <h6 class="mb-0">Secure Payment</h6>
-                                    <small class="text-muted">100% secure checkout</small>
+                                    <h6 class="mb-0">Thanh Toán An Toàn</h6>
+                                    <small class="text-muted">Thanh toán an toàn 100%</small>
                                 </div>
                             </div>
                         </div>
@@ -366,7 +360,7 @@
         </div>
 
         <!-- AI Help Button -->
-        <div id="chatbot-icon" class="ai-help-btn" title="AI Help">
+        <div id="chatbot-icon" class="ai-help-btn" title="Hỗ Trợ AI">
             <i class="ri-robot-line"></i>
             <span class="star-1"></span>
             <span class="star-2"></span>
@@ -380,24 +374,23 @@
             <div id="chatbot-response">Đang xử lý...</div>
             <button onclick="closeChatbot()">Đóng</button>
         </div>
-
     </div>
 </section>
 
 <!-- Reviews and Comments -->
 <section class="reviews-comments py-5">
     <div class="container">
-        <h3 class="mb-4">Reviews</h3>
+        <h3 class="mb-4">Đánh Giá</h3>
         <div class="row g-4">
             <div class="col-lg-12">
                 <div class="mb-4" id="averageRating"></div>
                 <div class="card p-3 mb-4">
-                    <h5>Add Your Review</h5>
+                    <h5>Thêm Đánh Giá Của Bạn</h5>
                     <form id="reviewForm">
                         <input type="hidden" name="productId" th:value="${product.productId}"/>
                         <input type="hidden" id="ratingValue" name="stars" value="0"/>
                         <div class="mb-3">
-                            <label for="ratingValue" class="form-label">Rating</label>
+                            <label for="ratingValue" class="form-label">Đánh Giá</label>
                             <div class="star-rating" id="starRating">
                                 <i class="ri-star-fill" data-value="1"></i>
                                 <i class="ri-star-fill" data-value="2"></i>
@@ -407,11 +400,11 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label for="review-text" class="form-label">Your Review</label>
+                            <label for="review-text" class="form-label">Nhận Xét Của Bạn</label>
                             <textarea id="review-text" class="form-control" rows="3" name="content"
-                                      placeholder="Write your review here..." required></textarea>
+                                      placeholder="Viết nhận xét của bạn tại đây..." required></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary">Submit Review</button>
+                        <button type="submit" class="btn btn-primary">Gửi Đánh Giá</button>
                     </form>
                 </div>
                 <div class="review-list" id="reviewList"></div>
@@ -422,30 +415,27 @@
 </section>
 
 <!-- Related Books -->
-<section class="related-books py-5 bg-light">
-    <div class="container">
-        <h3 class="mb-4">You May Also Like</h3>
-        <div class="row g-4">
-            <div class="col-lg-3 col-md-6" th:each="relatedProduct : ${relatedProjects}">
-                <div class="book-card bg-white rounded shadow-sm h-100">
-                    <img th:src="${relatedProduct.imageFile}"
-                         class="card-img-top"
-                         alt="Related Book"/>
-                    <div class="card-body">
-                        <p class="text-primary mb-1">Book</p>
-                        <h5 class="card-title" th:text="${relatedProduct.productName}">Related Product</h5>
-                        <p class="card-text text-muted">Author Not Available</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="h5 mb-0" th:text="${#numbers.formatDecimal(relatedProduct.price, 2, 2)+' VND'}">$0.00</span>
-                            <a th:href="@{/product/{id}(id=${relatedProduct.productId})}"
-                               class="btn btn-outline-primary">View Details</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+<!--<section class="related-books py-5 bg-light">-->
+<!--    <div class="container">-->
+<!--        <h3 class="mb-4">Có Thể Bạn Sẽ Thích</h3>-->
+<!--        <div class="row g-4">-->
+<!--            <div class="col-lg-3 col-md-6" th:each="relatedProduct : ${relatedProjects}">-->
+<!--                <div class="book-card bg-white rounded shadow-sm h-100">-->
+<!--                    <img th:src="${relatedProduct.imageFile}" class="card-img-top" alt="Sách Liên Quan"/>-->
+<!--                    <div class="card-body">-->
+<!--                        <p class="text-primary mb-1">Sách</p>-->
+<!--                        <h5 class="card-title" th:text="${relatedProduct.productName}">Sản Phẩm Liên Quan</h5>-->
+<!--                        <p class="card-text text-muted">Tác Giả Không Có</p>-->
+<!--                        <div class="d-flex justify-content-between align-items-center">-->
+<!--                            <span class="h5 mb-0" th:text="${#numbers.formatDecimal(relatedProduct.price, 2, 2)+' ₫'}">0.00 ₫</span>-->
+<!--                            <a th:href="@{/product/{id}(id=${relatedProduct.productId})}" class="btn btn-outline-primary">Xem Chi Tiết</a>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</section>-->
 
 <!-- Footer Placeholder -->
 <div th:insert="~{fragments/footer :: footer}"></div>
@@ -453,7 +443,7 @@
     <div class="toast" id="notificationToast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
             <strong class="me-auto" id="toastTitle"></strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Đóng"></button>
         </div>
         <div class="toast-body" id="toastMessage"></div>
     </div>
@@ -468,8 +458,8 @@
         const productId = getProductIdFromURL();
         const productResponse = await fetch(`/api/products/${productId}`);
         if (!productResponse.ok) {
-            document.getElementById("chatbot-response").innerText = "Không thể tải thông tin sản phẩm. Kiểm tra ID: " + productId;
-            console.error("Fetch error:", await productResponse.text());
+            document.getElementById("chatbot-response").innerText = "Không thể tải thông tin sản phẩm. Vui lòng kiểm tra ID: " + productId;
+            console.error("Lỗi khi tải:", await productResponse.text());
             return;
         }
         const product = await productResponse.json();
@@ -496,7 +486,7 @@
             body: JSON.stringify({title: bookTitle}),
         });
         if (!response.ok) {
-            console.error("Chatbot error:", await response.text());
+            console.error("Lỗi chatbot:", await response.text());
             return "Không thể lấy tóm tắt sách. Vui lòng thử lại sau.";
         }
         const data = await response.json();
@@ -506,7 +496,6 @@
 
 <script src="/js/components.js"></script>
 <script th:inline="javascript">
-    <!--    Message-->
     const toastEl = document.getElementById('notificationToast');
     const toast = new bootstrap.Toast(toastEl, {delay: 5000});
 
@@ -521,7 +510,6 @@
         toastEl.querySelector('.toast-header').classList.add(type === 'success' ? 'bg-success' : 'bg-danger');
         toast.show();
     }
-
 
     let quantity = 1;
     let product = [[${product}]];
@@ -543,7 +531,6 @@
         }
     }
 
-
     const addToCart = async (product) => {
         const cartItem = {
             productId: product.productId,
@@ -559,15 +546,13 @@
         })
             .then(response => {
                 if (response.status === 401) {
-                    showToast("Login required", "You need to login", 'danger');
+                    showToast("Yêu Cầu Đăng Nhập", "Bạn cần đăng nhập để thêm vào giỏ hàng", 'danger');
                 } else if (response.ok) {
-                    showToast("Successfully", "Add to cart successfully!");
-
+                    showToast("Thành Công", "Thêm vào giỏ hàng thành công!");
                 }
             })
             .catch(error => console.error('Lỗi:', error));
     };
-
 
     document.addEventListener('DOMContentLoaded', () => {
         const stars = document.querySelectorAll('#starRating i');
@@ -617,7 +602,7 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                credentials: 'include', // Đảm bảo gửi cookie session
+                credentials: 'include',
                 body: JSON.stringify({
                     productId: parseInt(productId),
                     stars: parseInt(stars),
@@ -626,19 +611,19 @@
             });
 
             if (response.ok) {
-                showToast('Success', 'Rating submitted successfully!', 'success');
+                showToast('Thành Công', 'Gửi đánh giá thành công!', 'success');
                 reviewForm.reset();
                 stars.forEach(s => s.classList.remove('selected'));
                 document.getElementById('ratingValue').value = '0';
                 fetchReviews();
             } else {
                 const errorMessage = await response.text();
-                showToast('Error', errorMessage || 'Failed to submit rating.', 'error');
+                showToast('Lỗi', errorMessage || 'Không thể gửi đánh giá.', 'error');
             }
         });
 
         function fetchReviews() {
-            console.log('Fetching reviews for productId:', productId); // Debug
+            console.log('Đang tải đánh giá cho productId:', productId);
             fetch(`/ratings/${productId}`)
                 .then(response => response.json())
                 .then(data => {
@@ -658,7 +643,7 @@
                                     ${'<i class="ri-star-fill text-warning"></i>'.repeat(Math.floor(averageRating)) +
                     '<i class="ri-star-fill text-muted"></i>'.repeat(5 - Math.floor(averageRating))}
                                 </div>
-                                <span class="ms-2 text-muted">(${data.length} reviews)</span>
+                                <span class="ms-2 text-muted">(${data.length} đánh giá)</span>
                             </div>
                         `;
                     const totalPages = Math.ceil(data.length / reviewsPerPage);
@@ -668,7 +653,7 @@
                     reviewList.innerHTML = paginatedReviews.map(review => `
                             <div class="card p-3 mb-2">
                                 <div class="d-flex align-items-center mb-2">
-                                    <img src="https://i.pravatar.cc/40?img=${review.userId}" alt="User Avatar" class="rounded-circle me-2" style="width: 40px; height: 40px;"/>
+                                    <img src="https://i.pravatar.cc/40?img=${review.userId}" alt="Ảnh đại diện" class="rounded-circle me-2" style="width: 40px; height: 40px;"/>
                                     <div>
                                         <strong>${review.userName}</strong>
                                         <div class="star-rating">
@@ -678,7 +663,7 @@
                                     </div>
                                 </div>
                                 <p class="text-muted">${review.content}</p>
-                                <small class="text-muted">Posted on ${new Date(review.createdAt).toLocaleString()}</small>
+                                <small class="text-muted">Đăng vào ${new Date(review.createdAt).toLocaleString('vi-VN')}</small>
                             </div>
                         `).join('');
                     pagination.innerHTML = '';
@@ -693,7 +678,7 @@
                         pagination.appendChild(button);
                     }
                 })
-                .catch(error => console.error('Error fetching reviews:', error));
+                .catch(error => console.error('Lỗi khi tải đánh giá:', error));
         }
 
         fetchReviews();

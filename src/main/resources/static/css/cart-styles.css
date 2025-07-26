@@ -454,6 +454,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  width: max-content;
 }
 
 .form-group label {
@@ -756,9 +757,10 @@ body {
 }
 
 .form-row {
-  display: grid;
+  display: inline-block;
   grid-template-columns: 1fr;
   gap: 1rem;
+
 }
 
 @media (min-width: 768px) {

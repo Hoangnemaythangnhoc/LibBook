@@ -226,9 +226,11 @@ public class RouterSetting {
     }
 
     @GetMapping("/admin")
-    public String admin(Model model) {
+    public String admin(Model model, HttpSession session) {
         List<Tag> tags = tagService.getAllTags();
         System.out.println("Tags for admin: " + (tags != null ? tags : "No tags fetched"));
+        User user = (User) session.getAttribute("USER");
+        model.addAttribute("USER", user);
         model.addAttribute("tags", tags);
         return "profile/admin";
     }
@@ -264,9 +266,25 @@ public class RouterSetting {
         }
         List<Product> products = productService.getAllProduct();
         List<Tag> tags = tagService.getAllTags();
+        User user = (User) session.getAttribute("USER");
+        model.addAttribute("USER", user);
         model.addAttribute("products", products);
         model.addAttribute("tags", tags);
         return "profile/staff";
+    }
+
+    @GetMapping("/customer-care")
+    public String customerCarePanel(Model model, HttpSession session) {
+        if (session.getAttribute("customer-care") != null) {
+            model.addAttribute("customerCareName", session.getAttribute("customer-care"));
+            model.addAttribute("customerCareEmail", "customercare@example.com");
+            model.addAttribute("customerCarePhone", "0123456789");
+        }
+        List<Product> products = productService.getAllProduct();
+        List<Tag> tags = tagService.getAllTags();
+        model.addAttribute("products", products);
+        model.addAttribute("tags", tags);
+        return "profile/customer-care";
     }
 
     @GetMapping("/shipper")
@@ -280,6 +298,8 @@ public class RouterSetting {
         List<Tag> tags = tagService.getAllTags();
         model.addAttribute("products", products);
         model.addAttribute("tags", tags);
+        User user = (User) session.getAttribute("USER");
+        model.addAttribute("USER", user);
         return "profile/shipper";
     }
 
@@ -328,8 +348,39 @@ public class RouterSetting {
     }
 
     @GetMapping("/chat-widget")
+    public String chat(HttpSession session, HttpServletResponse response,Model model,HttpServletRequest request) {
+        if (session.getAttribute("USER") != null) {
+            User user = (User) session.getAttribute("USER");
+            model.addAttribute("USER", user);
+        } else {
+            System.out.println("User in session is null");
+        }
 
-    public String chat(HttpSession session, HttpServletResponse response) {
+
+        if (session.getAttribute("USER") == null) {
+            Cookie[] cookies = request.getCookies();
+            String email = null;
+            String password = null;
+
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if ("email".equals(cookie.getName())) {
+                        email = cookie.getValue();
+                    }
+                    if ("password".equals(cookie.getName())) {
+                        password = cookie.getValue();
+                    }
+                }
+            }
+
+            if (email != null && password != null) {
+                User user = userService.checkLogin(email, password);
+                if (user != null) {
+                    session.setAttribute("USER", user);
+                    return "redirect:/home";
+                }
+            }
+        }
         return "fragments/chat-widget";
     }
 

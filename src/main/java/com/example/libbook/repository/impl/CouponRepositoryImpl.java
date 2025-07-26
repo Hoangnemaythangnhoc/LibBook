@@ -46,6 +46,11 @@ public class CouponRepositoryImpl implements CouponRepository {
         return jdbcTemplate.queryForObject(sql, new Object[]{id}, rowMapper);
     }
 
+    public Coupon findByCode(String code) {
+        String sql = "SELECT * FROM Coupon WHERE CouponId = ?";
+        return jdbcTemplate.queryForObject(sql, new Object[]{code}, rowMapper);
+    }
+
     @Override
     public void save(Coupon coupon) {
         String sql = "INSERT INTO Coupon (Code, DiscountPercent, Quantity, StartDate, EndDate, IsActive) " +

@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,6 +82,48 @@ public class OrderRepositoryImpl implements OrderRepository {
             System.err.println("OrderRepository: Error updating order status for id " + orderId + ": " + e.getMessage());
             throw new RuntimeException("Error updating order status", e);
         }
+    }
+
+    public int addNewOrder(Order order) {
+        int generatedId = 0;
+        String sql = "INSERT INTO [Order](UserId, CreateDate, OrderStatusId, Address, Paymentstatus, PaymentID) VALUES (?,?,?,?,?,?)";
+
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            pstmt.setInt(1, order.getUserId());
+            pstmt.setDate(2, java.sql.Date.valueOf(order.getCreateDate().toLocalDate()));
+            pstmt.setInt(3, 1); // OrderStatusId mặc định là 1
+            pstmt.setString(4, order.getAddress());
+
+            if ("bank_transfer".equals(order.getPaymentMethod())) {
+                if (order.getTransCode() == null || order.getTransCode().isEmpty()) {
+                    throw new IllegalArgumentException("transCode không được null hoặc rỗng cho thanh toán chuyển khoản");
+                }
+                pstmt.setInt(5, 1); // Paymentstatus = 1 (đã thanh toán)
+                pstmt.setString(6, order.getTransCode());
+            } else {
+                pstmt.setInt(5, order.getPaymentStatus()); // Paymentstatus từ Order
+                pstmt.setNull(6, java.sql.Types.VARCHAR); // PaymentID = NULL cho cod
+            }
+
+            int affectedRows = pstmt.executeUpdate();
+
+            if (affectedRows > 0) {
+                try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        generatedId = rs.getInt(1);
+                    }
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Lỗi khi chèn đơn hàng: " + e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            throw e; // Ném lại để controller xử lý
+        }
+
+        return generatedId;
     }
 
     private Order mapResultSetToOrder(ResultSet rs) throws Exception {

@@ -107,10 +107,12 @@ public class UserRepositoryImpl implements UserRepository {
             while (resultSet.next()) {
                 userDTO = new User();
                 userDTO.setEmail(resultSet.getString("Email"));
-                userDTO.setUserName(resultSet.getString("UserName"));
-                userDTO.setUserId(resultSet.getInt("UserId"));
-                userDTO.setRoleId(resultSet.getInt("RoleId"));
-                password = resultSet.getString("Password");
+                 userDTO.setUserName(resultSet.getString("UserName"));
+                 userDTO.setUserId(resultSet.getInt("UserId"));
+                 userDTO.setRoleId(resultSet.getInt("RoleId"));
+                 password = resultSet.getString("Password");
+                 userDTO.setProfilePicture(resultSet.getString("ProfilePicture"));
+                 userDTO.setPhoneNumber(resultSet.getString("Phonenumber"));
             }
             if (password.equals(hashPassword(pass)))
                 return userDTO;
@@ -136,6 +138,9 @@ public class UserRepositoryImpl implements UserRepository {
                 userDTO.setUserName(resultSet.getString("UserName"));
                 userDTO.setUserId(resultSet.getInt("UserId"));
                 userDTO.setRoleId(resultSet.getInt("RoleId"));
+                userDTO.setProfilePicture(resultSet.getString("ProfilePicture"));
+                userDTO.setPhoneNumber(resultSet.getString("Phonenumber"));
+
             }
             return userDTO;
         } catch (Exception e) {
@@ -195,6 +200,7 @@ public class UserRepositoryImpl implements UserRepository {
                 user.setDateOfBirth(rs.getDate("DateOfBirth") != null ?
                         rs.getDate("DateOfBirth").toLocalDate() : null);
                 user.setProfilePicture(rs.getString("ProfilePicture"));
+                user.setIsSubscribed(rs.getBoolean("IsSubscribed"));
                 logger.info("Đã tìm thấy người dùng với ID: {}", id);
             } else {
                 logger.warn("Không tìm thấy người dùng với ID: {}", id);
@@ -218,10 +224,10 @@ public class UserRepositoryImpl implements UserRepository {
         String sql = "UPDATE [User] SET [Password] = ? WHERE [Email] = ? ";
         try (Connection connection = db.openConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, hashPass);
-            statement.setString(2, email);
-            int check = statement.executeUpdate();
-            return check > 0;
+                statement.setString(1, hashPass);
+                statement.setString(2, email);
+                int check = statement.executeUpdate();
+                return check > 0;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } catch (Exception e) {
@@ -354,5 +360,39 @@ public class UserRepositoryImpl implements UserRepository {
         );
     }
 
+    @Override
+    public void updateUserSubscription(int userId, boolean isSubscribed) {
+        String sql = "UPDATE [User] SET IsSubscribed = ? WHERE UserId = ?";
+        try (Connection con = ConnectUtils.getInstance().openConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setBoolean(1, isSubscribed);
+            stmt.setInt(2, userId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            logger.error("Lỗi khi cập nhật trạng thái đăng ký thông báo cho userId: {}", userId, e);
+            throw new RuntimeException("Lỗi khi cập nhật trạng thái đăng ký", e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<String> getSubscribedEmails() {
+        String sql = "SELECT Email FROM [User] WHERE IsSubscribed = 1";
+        List<String> emails = new ArrayList<>();
+        try (Connection con = ConnectUtils.getInstance().openConnection();
+             PreparedStatement stmt = con.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                emails.add(rs.getString("Email"));
+            }
+        } catch (SQLException e) {
+            logger.error("Lỗi khi lấy danh sách email đã đăng ký", e);
+            throw new RuntimeException("Lỗi khi lấy danh sách email", e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return emails;
+    }
 
 }

@@ -6,6 +6,7 @@ import com.example.libbook.dto.FileUploadDTO;
 import com.example.libbook.dto.RatingDTO;
 import com.example.libbook.dto.UserDTO;
 import com.example.libbook.entity.User;
+import com.example.libbook.repository.impl.RoleRepositoryImpl;
 import com.example.libbook.service.EmailTokenService;
 import com.example.libbook.service.RatingService;
 import com.example.libbook.service.UserService;
@@ -127,8 +128,15 @@ public class UserController {
             response.addCookie(emailCookie);
             response.addCookie(passwordCookie);
         }
-
-        return "redirect:/home";
+        while(true){
+            switch (user.getRoleId()){
+                case 1: return "profile/admin";
+                case 2: return "redirect:/home";
+                case 3: return "profile/staff";
+                case 4: return  "profile/customer-care";
+                case 5: return "profile/shipper";
+            }
+        }
     }
 
 
@@ -300,5 +308,10 @@ public class UserController {
         }
     }
 
+    @PostMapping("/subscribe")
+    public ResponseEntity<String> updateSubscription(@RequestParam int userId, @RequestParam boolean isSubscribed) {
+        userService.updateUserSubscription(userId, isSubscribed);
+        return ResponseEntity.ok("Cập nhật trạng thái đăng ký thành công");
+    }
 
 }

@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title th:text="${tagName} + ' - LibBook'">Category - LibBook</title>
+    <title th:text="${tagName} + ' - LibBook'">Danh Mục - LibBook</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet"/>
     <link rel="stylesheet" href="/css/home.css"/>
@@ -38,6 +37,15 @@
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
         }
+
+        .alert.d-none {
+            display: none;
+        }
+
+        .rating {
+            font-size: 0.9rem;
+            color: #ffc107; /* Màu vàng cho sao */
+        }
     </style>
 </head>
 
@@ -50,31 +58,58 @@
         <div class="row align-items-center">
             <div class="col-lg-6">
                 <h1 class="display-4 fw-bold mb-3">
-                    Explore
-                    <span class="text-primary" th:text="${tagName}"></span> Books
+                    Khám Phá Sách
+                    <span class="text-primary" th:text="${tagName}"></span>
                 </h1>
-                <p class="lead mb-4">Find the best books in your favorite category!</p>
+                <p class="lead mb-4">Tìm những cuốn sách hay nhất trong danh mục yêu thích của bạn!</p>
                 <div class="search-form mb-4">
-                    <form th:action="@{/category/search}" method="get" class="bg-white p-4 rounded shadow-sm">
+                    <form id="filterForm" class="bg-white p-4 rounded shadow-sm"
+                          onsubmit="return filterProducts(event)">
                         <div class="row g-3">
-                            <div class="col-md-5">
-                                <input type="text" class="form-control" name="searchQuery" placeholder="Search by title or author"/>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control" id="searchQuery" name="searchQuery"
+                                       placeholder="Tìm kiếm theo tiêu đề hoặc tác giả"/>
                             </div>
-                            <div class="col-md-4">
-                                <select class="form-select" name="selectedTag" id="categorySelect" onchange="redirectToCategory()">
-                                    <option value="" selected>All Categories</option>
-                                    <option th:each="tag : ${tags}" th:value="${tag.tagName}" th:text="${tag.tagName}"></option>
-                                </select>
-                            </div>
+<!--                            <div class="col-md-4">-->
+<!--                                <select class="form-select" name="selectedTag" id="categorySelect"-->
+<!--                                        onchange="redirectToCategory()">-->
+<!--                                    <option value="" selected>Tất Cả Danh Mục</option>-->
+<!--                                    <option th:each="tag : ${tags}" th:value="${tag.tagName}"-->
+<!--                                            th:text="${tag.tagName}"></option>-->
+<!--                                </select>-->
+<!--                            </div>-->
                             <div class="col-md-3">
-                                <button type="submit" class="btn btn-primary w-100">Search</button>
+                                <button type="submit" class="btn btn-primary w-100">Tìm Kiếm</button>
                             </div>
                         </div>
+                        <!-- Bộ lọc giá và đánh giá -->
+                        <div class="row g-3 mt-3">
+                            <div class="col-md-3">
+                                <input type="number" class="form-control" id="minPrice" name="minPrice"
+                                       placeholder="Giá Tối Thiểu (₫)" min="0"/>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="number" class="form-control" id="maxPrice" name="maxPrice"
+                                       placeholder="Giá Tối Đa (₫)" min="0"/>
+                            </div>
+                            <div class="col-md-6">
+                                <select class="form-select" id="rating" name="rating">
+                                    <option value="" selected>Tất Cả Đánh Giá</option>
+                                    <option value="1">1 ⭐</option>
+                                    <option value="2">2 ⭐</option>
+                                    <option value="3">3 ⭐</option>
+                                    <option value="4">4 ⭐</option>
+                                    <option value="5">5 ⭐</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Thông báo lỗi -->
+                        <div id="errorMessage" class="alert alert-danger mt-3 d-none"></div>
                     </form>
                 </div>
             </div>
             <div class="col-lg-6">
-                <img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66" alt="Books"
+                <img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66" alt="Sách"
                      class="img-fluid rounded shadow"/>
             </div>
         </div>
@@ -86,30 +121,35 @@
     <div class="container">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a th:href="@{/home}">Home</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/home}">Trang Chủ</a></li>
                 <li class="breadcrumb-item active" aria-current="page" th:text="${tagName}"></li>
             </ol>
         </nav>
 
-        <h2 class="mb-4" th:text="${tagName} + ' Books'"></h2>
+        <h2 class="mb-4" th:text="${tagName} + ' Sách'"></h2>
 
         <div th:if="${products == null or products.isEmpty()}">
-            <p class="text-center text-muted">No products available for this category.</p>
+            <p class="text-center text-muted">Không có sản phẩm nào trong danh mục này.</p>
         </div>
 
-        <div th:unless="${products == null or products.isEmpty()}" class="row g-4">
-            <div class="col-lg-3 col-md-6" th:each="product : ${products}">
+        <div th:unless="${products == null or products.isEmpty()}" class="row g-4" id="productList">
+            <div class="col-lg-3 col-md-6" th:each="product : ${products}" th:data-price="${product.price}"
+                 th:data-rating="${product.rating ?: 0}">
                 <div class="book-card bg-white rounded shadow-sm">
                     <img th:src="${product.imageFile.startsWith('http') ? product.imageFile : '/images/' + product.imageFile}"
-                         class="card-img-top" alt="Book Cover"/>
+                         class="card-img-top" alt="Bìa Sách"/>
                     <div class="card-body">
-                        <p class="text-primary mb-1">Book</p>
+                        <p class="text-primary mb-1">Sách</p>
                         <h5 class="card-title" th:text="${product.productName}"></h5>
                         <p class="card-text text-muted" th:text="${product.description}"></p>
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="h5 mb-0" th:text="${product.price}+' VND'"></span>
+                            <span class="h5 mb-0" th:text="${product.price}+' ₫'"></span>
+                            <span class="rating"
+                                  th:text="${product.rating != null ? product.rating + ' ⭐' : 'Chưa có đánh giá'}"></span>
+                        </div>
+                        <div class="mt-1">
                             <a th:href="@{/product/{id}(id=${product.productId})}"
-                               class="btn btn-outline-primary">View Details</a>
+                               class="btn btn-outline-primary">Xem Chi Tiết</a>
                         </div>
                     </div>
                 </div>
@@ -129,6 +169,42 @@
         if (selectedTag) {
             window.location.href = '/category/' + encodeURIComponent(selectedTag);
         }
+    }
+
+    function filterProducts(event) {
+        event.preventDefault();
+
+        const searchQuery = document.getElementById('searchQuery').value.toLowerCase();
+        const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
+        const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
+        const rating = parseInt(document.getElementById('rating').value) || 0;
+        const errorMessage = document.getElementById('errorMessage');
+
+        if (minPrice > maxPrice && maxPrice !== 0) {
+            errorMessage.textContent = 'Giá tối thiểu không thể lớn hơn giá tối đa';
+            errorMessage.classList.remove('d-none');
+            return;
+        } else {
+            errorMessage.classList.add('d-none');
+        }
+
+        const products = document.querySelectorAll('#productList > div');
+
+        products.forEach(product => {
+            const price = parseFloat(product.dataset.price);
+            const productRating = parseInt(product.dataset.rating) || 0;
+            const title = product.querySelector('.card-title').textContent.toLowerCase();
+
+            const matchesSearch = searchQuery ? title.includes(searchQuery) : true;
+            const matchesPrice = price >= minPrice && (maxPrice === Infinity || price <= maxPrice);
+            const matchesRating = rating === 0 || (rating === 5 ? productRating === 5 : productRating >= rating);
+
+            if (matchesSearch && matchesPrice && matchesRating) {
+                product.style.display = 'block';
+            } else {
+                product.style.display = 'none';
+            }
+        });
     }
 </script>
 </body>
