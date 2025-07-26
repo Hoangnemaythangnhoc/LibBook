@@ -537,6 +537,12 @@
                             <button class="btn btn-primary">Hồ sơ</button>
                         </form>
 
+                        <form th:if="${session.USER.roleId == 1}" action="/admin" method="get">
+                            <button class="btn btn-primary">Quản lý</button>
+                        </form>
+                        <form th:if="${session.USER.roleId == 3}" action="/staff" method="get">
+                            <button class="btn btn-primary">Quản lý</button>
+                        </form>
                         <form action="/custom-logout" method="post">
                             <button class="btn btn-warning" type="submit">Đăng xuất</button>
                         </form>
