@@ -9,6 +9,6 @@ import java.util.List;
 public interface TagRepository  {
     ArrayList<Tag> getAllTags();
     Tag getTagById(int id);
-    List<Long> getTagByTagName(String Taglist);
+    List<Long> getTagByTagName(String tags);
 
 }

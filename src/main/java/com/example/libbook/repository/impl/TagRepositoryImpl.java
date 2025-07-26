@@ -83,7 +83,7 @@ public class TagRepositoryImpl implements TagRepository {
                 e.printStackTrace();
             }
         }
-        return null;
+        return ids;
     }
 
 }

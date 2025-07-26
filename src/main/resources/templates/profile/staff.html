@@ -133,7 +133,7 @@
             border-radius: 50%;
             width: 45px;
             height: 45px;
-            border: 2px solid #3498db;
+            border:  2px solid #3498db;
             transition: transform 0.3s ease;
         }
 
@@ -313,6 +313,8 @@
             font-weight: 600;
             transition: all 0.3s ease;
         }
+
+        .profile-section button:hover, .uploadzelfde
 
         .profile-section button:hover, .upload-section button:hover, .manage-ratings button:hover {
             background: linear-gradient(90deg, #2980b9 0%, #1e6b9f 100%);
@@ -690,6 +692,14 @@
     let currentPage = 1;
     let currentRatingPage = 1;
 
+    function debounce(func, wait) {
+        let timeout;
+        return function (...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         sections.forEach(section => section.style.display = 'none');
         document.getElementById('overview-section').style.display = 'block';
@@ -705,6 +715,31 @@
                 initializeUploadForm();
             }
             activeSectionIndex = Array.from(sidebarItems).findIndex(item => item.getAttribute('data-section') === 'upload-book-section');
+        });
+
+        document.getElementById('searchInput').addEventListener('input', debounce(() => {
+            console.log('Search input changed:', document.getElementById('searchInput').value);
+            applyFiltersAndSort();
+            currentPage = 1;
+            renderPagination();
+        }, 300));
+
+        document.getElementById('sortSelect').addEventListener('change', () => {
+            applyFiltersAndSort();
+            currentPage = 1;
+            renderPagination();
+        });
+
+        document.getElementById('ratingSearchInput')?.addEventListener('input', debounce(() => {
+            applyRatingFiltersAndSort();
+            currentRatingPage = 1;
+            renderRatingPagination();
+        }, 300));
+
+        document.getElementById('ratingSortSelect')?.addEventListener('change', () => {
+            applyRatingFiltersAndSort();
+            currentRatingPage = 1;
+            renderRatingPagination();
         });
     });
 
@@ -861,6 +896,7 @@
                 return response.json();
             })
             .then(data => {
+                console.log('Fetched books:', data);
                 originalAllBooks = data.filter(book => book.status === 1);
                 allBooks = [...originalAllBooks];
                 applyFiltersAndSort();
@@ -876,30 +912,36 @@
     function renderTable() {
         const tableBody = document.getElementById('book-table-body');
         tableBody.innerHTML = '';
+        console.log('Rendering table with books:', allBooks);
 
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
         const paginatedBooks = allBooks.slice(startIndex, endIndex);
+        console.log('Paginated books:', paginatedBooks);
 
-        paginatedBooks.forEach(book => {
-            const discountedPrice = book.price * ((100 - book.discount) / 100);
-            const row = `
-                <tr>
-                    <td><img src="${book.imageFile}" alt="${book.productName} Cover"/></td>
-                    <td>${book.productName}</td>
-                    <td>${book.author}</td>
-                    <td>${book.publisher ?? 'Unknown'}</td>
-                    <td>${discountedPrice.toFixed(2) + " VND"}</td>
-                    <td>${book.discount}%</td>
-                    <td>${new Date().toISOString().split('T')[0]}</td>
-                    <td>
-                        <a href="/staff/edit-book/${book.productId}" class="btn btn-sm btn-primary">Edit</a>
-                        <button class="btn btn-sm btn-danger delete-btn" data-product-id="${book.productId}">Delete</button>
-                    </td>
-                </tr>
-            `;
-            tableBody.innerHTML += row;
-        });
+        if (paginatedBooks.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No books found.</td></tr>';
+        } else {
+            paginatedBooks.forEach(book => {
+                const discountedPrice = book.price * ((100 - book.discount) / 100);
+                const row = `
+                    <tr>
+                        <td><img src="${book.imageFile}" alt="${book.productName} Cover"/></td>
+                        <td>${book.productName}</td>
+                        <td>${book.author}</td>
+                        <td>${book.publisher ?? 'Unknown'}</td>
+                        <td>${discountedPrice.toFixed(2) + " VND"}</td>
+                        <td>${book.discount}%</td>
+                        <td>${new Date().toISOString().split('T')[0]}</td>
+                        <td>
+                            <a href="/staff/edit-book/${book.productId}" class="btn btn-sm btn-primary">Edit</a>
+                            <button class="btn btn-sm btn-danger delete-btn" data-product-id="${book.productId}">Delete</button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        }
 
         document.querySelectorAll('.delete-btn').forEach(button => {
             button.addEventListener('click', function () {
@@ -938,14 +980,19 @@
         const searchTerm = document.getElementById('searchInput').value.toLowerCase();
         const sortOption = document.getElementById('sortSelect').value;
 
+        console.log('Original books:', allBooks);
         allBooks = [...originalAllBooks];
 
         if (searchTerm) {
-            allBooks = allBooks.filter(book =>
-                book.productName.toLowerCase().includes(searchTerm) ||
-                book.author.toLowerCase().includes(searchTerm)
-            );
+            allBooks = allBooks.filter(book => {
+                const matches = (book.productName?.toLowerCase().includes(searchTerm) || false) ||
+                    (book.author?.toLowerCase().includes(searchTerm) || false);
+                console.log(`Book: ${book.productName}, Matches: ${matches}`);
+                return matches;
+            });
         }
+
+        console.log('Filtered books:', allBooks);
 
         allBooks.sort((a, b) => {
             switch (sortOption) {
@@ -962,18 +1009,6 @@
             }
         });
     }
-
-    document.getElementById('searchInput').addEventListener('input', () => {
-        applyFiltersAndSort();
-        currentPage = 1;
-        renderPagination();
-    });
-
-    document.getElementById('sortSelect').addEventListener('change', () => {
-        applyFiltersAndSort();
-        currentPage = 1;
-        renderPagination();
-    });
 
     function renderPagination() {
         const totalPages = Math.ceil(allBooks.length / itemsPerPage);
@@ -1183,18 +1218,6 @@
         pagination.appendChild(nextButton);
         renderRatingTable();
     }
-
-    document.getElementById('ratingSearchInput')?.addEventListener('input', () => {
-        applyRatingFiltersAndSort();
-        currentRatingPage = 1;
-        renderRatingPagination();
-    });
-
-    document.getElementById('ratingSortSelect')?.addEventListener('change', () => {
-        applyRatingFiltersAndSort();
-        currentRatingPage = 1;
-        renderRatingPagination();
-    });
 </script>
 </body>
 </html>

@@ -111,6 +111,7 @@ public class UserRepositoryImpl implements UserRepository {
                 userDTO.setUserId(resultSet.getInt("UserId"));
                 userDTO.setRoleId(resultSet.getInt("RoleId"));
                 password = resultSet.getString("Password");
+                userDTO.setProfilePicture(resultSet.getString("ProfilePicture"));
             }
             if (password.equals(hashPassword(pass)))
                 return userDTO;
@@ -136,6 +137,7 @@ public class UserRepositoryImpl implements UserRepository {
                 userDTO.setUserName(resultSet.getString("UserName"));
                 userDTO.setUserId(resultSet.getInt("UserId"));
                 userDTO.setRoleId(resultSet.getInt("RoleId"));
+                userDTO.setProfilePicture(resultSet.getString("ProfilePicture"));
             }
             return userDTO;
         } catch (Exception e) {

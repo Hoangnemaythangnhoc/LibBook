@@ -17,4 +17,5 @@ public interface ProductRepository {
     List<String> getRandomTags(int limit);
     List<Product> getAllDataChart();
     List<String> getAllTags();
+    Long addProductFromCSV(Product product, List<Long> tagIds);
 }

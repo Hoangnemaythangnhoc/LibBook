@@ -226,9 +226,11 @@ public class RouterSetting {
     }
 
     @GetMapping("/admin")
-    public String admin(Model model) {
+    public String admin(Model model, HttpSession session) {
         List<Tag> tags = tagService.getAllTags();
         System.out.println("Tags for admin: " + (tags != null ? tags : "No tags fetched"));
+        User user = (User) session.getAttribute("USER");
+        model.addAttribute("USER", user);
         model.addAttribute("tags", tags);
         return "profile/admin";
     }
@@ -264,6 +266,8 @@ public class RouterSetting {
         }
         List<Product> products = productService.getAllProduct();
         List<Tag> tags = tagService.getAllTags();
+        User user = (User) session.getAttribute("USER");
+        model.addAttribute("USER", user);
         model.addAttribute("products", products);
         model.addAttribute("tags", tags);
         return "profile/staff";

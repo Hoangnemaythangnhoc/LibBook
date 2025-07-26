@@ -34,6 +34,7 @@ const fetchUserChat = async () => {
         const response = await fetch("/chat/user", {
             headers: {
                 "X-Requested-With": "XMLHttpRequest",
+                "Content-Type": "application/json",
             },
         });
         const data = await response.json();

@@ -56,6 +56,7 @@ public class DynamicHtml {
 
         }
         if (u.getRoleId() == 1) return "redirect:/admin";
+        if (u.getRoleId() == 3) return "redirect:/staff";
         session.setAttribute("USER", u);
         return "redirect:/home";
     }
