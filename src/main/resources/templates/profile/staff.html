@@ -133,7 +133,7 @@
             border-radius: 50%;
             width: 45px;
             height: 45px;
-            border:  2px solid #3498db;
+            border: 2px solid #3498db;
             transition: transform 0.3s ease;
         }
 
@@ -469,7 +469,7 @@
         <header class="topbar">
             <h1>Staff Dashboard</h1>
             <div class="staff-info">
-                    <span th:if="${session.USER != null}" th:text="'xin chào' + ${session.USER.userName}"></span>
+                    <span th:if="${session.USER != null}" th:text="'xin chào ' + ${session.USER.userName}"></span>
                     <div class="dropdown">
                         <img th:if="${session.USER != null}" th:src="${session.USER.profilePicture}" alt="Avatar" data-bs-toggle="dropdown" aria-expanded="false" id="avatarDropdown"/>
                         <ul class="dropdown-menu" aria-labelledby="avatarDropdown">
@@ -480,8 +480,6 @@
                             </li>
                         </ul>
                     </div>
-                <span th:if="${session.USER != null}" th:text="'Hello ' + ${session.USER.userName}"></span>
-                <img th:if="${session.USER != null}" th:src="${session.USER.profilePicture}" alt="Avatar"/>
             </div>
         </header>
 
@@ -573,14 +571,6 @@
         };
     }
 
-    function debounce(func, wait) {
-        let timeout;
-        return function (...args) {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, args), wait);
-        };
-    }
-
     document.addEventListener('DOMContentLoaded', () => {
         console.log('DOMContentLoaded triggered');
         sections.forEach(section => section.style.display = 'none');
@@ -617,29 +607,9 @@
 
         sortSelect.addEventListener('change', () => {
             console.log('Sort option changed:', sortSelect.value);
-        document.getElementById('searchInput').addEventListener('input', debounce(() => {
-            console.log('Search input changed:', document.getElementById('searchInput').value);
             applyFiltersAndSort();
             currentPage = 1;
             renderPagination();
-        }, 300));
-
-        document.getElementById('sortSelect').addEventListener('change', () => {
-            applyFiltersAndSort();
-            currentPage = 1;
-            renderPagination();
-        });
-
-        document.getElementById('ratingSearchInput')?.addEventListener('input', debounce(() => {
-            applyRatingFiltersAndSort();
-            currentRatingPage = 1;
-            renderRatingPagination();
-        }, 300));
-
-        document.getElementById('ratingSortSelect')?.addEventListener('change', () => {
-            applyRatingFiltersAndSort();
-            currentRatingPage = 1;
-            renderRatingPagination();
         });
     });
 
@@ -805,33 +775,12 @@
             console.error('Error fetching books:', error);
             alert('Failed to load books. Check the console for details.');
         }
-    function fetchBooks() {
-        fetch('http://localhost:8080/api/products')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok ' + response.statusText);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Fetched books:', data);
-                originalAllBooks = data.filter(book => book.status === 1);
-                allBooks = [...originalAllBooks];
-                applyFiltersAndSort();
-                renderPagination();
-                document.getElementById('books-added').textContent = allBooks.length;
-            })
-            .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
-                alert('Failed to load books. Check the console for details.');
-            });
     }
 
     function renderTable() {
         console.log('Rendering table with books:', allBooks);
         const tableBody = document.getElementById('book-table-body');
         tableBody.innerHTML = '';
-        console.log('Rendering table with books:', allBooks);
 
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
@@ -862,31 +811,6 @@
             `;
             tableBody.innerHTML += row;
         });
-        console.log('Paginated books:', paginatedBooks);
-
-        if (paginatedBooks.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No books found.</td></tr>';
-        } else {
-            paginatedBooks.forEach(book => {
-                const discountedPrice = book.price * ((100 - book.discount) / 100);
-                const row = `
-                    <tr>
-                        <td><img src="${book.imageFile}" alt="${book.productName} Cover"/></td>
-                        <td>${book.productName}</td>
-                        <td>${book.author}</td>
-                        <td>${book.publisher ?? 'Unknown'}</td>
-                        <td>${discountedPrice.toFixed(2) + " VND"}</td>
-                        <td>${book.discount}%</td>
-                        <td>${new Date().toISOString().split('T')[0]}</td>
-                        <td>
-                            <a href="/staff/edit-book/${book.productId}" class="btn btn-sm btn-primary">Edit</a>
-                            <button class="btn btn-sm btn-danger delete-btn" data-product-id="${book.productId}">Delete</button>
-                        </td>
-                    </tr>
-                `;
-                tableBody.innerHTML += row;
-            });
-        }
 
         document.querySelectorAll('.delete-btn').forEach(button => {
             button.addEventListener('click', function () {
@@ -932,14 +856,8 @@
                 const productName = book.productName ? book.productName.toLowerCase() : '';
                 const author = book.author ? book.author.toLowerCase() : '';
                 return productName.includes(searchTerm) || author.includes(searchTerm);
-                const matches = (book.productName?.toLowerCase().includes(searchTerm) || false) ||
-                    (book.author?.toLowerCase().includes(searchTerm) || false);
-                console.log(`Book: ${book.productName}, Matches: ${matches}`);
-                return matches;
             });
         }
-
-        console.log('Filtered books:', allBooks);
 
         allBooks.sort((a, b) => {
             const aPrice = a.price * ((100 - (a.discount || 0)) / 100);
@@ -1004,171 +922,6 @@
         pagination.appendChild(nextButton);
 
         renderTable();
-    }
-
-    async function fetchRatings() {
-        try {
-            const response = await fetch('http://localhost:8080/ratings');
-            if (!response.ok) throw new Error('Failed to load ratings: ' + response.statusText);
-            originalAllRatings = await response.json();
-            allRatings = [...originalAllRatings];
-
-            const productPromises = allRatings.map(async rating => {
-                try {
-                    const productResponse = await fetch(`http://localhost:8080/api/products/${rating.productId}`);
-                    if (productResponse.ok) {
-                        const product = await productResponse.json();
-                        rating.productName = product.productName || 'Unknown';
-                    } else {
-                        rating.productName = 'Unknown';
-                        console.warn(`Product ${rating.productId} not found, status: ${productResponse.status}`);
-                    }
-                } catch (error) {
-                    console.error(`Error fetching product ${rating.productId}:`, error);
-                    rating.productName = 'Unknown';
-                }
-            });
-            await Promise.all(productPromises);
-
-            applyRatingFiltersAndSort();
-            renderRatingPagination();
-        } catch (error) {
-            console.error('Error fetching ratings:', error);
-            alert('Failed to load ratings. Check the console for details.');
-        }
-    }
-
-    function renderRatingTable() {
-        const tableBody = document.getElementById('rating-table-body');
-        tableBody.innerHTML = '';
-        const startIndex = (currentRatingPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        const paginatedRatings = allRatings.slice(startIndex, endIndex);
-        paginatedRatings.forEach(rating => {
-            const statusClass = rating.status ? 'status-active' : 'status-inactive';
-            const row = `
-                <tr>
-                    <td>${rating.ratingId}</td>
-                    <td>${rating.productName || 'Unknown'}</td>
-                    <td>${rating.userName}</td>
-                    <td>${rating.stars}</td>
-                    <td>${new Date(rating.createdAt).toLocaleString('sv-SE', {timeZone: 'Asia/Ho_Chi_Minh'}).slice(0, 19).replace('T', ' ')}</td>
-                    <td>${rating.content}</td>
-                    <td>
-                        <select class="status-select ${statusClass}" id="status-${rating.ratingId}" onchange="updateRatingStatusColor(this, ${rating.ratingId})">
-                            <option value="1" ${rating.status ? 'selected' : ''}>Active</option>
-                            <option value="0" ${!rating.status ? 'selected' : ''}>Inactive</option>
-                        </select>
-                    </td>
-                    <td>
-                        <button class="btn-update" onclick="updateRatingStatus(${rating.ratingId})">Update</button>
-                    </td>
-                </tr>
-            `;
-            tableBody.innerHTML += row;
-        });
-    }
-
-    function updateRatingStatusColor(selectElement, ratingId) {
-        const newStatus = parseInt(selectElement.value);
-        selectElement.classList.remove('status-active', 'status-inactive');
-        selectElement.classList.add(newStatus === 1 ? 'status-active' : 'status-inactive');
-    }
-
-    async function updateRatingStatus(ratingId) {
-        const selectElement = document.getElementById(`status-${ratingId}`);
-        const newStatus = parseInt(selectElement.value) === 1;
-        try {
-            const response = await fetch(`http://localhost:8080/ratings/${ratingId}/status`, {
-                method: 'PATCH',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({status: newStatus})
-            });
-            if (!response.ok) throw new Error('Failed to update rating status: ' + response.statusText);
-            const toast = new bootstrap.Toast(document.getElementById('statusToast'), {delay: 3000});
-            toast.show();
-            await fetchRatings();
-        } catch (error) {
-            console.error('Error updating rating status:', error);
-            alert('Failed to update rating status. Check console for details.');
-            await fetchRatings();
-        }
-    }
-
-    function applyRatingFiltersAndSort() {
-        const searchTerm = document.getElementById('ratingSearchInput').value.toLowerCase();
-        const sortOption = document.getElementById('ratingSortSelect').value;
-        allRatings = [...originalAllRatings];
-        if (searchTerm) {
-            allRatings = allRatings.filter(rating =>
-                rating.ratingId.toString().includes(searchTerm) ||
-                rating.userName.toLowerCase().includes(searchTerm) ||
-                rating.content.toLowerCase().includes(searchTerm) ||
-                (rating.productName && rating.productName.toLowerCase().includes(searchTerm))
-            );
-        }
-        allRatings.sort((a, b) => {
-            switch (sortOption) {
-                case 'id-asc':
-                    return a.ratingId - b.ratingId;
-                case 'id-desc':
-                    return b.ratingId - a.ratingId;
-                case 'stars-asc':
-                    return a.stars - b.stars;
-                case 'stars-desc':
-                    return b.stars - a.stars;
-                case 'date-asc':
-                    return new Date(a.createdAt) - new Date(b.createdAt);
-                case 'date-desc':
-                    return new Date(b.createdAt) - new Date(a.createdAt);
-                case 'username-asc':
-                    return a.userName.localeCompare(b.userName);
-                case 'username-desc':
-                    return b.userName.localeCompare(a.userName);
-                default:
-                    return 0;
-            }
-        });
-    }
-
-    function renderRatingPagination() {
-        const totalPages = Math.ceil(allRatings.length / itemsPerPage);
-        const pagination = document.getElementById('rating-pagination');
-        pagination.innerHTML = '';
-        const prevButton = document.createElement('button');
-        prevButton.textContent = 'Previous';
-        prevButton.disabled = currentRatingPage === 1;
-        prevButton.addEventListener('click', () => {
-            if (currentRatingPage > 1) {
-                currentRatingPage--;
-                renderRatingTable();
-                renderRatingPagination();
-            }
-        });
-        pagination.appendChild(prevButton);
-        for (let i = 1; i <= totalPages; i++) {
-            const pageButton = document.createElement('button');
-            pageButton.textContent = i;
-            pageButton.disabled = i === currentRatingPage;
-            pageButton.addEventListener('click', () => {
-                currentRatingPage = i;
-                renderRatingTable();
-                renderRatingPagination();
-            });
-            pagination.appendChild(pageButton);
-        }
-        const nextButton = document.createElement('button');
-        nextButton.textContent = 'Next';
-        nextButton.disabled = currentRatingPage === totalPages;
-        nextButton.addEventListener('click', () => {
-            if (currentRatingPage < totalPages) {
-                currentRatingPage++;
-                renderRatingTable();
-                renderRatingPagination();
-            }
-        });
-        pagination.appendChild(nextButton);
-        renderRatingTable();
     }
 </script>
 </body>

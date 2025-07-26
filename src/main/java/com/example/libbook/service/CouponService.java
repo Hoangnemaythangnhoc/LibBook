@@ -10,5 +10,6 @@ public interface CouponService {
     void updateCoupon(Integer id, Coupon coupon);
     List<Coupon> getAllCouponsPaged(String search, int page, int size);
     int countCoupons(String search);
+    int checkCouponCode(String code);
 
 }

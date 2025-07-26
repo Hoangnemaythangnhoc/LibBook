@@ -361,6 +361,19 @@
                 width: 100%;
             }
         }
+        .staff-info .dropdown-menu {
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            border: none;
+            min-width: 120px;
+        }
+
+        .staff-info .dropdown-item {
+            font-size: 1rem;
+            color: var(--text-dark);
+            padding: 8px 15px;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
     </style>
 </head>
 <body>
@@ -379,8 +392,17 @@
         <header class="topbar">
             <h1>Customer Care Dashboard</h1>
             <div class="staff-info">
-                <span th:text="'Hello, ' + ${staffName ?: 'Customer Care'}">Hello, Customer Care</span>
-                <img src="https://i.pravatar.cc/40" alt="Avatar"/>
+                <span th:if="${session.USER != null}" th:text="'xin chào' + ${session.USER.userName}"></span>
+                <div class="dropdown">
+                    <img th:if="${session.USER != null}" th:src="${session.USER.profilePicture}" alt="Avatar" data-bs-toggle="dropdown" aria-expanded="false" id="avatarDropdown"/>
+                    <ul class="dropdown-menu" aria-labelledby="avatarDropdown">
+                        <li>
+                            <form action="/custom-logout" method="post" style="margin: 0;">
+                                <button type="submit" class="dropdown-item">Logout</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </header>
 

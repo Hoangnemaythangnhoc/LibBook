@@ -3,6 +3,7 @@ package com.example.libbook.service.impl;
 import com.example.libbook.entity.Product;
 import com.example.libbook.repository.ProductRepository;
 import com.example.libbook.repository.TagRepository;
+import com.example.libbook.service.NotificationService;
 import com.example.libbook.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

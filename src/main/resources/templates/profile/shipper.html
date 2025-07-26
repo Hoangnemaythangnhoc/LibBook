@@ -476,7 +476,7 @@
         <header class="topbar">
             <h1>Shipper Dashboard</h1>
             <div class="staff-info">
-                <span th:if="${session.USER != null}" th:text="'xin chào' + ${session.USER.userName}"></span>
+                <span th:if="${session.USER != null}" th:text="'xin chào ' + ${session.USER.userName}"></span>
                 <div class="dropdown">
                     <img th:if="${session.USER != null}" th:src="${session.USER.profilePicture}" alt="Avatar" data-bs-toggle="dropdown" aria-expanded="false" id="avatarDropdown"/>
                     <ul class="dropdown-menu" aria-labelledby="avatarDropdown">

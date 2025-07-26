@@ -49,4 +49,9 @@ public class CouponServiceImpl implements CouponService {
         return couponRepository.countAll(search);
     }
 
+    @Override
+    public int checkCouponCode(String code) {
+        return couponRepository.checkCouponCode(code);
+    }
+
 }
