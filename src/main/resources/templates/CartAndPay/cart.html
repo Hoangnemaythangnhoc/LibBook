@@ -151,12 +151,9 @@
                     <label for="standard">
                       <div class="option-info">
                         <span class="option-name">Giao hàng tiêu chuẩn</span>
-                        <div>
-                          <span class="option-time">3-5 ngày</span>
-                          <span class="option-price">30,000 đ</span>
-                        </div>
+                        <span class="option-time">3-5 ngày</span>
                       </div>
-
+                      <span class="option-price">30,000 đ</span>
                     </label>
                   </div>
                   <div class="shipping-option">
@@ -291,7 +288,9 @@
               </div>
             </div>
             <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" id="cancel">Hủy Đơn Hàng</button>
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+
             </div>
           </div>
         </div>
@@ -485,6 +484,9 @@
 
       const modalElement = document.getElementById('orderDetailsModal');
       const modal = new bootstrap.Modal(modalElement);
+
+      const cancelButton = document.getElementById('cancel');
+      cancelButton.onclick = () => cancelOrder(orderId, modal);
       modal.show();
     } catch (error) {
       console.error('Lỗi khi tải chi tiết đơn hàng:', error);
@@ -494,6 +496,50 @@
       document.getElementById('orderQuantity').textContent = '0';
       new bootstrap.Modal(document.getElementById('orderDetailsModal')).show();
     }
+  }
+
+  async function cancelOrder(orderId, orderDetailsModal) {
+    if (!user || !user.userId) {
+      showToast("Vui lòng đăng nhập để hủy đơn hàng", "error");
+      return;
+    }
+
+    showModal(
+            "Xác nhận hủy đơn hàng",
+            `Bạn có chắc chắn muốn hủy đơn hàng này?`,
+            async () => {
+              try {
+                showLoading(true);
+                const response = await fetch("/api/cancel", {
+                  method: "PATCH",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "X-Requested-With": "XMLHttpRequest",
+                  },
+                  body: JSON.stringify({ orderId, userId: user.userId }),
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                  showToast("Hủy đơn hàng thành công!", "success");
+                  // Update userOrders to reflect canceled status
+                  userOrders = userOrders.map(order =>
+                          order.orderId === orderId ? { ...order, orderStatusId: 4 } : order
+                  );
+                  renderOrders(userOrders);
+                  orderDetailsModal.hide(); // Close the order details modal
+                } else {
+                  showToast(result.message || "Có lỗi xảy ra khi hủy đơn hàng", "error");
+                }
+              } catch (error) {
+                console.error("Lỗi khi hủy đơn hàng:", error);
+                showToast("Có lỗi xảy ra khi hủy đơn hàng", "error");
+              } finally {
+                showLoading(false);
+              }
+            }
+    );
   }
 </script>
 </body>

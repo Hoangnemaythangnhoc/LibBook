@@ -21,4 +21,9 @@ public class CheckBuyServiceImpl implements CheckBuyService {
     public boolean saveCheckBuy(CheckBuy checkBuy) {
         return checkBuyRepository.saveCheckBuy(checkBuy);
     }
+
+    @Override
+    public boolean save(int productID, int UserID) {
+        return  checkBuyRepository.save(productID,UserID);
+    }
 }

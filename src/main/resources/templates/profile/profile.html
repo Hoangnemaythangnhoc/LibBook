@@ -1,419 +1,265 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Customer Care - LibBook</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hồ Sơ Cá Nhân - LibBook</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet"/>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="/css/ProfileUser.css" />
+    <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+            rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --accent-color: #e74c3c;
-            --background-light: #f4f4f9;
-            --card-bg: #ffffff;
-            --text-dark: #2c3e50;
-            --text-light: #7f8c8d;
-            --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            --hover-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #f4f4f9 0%, #e0e7ff 100%);
-            min-height: 100vh;
-            overflow-x: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .dashboard-container {
-            display: flex;
-            min-height: 100vh;
-            overflow: hidden;
-        }
-
-        .sidebar {
-            width: 250px;
-            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
-            color: #fff;
-            padding: 20px;
-            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
-            position: fixed;
-            height: 100vh;
-            transition: width 0.3s ease;
-        }
-
-        .sidebar h2 {
-            font-size: 1.6rem;
-            margin-bottom: 30px;
-            text-align: center;
-            color: #ecf0f1;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .sidebar ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .sidebar ul li {
-            padding: 15px 20px;
-            cursor: pointer;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            border-radius: 8px;
-            margin-bottom: 5px;
-        }
-
-        .sidebar ul li:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #3498db;
-            transform: translateX(5px);
-        }
-
-        .sidebar ul li.active {
-            font-weight: bold;
-            background: rgba(52, 73, 94, 0.8);
-            color: #fff;
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .main-content {
-            flex: 1;
-            padding: 20px 30px;
-            background-color: transparent;
-            margin-left: 250px;
-            transition: margin-left 0.3s ease;
-        }
-
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: linear-gradient(90deg, #ecf0f1 0%, #fff 100%);
-            padding: 15px 25px;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            margin-bottom: 25px;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .topbar h1 {
-            font-size: 1.9rem;
-            margin: 0;
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-
-        .staff-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .staff-info img {
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            border: 2px solid #3498db;
-            transition: transform 0.3s ease;
-        }
-
-        .staff-info img:hover {
-            transform: scale(1.1);
-        }
-
-        .staff-info span {
-            font-size: 1.1rem;
-            color: var(--text-dark);
-            font-weight: 500;
-        }
-
-        .manage-ratings, .profile-section {
-            background: linear-gradient(145deg, #ffffff 0%, #f9f9f9 100%);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: var(--shadow);
-            animation: slideIn 0.5s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .manage-ratings h2, .profile-section h2 {
-            font-size: 1.6rem;
-            margin-bottom: 20px;
-            color: var(--primary-color);
-            border-bottom: 2px solid var(--secondary-color);
-            padding-bottom: 5px;
-        }
-
-        .manage-ratings table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            background: #fff;
-            box-shadow: var(--shadow);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .manage-ratings th, .manage-ratings td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-            transition: background 0.3s ease;
-        }
-
-        .manage-ratings th {
-            background: var(--primary-color);
-            color: #fff;
-            font-weight: 600;
-        }
-
-        .manage-ratings td:hover {
-            background: #f8f9fa;
-        }
-
-        .search-sort-container {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            align-items: center;
-        }
-
-        .search-sort-container input {
-            flex: 1;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-        }
-
-        .search-sort-container input:focus {
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
-            outline: none;
-        }
-
-        .search-sort-container select {
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background: #fff;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-        }
-
-        .search-sort-container select:focus {
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
-            outline: none;
-        }
-
-        .status-select {
-            padding: 0.375rem 0.75rem;
-            border-radius: 0.375rem;
-            border: 1px solid #ced4da;
-            background-color: #ffffff;
-            font-size: 0.875rem;
-            transition: border-color 0.2s ease;
-        }
-
-        .status-select:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-        }
-
-        .btn-update {
-            background-color: #0d6efd;
-            color: #ffffff;
-            border: none;
-            padding: 0.375rem 0.75rem;
-            border-radius: 0.375rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: background-color 0.2s ease;
-            margin-left: 0.5rem;
-        }
-
-        .btn-update:hover {
-            background-color: #0b5ed7;
-        }
-
-        .btn-update:disabled {
-            background-color: #6c757d;
-            cursor: not-allowed;
-        }
-
-        .status-active {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .status-inactive {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-
-        .profile-section label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text-dark);
-        }
-
-        .profile-section input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-        }
-
-        .profile-section input:focus {
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
-            outline: none;
-        }
-
-        .profile-section button {
-            background: linear-gradient(90deg, #3498db 0%, #2980b9 100%);
-            color: #fff;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .profile-section button:hover {
-            background: linear-gradient(90deg, #2980b9 0%, #1e6b9f 100%);
-            transform: translateY(-2px);
-            box-shadow: var(--hover-shadow);
-        }
-
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1050;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 200px;
-            }
-
-            .main-content {
-                margin-left: 200px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-            }
-
-            .main-content {
-                margin-left: 0;
-                padding: 15px;
-            }
-
-            .search-sort-container {
-                flex-direction: column;
-            }
-
-            .search-sort-container input,
-            .search-sort-container select {
-                width: 100%;
-            }
-        }
-    </style>
 </head>
 <body>
-<div class="dashboard-container">
-    <aside class="sidebar">
-        <h2>👩‍💼 Customer Care</h2>
-        <nav>
-            <ul>
-                <li data-section="manage-profile-section" class="active">👤 Quản lý Hồ sơ</li>
-                <li data-section="manage-ratings-section">💬 Quản lý đánh giá</li>
-            </ul>
-        </nav>
-    </aside>
+<!-- Include Navbar -->
+<div class="container">
+    <!-- Main Content -->
+    <main class="main">
+        <a href="/" >
+            <button class="btn btn-primary position-absolute top-0 start-0 m-3">
+                Home
+            </button>
+        </a>
 
-    <main class="main-content">
-        <header class="topbar">
-            <h1>Customer Care Dashboard</h1>
-            <div class="staff-info">
-                <span th:text="'Hello, ' + ${staffName ?: 'Customer Care'}">Hello, Customer Care</span>
-                <img src="https://i.pravatar.cc/40" alt="Avatar"/>
+
+        <!-- Profile Header -->
+        <section class="profile-header">
+            <div class="profile-avatar">
+                <img
+                        th:src="${userProfile.getProfilePicture()}"
+                        alt="Avatar"
+                        id="avatarImage"
+                        onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNDAiIHI9IjE1IiBmaWxsPSIjOUNBM0FGIi8+CjxwYXRoIGQ9Ik0yMCA4MEM0MCA2MCA2MCA2MCA4MCA4MEgyMFoiIGZpbGw9IiM5Q0EzQUYiLz4KPC9zdmc+'" />
+                <div class="avatar-upload"  th:if="${userProfile.userId} == ${session.USER.userId}">
+                    <input type="file" id="avatarInput" accept="image/*" style="display: none" />
+                    <button type="button" class="upload-btn" onclick="document.getElementById('avatarInput').click()">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                </div>
             </div>
-        </header>
+            <div class="profile-info">
+                <h1 class="profile-name" id="firstname"
+                    th:text="${userProfile.firstName != null || userProfile.lastName != null} ? ${userProfile.firstName + ' ' + userProfile.lastName} : ''">
+                </h1>
 
-        <section class="profile-section" id="manage-profile-section" style="display: block;">
-            <h2>Quản lý hồ sơ</h2>
-            <form id="profileForm">
-                <label for="staff-name">Tên</label>
-                <input type="text" id="staff-name" th:value="${staffName ?: 'Customer Care'}"/>
+                <h5 class="profile-name" id="userName" th:text="${userProfile.userName}"></h5>
 
-                <label for="staff-email">Email</label>
-                <input type="email" id="staff-email" th:value="${staffEmail ?: 'email@example.com'}"/>
 
-                <label for="staff-phone">Số điện thoại</label>
-                <input type="text" id="staff-phone" th:value="${staffPhone ?: '0123456789'}"/>
 
-                <button type="submit">Cập nhật</button>
-            </form>
+                <p class="profile-email" id="userEmail" th:text="${userProfile.email}"></p>
+                <div class="profile-stats">
+                    <div class="stat">
+
+                        <span class="stat-number" id="totalBooks" th:text="${userProfile.productPurchased}"></span>
+                        <span class="stat-label">Purchased book</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" id="totalSpent" th:text="${userProfile.totalSpent}"></span>
+                        <span class="stat-label">Tổng chi tiêu</span>
+                    </div>
+                </div>
+            </div>
         </section>
 
-        <section class="manage-ratings" id="manage-ratings-section" style="display: none;">
-            <h2>Quản lý đánh giá</h2>
-            <div class="search-sort-container">
-                <input type="text" id="ratingSearchInput" placeholder="Tìm kiếm theo ID xếp hạng, tên người dùng hoặc nội dung..."/>
-                <select id="ratingSortSelect">
-                    <option value="id-asc">Mã xếp hạng (Tăng dần)</option>
-                    <option value="id-desc">Mã xếp hạng (Giảm dần)</option>
-                    <option value="stars-asc">Sao (Thấp đến Cao)</option>
-                    <option value="stars-desc">Sao (Cao đến Thấp)</option>
-                    <option value="date-asc">Ngày tạo (Cũ nhất trước)</option>
-                    <option value="date-desc">Ngày tạo (Mới nhất trước)</option>
-                    <option value="username-asc">Tên người dùng (A-Z)</option>
-                    <option value="username-desc">Tên người dùng (Z-A)</option>
-                </select>
+        <!-- Navigation Tabs -->
+        <nav class="profile-nav">
+            <button class="tab-btn active" data-tab="personal">Profile details</button>
+            <button class="tab-btn" data-tab="orders">Orders</button>
+            <button class="tab-btn" data-tab="reviews">Rates</button>
+            <button  class="tab-btn" data-tab="settings" th:if="${userProfile.userId} == ${session.USER.userId}" >Setting</button>
+        </nav>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- Personal Information Tab -->
+            <div class="tab-pane active" id="personal">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>User information</h2>
+                        <button type="button" th:if="${userProfile.userId} == ${session.USER.userId}" class="edit-btn" id="editPersonalBtn">
+                            <i class="fas fa-edit"></i>
+                            Edit
+                        </button>
+                    </div>
+                    <form class="profile-form" action="/profile/update" method="POST" id="personalForm">
+                        <input type="hidden" name="userId" id="userId" th:value="${userProfile.userId}" />
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="firstname">First Name</label>
+                                <input type="text" id="" name="firstName" th:value="${userProfile.firstName}" readonly />
+                            </div>
+                            <div class="form-group">
+                                <label for="lastname">Last Name</label>
+                                <input type="text" id="lastname" name="lastName" th:value="${userProfile.lastName}" readonly />
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" th:value="${userProfile.email}" readonly />
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone number</label>
+                                <input type="tel" id="phone" name="phoneNumber" th:value="${userProfile.phoneNumber}" readonly />
+                            </div>
+                            <div class="form-group">
+                                <label for="birthDate">Date of birth</label>
+                                <input type="date" id="birthDate" name="dateOfBirth" th:value="${userProfile.dateOfBirth}" readonly />
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="address">Address</label>
+                                <textarea id="address" name="address" rows="3" th:text="${userProfile.address}" readonly></textarea>
+                            </div>
+                        </div>
+                        <div class="form-actions" style="display: none" id="personalActions">
+                            <button type="submit" class="btn btn-primary">Confirm</button>
+                            <button type="button" class="btn btn-secondary" id="cancelPersonalBtn">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Orders Tab -->
+            <div class="tab-pane" id="orders">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Lịch sử đơn hàng</h2>
+                        <div class="filter-group">
+                            <select class="filter-select" id="orderStatus">
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="pending">Chờ xử lý</option>
+                                <option value="processing">Đang xử lý</option>
+                                <option value="shipped">Đã gửi</option>
+                                <option value="delivered">Đã giao</option>
+                                <option value="cancelled">Đã hủy</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="orders-list" id="ordersList">
+                        <!-- Orders will be loaded via AJAX -->
+                        <div class="order-item" data-order-id="${order.id}">
+                            <div class="order-header">
+                                <div class="order-info">
+                                    <span class="order-id">#${order.id}</span>
+                                    <span class="order-date">${order.createdDate}</span>
+                                </div>
+                                <span class="order-status status-${order.status}">${order.statusText}</span>
+                            </div>
+                            <div class="order-items">
+                                <!-- Loop through order items -->
+                                <div class="order-book">
+                                    <img src="${book.imageUrl}" alt="${book.title}" class="book-thumb" />
+                                    <div class="book-info">
+                                        <h4>${book.title}</h4>
+                                        <p>Tác giả: ${book.author}</p>
+                                        <p>Số lượng: ${orderItem.quantity}</p>
+                                    </div>
+                                    <div class="book-price">${orderItem.price} VNĐ</div>
+                                </div>
+                            </div>
+                            <div class="order-footer">
+                                <div class="order-total">Tổng: ${order.totalAmount} VNĐ</div>
+                                <div class="order-actions">
+                                    <a href="/orders/${order.id}" class="btn btn-outline">Chi tiết</a>
+                                    <button type="button" class="btn btn-outline" onclick="reorderItems(${order.id})">Mua lại</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wishlist Tab -->
+            <div class="tab-pane" id="wishlist">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Sách yêu thích</h2>
+                        <span class="item-count" id="wishlistCount">${wishlistCount} sách</span>
+                    </div>
+                    <div class="wishlist-grid" id="wishlistGrid">
+                        <!-- Wishlist items will be loaded via AJAX -->
+                        <div class="book-card" data-book-id="${book.id}">
+                            <div class="book-image">
+                                <img src="${book.imageUrl}" alt="${book.title}" />
+                                <button class="remove-wishlist" onclick="removeFromWishlist(${book.id})">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+                            <div class="book-details">
+                                <h3>${book.title}</h3>
+                                <p class="book-author">${book.author}</p>
+                                <div class="book-rating">
+                                    <div class="stars">
+                                        <!-- Generate stars based on rating -->
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="far fa-star"></i>
+                                    </div>
+                                    <span>(${book.reviewCount})</span>
+                                </div>
+                                <div class="book-price">
+                                    <span class="current-price">${book.price} VNĐ</span>
+                                    <span class="original-price">${book.originalPrice} VNĐ</span>
+                                </div>
+                                <button class="btn btn-primary" onclick="addToCart(${book.id})">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    Thêm vào giỏ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reviews Tab -->
+            <div class="tab-pane" id="reviews">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Đánh giá của tôi</h2>
+                        <span class="item-count" id="reviewCount">${reviewCount} đánh giá</span>
+                    </div>
+                    <div class="reviews-list" id="reviewsList">
+                        <!-- Reviews will be loaded via AJAX -->
+                        <div class="review-item" data-review-id="${review.id}">
+                            <div class="review-book">
+                                <img src="${review.book.imageUrl}" alt="${review.book.title}" class="book-thumb" />
+                                <div class="book-info">
+                                    <h4>${review.book.title}</h4>
+                                    <p>${review.book.author}</p>
+                                </div>
+                            </div>
+                            <div class="review-content">
+                                <div class="review-header">
+                                    <div class="review-rating">
+                                        <!-- Generate stars -->
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="far fa-star"></i>
+                                    </div>
+                                    <span class="review-date">${review.createdDate}</span>
+                                </div>
+                                <p class="review-text">${review.content}</p>
+                                <div class="review-actions">
+                                    <button class="btn btn-outline btn-sm" onclick="editReview(${review.id})">
+                                        <i class="fas fa-edit"></i>
+                                        Chỉnh sửa
+                                    </button>
+                                    <button class="btn btn-outline btn-sm" onclick="deleteReview(${review.id})">
+                                        <i class="fas fa-trash"></i>
+                                        Xóa
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Settings Tab -->
             <div class="tab-pane" id="settings">
                 <div class="settings-grid">
@@ -551,353 +397,33 @@
                     <!--                    </div>-->
                 </div>
             </div>
-            <table class="mb-4">
-                <thead>
-                <tr>
-                    <th>Mã đánh giá</th>
-                    <th>Tên sản phẩm</th>
-                    <th>Tên người dùng</th>
-                    <th>Sao</th>
-                    <th>Ngày tạo</th>
-                    <th>Nội dung</th>
-                    <th>Trạng thái</th>
-                    <th>Hành động</th>
-                </tr>
-                </thead>
-                <tbody id="rating-table-body">
-                </tbody>
-            </table>
-            <div class="pagination" id="rating-pagination"></div>
-        </section>
+        </div>
     </main>
 </div>
 
-<div class="toast-container position-fixed top-0 end-0 p-3">
-    <div id="statusToast" class="toast bg-success text-white" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <strong class="me-auto">Notification</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-            Rating status updated successfully!
-        </div>
-    </div>
-    <div id="profileToast" class="toast bg-success text-white" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <strong class="me-auto">Notification</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-            Profile updated successfully!
-        </div>
-    </div>
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script>
-    let originalAllRatings = [];
-    let allRatings = [];
-    const itemsPerPage = 10;
-    let currentRatingPage = 1;
-    let activeSectionIndex = 0;
+<!-- Toast Notifications -->
+<div class="toast-container" id="toastContainer"></div>
 
-    // Mock profile data
-    let mockProfile = {
-        staffName: "Customer Care",
-        email: "email@example.com",
-        phoneNumber: "0123456789"
-    };
+<script src="/js/profile.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const sidebarItems = document.querySelectorAll('.sidebar ul li');
-        const sections = document.querySelectorAll('.main-content section');
-
-        // Initialize: Show Manage Profile section by default
-        sections.forEach(section => section.style.display = 'none');
-        document.getElementById('manage-profile-section').style.display = 'block';
-        sidebarItems[0].classList.add('active');
-
-        // Load ratings from API
-        fetchRatings();
-
-        // Handle sidebar navigation
-        sidebarItems.forEach((item, index) => {
-            item.addEventListener('click', () => {
-                const sectionId = item.getAttribute('data-section');
-                const currentSection = document.getElementById(sectionId);
-
-                if (activeSectionIndex === index && currentSection.style.display === 'block') {
-                    return;
-                }
-
-                sidebarItems.forEach(li => li.classList.remove('active'));
-                sections.forEach(section => section.style.display = 'none');
-
-                if (currentSection) {
-                    currentSection.style.display = 'block';
-                    item.classList.add('active');
-                    if (sectionId === 'manage-ratings-section') {
-                        applyRatingFiltersAndSort();
-                        renderRatingPagination();
-                    }
-                }
-
-                activeSectionIndex = index;
+<script th:if="${error}" th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        console.log("Hello")
+        setTimeout(function () {
+            Swal.fire({
+                icon: 'info',
+                title: [[${error}]],
+                confirmButtonText: 'OK'
             });
-        });
-
-        // Handle profile form submission with mock data
-        document.getElementById('profileForm')?.addEventListener('submit', function (e) {
-            e.preventDefault();
-            console.log('Profile form submitted');
-
-            const name = document.getElementById('staff-name')?.value.trim();
-            const email = document.getElementById('staff-email')?.value.trim();
-            const phone = document.getElementById('staff-phone')?.value.trim();
-
-            if (!name || !email || !phone) {
-                alert('Vui lòng điền đầy đủ tất cả các trường!');
-                return;
-            }
-
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                alert('Vui lòng nhập địa chỉ email hợp lệ!');
-                return;
-            }
-
-            const phoneRegex = /^\d{10,11}$/;
-            if (!phoneRegex.test(phone)) {
-                alert('Vui lòng nhập số điện thoại hợp lệ (10-11 số)!');
-                return;
-            }
-
-            // Update mock profile data
-            mockProfile = {
-                staffName: name,
-                email: email,
-                phoneNumber: phone
-            };
-
-            console.log('Updated mock profile:', mockProfile);
-
-            // Update the topbar greeting
-            document.querySelector('.staff-info span').textContent = `Hello, ${name}`;
-
-            // Show success toast
-            const toast = new bootstrap.Toast(document.getElementById('profileToast'), {delay: 3000});
-            toast.show();
-
-            // Reset form
-            document.getElementById('profileForm').reset();
-            document.getElementById('staff-name').value = mockProfile.staffName;
-            document.getElementById('staff-email').value = mockProfile.email;
-            document.getElementById('staff-phone').value = mockProfile.phoneNumber;
-        });
-
-        // Initialize search and sort for ratings
-        const ratingSearchInput = document.getElementById('ratingSearchInput');
-        const ratingSortSelect = document.getElementById('ratingSortSelect');
-        if (!ratingSearchInput || !ratingSortSelect) {
-            console.error('ratingSearchInput or ratingSortSelect not found');
-            return;
-        }
-
-        ratingSearchInput.addEventListener('input', () => {
-            console.log('Rating search input changed:', ratingSearchInput.value);
-            applyRatingFiltersAndSort();
-            currentRatingPage = 1;
-            renderRatingPagination();
-        });
-
-        ratingSortSelect.addEventListener('change', () => {
-            console.log('Rating sort option changed:', ratingSortSelect.value);
-            applyRatingFiltersAndSort();
-            currentRatingPage = 1;
-            renderRatingPagination();
-        });
+        }, 500);
     });
-
-    async function fetchRatings() {
-        try {
-            const response = await fetch('http://localhost:8080/ratings');
-            if (!response.ok) throw new Error('Failed to load ratings: ' + response.statusText);
-            originalAllRatings = await response.json();
-            allRatings = [...originalAllRatings];
-
-            const productPromises = allRatings.map(async rating => {
-                try {
-                    const productResponse = await fetch(`http://localhost:8080/api/products/${rating.productId}`);
-                    if (productResponse.ok) {
-                        const product = await productResponse.json();
-                        rating.productName = product.productName || 'Unknown';
-                    } else {
-                        rating.productName = 'Unknown';
-                        console.warn(`Product ${rating.productId} not found, status: ${productResponse.status}`);
-                    }
-                } catch (error) {
-                    console.error(`Error fetching product ${rating.productId}:`, error);
-                    rating.productName = 'Unknown';
-                }
-            });
-            await Promise.all(productPromises);
-
-            applyRatingFiltersAndSort();
-            renderRatingPagination();
-        } catch (error) {
-            console.error('Error fetching ratings:', error);
-            alert('Failed to load ratings. Check the console for details.');
-        }
-    }
-
-    function renderRatingTable() {
-        console.log('Rendering rating table with ratings:', allRatings);
-        const tableBody = document.getElementById('rating-table-body');
-        tableBody.innerHTML = '';
-        const startIndex = (currentRatingPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        const paginatedRatings = allRatings.slice(startIndex, endIndex);
-
-        if (paginatedRatings.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="8">Không tìm thấy đánh giá</td></tr>';
-            return;
-        }
-
-        paginatedRatings.forEach(rating => {
-            const statusClass = rating.status ? 'status-active' : 'status-inactive';
-            const row = `
-        <tr>
-          <td>${rating.ratingId}</td>
-          <td>${rating.productName || 'Unknown'}</td>
-          <td>${rating.userName}</td>
-          <td>${rating.stars}⭐</td>
-          <td>${new Date(rating.createdAt).toLocaleString('vi-VN', {timeZone: 'Asia/Ho_Chi_Minh'})}</td>
-          <td>${rating.content}</td>
-          <td>
-            <select class="status-select ${statusClass}" id="status-${rating.ratingId}" onchange="updateRatingStatusColor(this, ${rating.ratingId})">
-              <option value="1" ${rating.status ? 'selected' : ''}>Mở</option>
-              <option value="0" ${!rating.status ? 'selected' : ''}>Đóng</option>
-            </select>
-          </td>
-          <td>
-            <button class="btn-update" onclick="updateRatingStatus(${rating.ratingId})">Cập nhật</button>
-          </td>
-        </tr>
-      `;
-            tableBody.innerHTML += row;
-        });
-    }
-
-    function updateRatingStatusColor(selectElement, ratingId) {
-        const newStatus = parseInt(selectElement.value);
-        selectElement.classList.remove('status-active', 'status-inactive');
-        selectElement.classList.add(newStatus === 1 ? 'status-active' : 'status-inactive');
-    }
-
-    async function updateRatingStatus(ratingId) {
-        console.log('Updating rating status for ID:', ratingId);
-        const selectElement = document.getElementById(`status-${ratingId}`);
-        const newStatus = parseInt(selectElement.value) === 1;
-        try {
-            const response = await fetch(`http://localhost:8080/ratings/${ratingId}/status`, {
-                method: 'PATCH',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({status: newStatus})
-            });
-            if (!response.ok) throw new Error('Failed to update rating status: ' + response.statusText);
-            const toast = new bootstrap.Toast(document.getElementById('statusToast'), {delay: 3000});
-            toast.show();
-            await fetchRatings();
-        } catch (error) {
-            console.error('Error updating rating status:', error);
-            alert('Failed to update rating status. Check console for details.');
-            await fetchRatings();
-        }
-    }
-
-    function applyRatingFiltersAndSort() {
-        console.log('Applying rating filters and sort...');
-        const searchTerm = document.getElementById('ratingSearchInput').value.toLowerCase();
-        const sortOption = document.getElementById('ratingSortSelect').value;
-        allRatings = [...originalAllRatings];
-        if (searchTerm) {
-            allRatings = allRatings.filter(rating =>
-                rating.ratingId.toString().includes(searchTerm) ||
-                rating.userName.toLowerCase().includes(searchTerm) ||
-                rating.content.toLowerCase().includes(searchTerm) ||
-                (rating.productName && rating.productName.toLowerCase().includes(searchTerm))
-            );
-        }
-        allRatings.sort((a, b) => {
-            switch (sortOption) {
-                case 'id-asc':
-                    return a.ratingId - b.ratingId;
-                case 'id-desc':
-                    return b.ratingId - a.ratingId;
-                case 'stars-asc':
-                    return a.stars - b.stars;
-                case 'stars-desc':
-                    return b.stars - a.stars;
-                case 'date-asc':
-                    return new Date(a.createdAt) - new Date(b.createdAt);
-                case 'date-desc':
-                    return new Date(b.createdAt) - new Date(a.createdAt);
-                case 'username-asc':
-                    return a.userName.localeCompare(b.userName);
-                case 'username-desc':
-                    return b.userName.localeCompare(a.userName);
-                default:
-                    return 0;
-            }
-        });
-        console.log('Filtered and sorted ratings:', allRatings);
-    }
-
-    function renderRatingPagination() {
-        console.log('Rendering rating pagination...');
-        const totalPages = Math.ceil(allRatings.length / itemsPerPage);
-        const pagination = document.getElementById('rating-pagination');
-        pagination.innerHTML = '';
-        const prevButton = document.createElement('button');
-        prevButton.textContent = 'Trước';
-        prevButton.disabled = currentRatingPage === 1;
-        prevButton.className = 'btn btn-primary me-2';
-        prevButton.addEventListener('click', () => {
-            if (currentRatingPage > 1) {
-                currentRatingPage--;
-                renderRatingTable();
-                renderRatingPagination();
-            }
-        });
-        pagination.appendChild(prevButton);
-        for (let i = 1; i <= totalPages; i++) {
-            const pageButton = document.createElement('button');
-            pageButton.textContent = i;
-            pageButton.disabled = i === currentRatingPage;
-            pageButton.className = 'btn btn-primary me-2';
-            pageButton.addEventListener('click', () => {
-                currentRatingPage = i;
-                renderRatingTable();
-                renderRatingPagination();
-            });
-            pagination.appendChild(pageButton);
-        }
-        const nextButton = document.createElement('button');
-        nextButton.textContent = 'Sau';
-        nextButton.disabled = currentRatingPage === totalPages;
-        nextButton.className = 'btn btn-primary';
-        nextButton.addEventListener('click', () => {
-            if (currentRatingPage < totalPages) {
-                currentRatingPage++;
-                renderRatingTable();
-                renderRatingPagination();
-            }
-        });
-        pagination.appendChild(nextButton);
-        renderRatingTable();
-    }
 </script>
+
 </body>
 </html>

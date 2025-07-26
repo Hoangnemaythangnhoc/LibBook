@@ -86,7 +86,27 @@ public class OrderController {
     }
 
     @PatchMapping("/cancel")
-    public ResponseEntity<?> cancelOrder(@RequestBody Order order){
-
+    public ResponseEntity<?> cancelOrder(@RequestBody Map<String, Integer> request) {
+        try {
+            int orderId = request.get("orderId");
+            int userId = request.get("userId");
+            Order order = orderService.getOrderById(orderId);
+            if (order.getUserId() != userId) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("success", false, "message", "Không có quyền hủy đơn hàng"));
+            }
+            if (order.getOrderStatusId() > 2) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("success", false, "message", "Đơn hàng không thể hủy"));
+            }
+            if (orderService.cancelOrder(order)) {
+                return ResponseEntity.ok(Map.of("success", true));
+            }
+            return ResponseEntity.badRequest()
+                    .body(Map.of("success", false, "message", "Hủy đơn hàng thất bại"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("success", false, "message", e.getMessage()));
+        }
     }
 }

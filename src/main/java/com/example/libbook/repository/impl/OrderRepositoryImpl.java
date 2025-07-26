@@ -130,7 +130,7 @@ public class OrderRepositoryImpl implements OrderRepository {
 
     @Override
     public boolean cancelOrder(Order order) {
-        String sql = "Update [Order] set OrderStatusId = ? where OrderId ?";
+        String sql = "Update [Order] set OrderStatusId = ? where OrderId = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setInt(1, 4);
