@@ -76,7 +76,7 @@ public class UserRepositoryImpl implements UserRepository {
             statement.setInt(2, 2);
             statement.setString(3, userDTO.getEmail());
             statement.setString(4, hashPassword(userDTO.getPassword()));
-            statement.setBoolean(5, userDTO.isStatus());
+            statement.setBoolean(5, true);
 
             statement.executeUpdate();
         } catch (Exception e) {
@@ -96,7 +96,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     public User checkLogin(String email, String pass) {
-        String sql = "Select Top 1 *  from [User] where Email = ?";
+        String sql = "Select Top 1 *  from [User] where Email = ? and [Status] = 1";
         ConnectUtils db = ConnectUtils.getInstance();
         User userDTO = null ;
         String password = null;
@@ -401,5 +401,27 @@ public class UserRepositoryImpl implements UserRepository {
         }
         return emails;
     }
+
+    @Override
+    public boolean checkBanAccount(String email) {
+        String sql = "SELECT [Status] FROM [User] WHERE [Email] = ?";
+        try (Connection con = ConnectUtils.getInstance().openConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setString(1, email);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Byte status = rs.getByte("Status");
+                    if(status == 0) {
+                        return false;
+                    }
+                    else return true;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 
 }

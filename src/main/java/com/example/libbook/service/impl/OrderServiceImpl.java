@@ -84,10 +84,10 @@ public class OrderServiceImpl implements OrderService {
             orderDataDTO.setUserID((Integer) orderData.get("userId"));
             orderDataDTO.setTransCode( String.valueOf(orderData.get("transCode")));
             String code = (String)orderData.get("promoCode");
-            Coupon coupon = couponRepository.findByCode(code);
             if (code.equals("")){
                 orderDataDTO.setPromoCode(0);
             }else {
+                Coupon coupon = couponRepository.findByCode(code);
                 orderDataDTO.setPromoCode(coupon.getCouponId());
             }
             Converter converter = new Converter();
@@ -101,7 +101,8 @@ public class OrderServiceImpl implements OrderService {
             for (CartItemDTO cart : order.getCartItemDTOS()) {
                 productRepository.updateQuantityProduct(Math.toIntExact(cart.getProductId()), cart.getQuantity());
             }
-            couponRepository.updateAmountCoupon(coupon.getCouponId(),coupon.getQuantity());
+            if(order.getCouponId() != 0)
+            {couponRepository.updateAmountCoupon(couponRepository.findByCode(code).getCouponId(),couponRepository.findByCode(code).getQuantity());}
             boolean orderDetailCheck = orderDetailRepository.addNewOrderDetail(order, orderID);
             return orderDetailCheck;
         } catch (Exception e) {
@@ -114,4 +115,7 @@ public class OrderServiceImpl implements OrderService {
     public boolean cancelOrder(Order order) {
         return orderRepository.cancelOrder(order);
     }
+
+
+
 }

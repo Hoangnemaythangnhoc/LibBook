@@ -24,4 +24,5 @@ public interface UserRepository {
     void updateUser(User user);
     void updateUserSubscription(int userId, boolean isSubscribed);
     List<String> getSubscribedEmails();
+    boolean checkBanAccount(String email);
 }

@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -27,6 +28,7 @@ public class DynamicHtml {
 
     @Autowired
     UserRepository userRepository;
+
 
     @GetMapping("/fragment/footer")
     public String getFooterFragment() {
@@ -40,12 +42,18 @@ public class DynamicHtml {
 
     @GetMapping("/oauth2/callback")
     public String handleGoogleCallback(        @RequestParam(value = "code", required = false) String code,
-                                               @RequestParam(value = "error", required = false) String error, HttpSession session) throws IOException {
+                                               @RequestParam(value = "error", required = false) String error, HttpSession session,
+                                               RedirectAttributes redirectAttributes) throws IOException {
         if ("access_denied".equals(error)) {
             return "redirect:/login?error=access_denied";
         }
         String accessToken = getAccessToken(code);
         GoogleUser user = getUserInfo(accessToken);
+        boolean accountBan = userRepository.checkBanAccount(user.getEmail());
+        if (!accountBan){
+            redirectAttributes.addFlashAttribute("error", "tài khoản của bạn đã bị vô hiệu hóa");
+            return "redirect:/login";
+        }
         User u = userRepository.getUserByEmail(user.getEmail());
         if (u != null) {
             session.setAttribute("USER", u);
@@ -65,7 +73,6 @@ public class DynamicHtml {
         if (u.getRoleId() == 3) return "redirect:/staff";
         if (u.getRoleId() == 4) return "profile/customer-care";
         if (u.getRoleId() == 5) return "redirect:/shipper";
-        if (u.getRoleId() == 3) return "redirect:/staff";
         session.setAttribute("USER", u);
         return "redirect:/home";
     }
