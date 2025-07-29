@@ -425,7 +425,7 @@
                     ${orders.map(order => `
                         <tr>
                             <td>${order.orderId}</td>
-                            <td>${order.orderStatusId === 1 ? 'Đang Chờ Xử Lý' : order.orderStatusId === 2 ? 'Đang Xử Lý' : order.orderStatusId === 3 ? 'Đang Giao' : 'Đã Hủy'}</td>
+                            <td>${order.orderStatusId === 1 ? 'Đang Chờ Xử Lý' : order.orderStatusId === 2 ? 'Đang Xử Lý' : order.orderStatusId === 3 ? 'Đã Giao' : 'Đã Hủy'}</td>
                             <td>${new Date(order.createDate).toLocaleString('vi-VN', {timeZone: 'Asia/Ho_Chi_Minh'})}</td>
                             <td>${order.address || 'N/A'}</td>
                             <!-- Modified: Display payment method based on value -->
