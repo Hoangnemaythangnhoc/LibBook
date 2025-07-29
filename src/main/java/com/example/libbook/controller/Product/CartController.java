@@ -167,7 +167,7 @@ public class CartController {
             response.put("success", false);
             response.put("message", "Có lỗi xảy ra: " + e.getMessage());
         }
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(response); 
     }
 
     @GetMapping("/items")

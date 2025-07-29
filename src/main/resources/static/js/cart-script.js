@@ -1,6 +1,10 @@
+const currentUserId = Number(document.getElementById("currentUserId").value);
+
 document.addEventListener("DOMContentLoaded", function () {
   initializeCartPage();
 });
+let lastTransCode = null; // Lưu mã giao dịch thành công
+
 
 // Global variables
 let cartData = {
@@ -13,17 +17,24 @@ let cartData = {
   appliedPromo: null, // Track applied promo code
 };
 
-
-
-const description = userInSession.phoneNumber.slice(5,10);
+let shippingInform = {
+  userName : null,
+  phoneNumber : null,
+  email : null,
+  address: null,
+}
+let description = null;
+if (userInSession.phoneNumber !== null) {
+  description = userInSession.phoneNumber.slice(5, 10);
+}
 
 const MY_BANK = {
   BANK_ID: "970422", // MB Bank
-  ACCOUNT_NO: "7500146341390",
+  ACCOUNT_NO: "0814033612",
   TEMPLATE: "qr_only",
-  ACCOUNT_NAME: "Nguyen Thanh Ha",
+  ACCOUNT_NAME: "DUONG CONG MINH",
 };
-let lastTransCode = null; // Lưu mã giao dịch thành công
+// let lastTransCode = ""; // Lưu mã giao dịch thành công
 let paymentInterval = null;
 let paymentSuccess = false;
 let startTime = null;
@@ -54,8 +65,34 @@ function initializePromoForm() {
 
 function initializeShippingForm() {
   const shippingForm = document.getElementById("shippingForm");
+  if (userInSession) {
+    shippingInform = {
+      userName: `${userInSession.firstName || ''} ${userInSession.lastName || ''}`.trim() ,
+      phoneNumber: userInSession.phoneNumber || '',
+      email: userInSession.email || '',
+      address: userInSession.address || '',
+    };
+  }
+
   if (shippingForm) {
+    // Pre-fill form if userInSession exists
+    if (userInSession) {
+      document.getElementById("fullName").value = shippingInform.userName || '';
+      document.getElementById("phone").value = shippingInform.phoneNumber || '';
+      document.getElementById("email").value = shippingInform.email || '';
+      document.getElementById("address").value = shippingInform.address || '';
+
+      // Province and district will be handled by address-handler.js
+    }
+
+    // Add event listener for form submission
     shippingForm.addEventListener("submit", confirmOrder);
+
+    // Initialize shipping method
+    const shippingMethods = document.querySelectorAll('input[name="shippingMethod"]');
+    shippingMethods.forEach(method => {
+      method.addEventListener("change", updateShippingFeeAndBill);
+    });
   }
 }
 
@@ -77,7 +114,6 @@ async function applyPromoCode(promoCode) {
       cartData.appliedPromo = { code: promoCode, discount: discountPercent / 100 }; // Convert to decimal (e.g., 0.2)
       calculateTotals();
       showToast(`Mã ${promoCode} được áp dụng thành công!`, "success");
-      document.getElementById("promoCode").value = "";
     } else {
       // Invalid promo code
       showToast("Mã giảm giá không hợp lệ", "error");
@@ -179,7 +215,7 @@ function stopPaymentCheck() {
 async function checkPaid() {
   if (paymentSuccess || !userInSession) return;
 
-  const appScriptUrl = "https://script.google.com/macros/s/AKfycbwTfULNVpgezDygzUXfdg-RFYAdbUAddmzlgvIRvdWzzwlvY7IROtuPjyfJLPfDIj6g/exec";
+  const appScriptUrl = "https://script.google.com/macros/s/AKfycbz-K7VD1kMSfChfFGAWWt8WLpqwWw71JarCJcP_ThoOXQpTOvao-t_estELyiOPyZiI/exec";
   let retryCount = 0;
   const maxRetries = 3;
 
@@ -197,7 +233,7 @@ async function checkPaid() {
 
       console.log("Dữ liệu từ Google Apps Script:", { lastPrice, lastTransCode: lastTransCodeLocal, lastContent });
 
-      if (String(lastContent).trim().includes(`${userInSession.userId}${description}`)) {
+      if (String(lastContent).trim().includes(`${userInSession.userId}${description}`.toUpperCase())) {
         if (isNaN(Number(lastPrice)) || Number(lastPrice) !== cartData.total) {
           console.warn("Số tiền giao dịch không khớp:", { lastPrice, total: cartData.total });
           continue;
@@ -301,7 +337,7 @@ async function verifyTransaction() {
   try {
     showLoading(true);
     const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbwTfULNVpgezDygzUXfdg-RFYAdbUAddmzlgvIRvdWzzwlvY7IROtuPjyfJLPfDIj6g/exec"
+        "https://script.google.com/macros/s/AKfycbz-K7VD1kMSfChfFGAWWt8WLpqwWw71JarCJcP_ThoOXQpTOvao-t_estELyiOPyZiI/exec"
     );
     if (!response.ok) throw new Error("Không thể kiểm tra giao dịch");
     const data = await response.json();
@@ -671,6 +707,19 @@ function confirmOrder(event) {
 async function submitOrder(orderData) {
   try {
     showLoading(true);
+    const _items =  orderData.items;
+    console.log(orderData);
+    for (const item of _items) {
+      const userId = item.userId;
+
+      const newDbMessage = {
+        receiverId: currentUserId,
+        senderId: userId,
+        messageText: "Cám ơn bạn đã mua hàng của chúng tôi!"
+      };
+
+      await fetchSendMessage(newDbMessage);
+    }
 
     const response = await fetch("/cart/api/checkout", {
       method: "POST",
@@ -685,7 +734,9 @@ async function submitOrder(orderData) {
 
     if (result.success) {
       showToast("Đặt hàng thành công!", "success");
-      stopPaymentCheck();
+      if(orderData.payment === "bank_transfer") {
+        stopPaymentCheck();
+      }
 
       setTimeout(async function () {
         const deleteResponse = await fetch("/cart/api/delete/allItems", {
@@ -757,4 +808,22 @@ function showModal(title, message, onConfirm) {
 function showLoading(show) {
   const loadingOverlay = document.getElementById("loadingOverlay");
   loadingOverlay.style.display = show ? "flex" : "none";
+}
+
+async function fetchSendMessage(messageData) {
+  try {
+    const response = await fetch("/chat/send-message", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      body: JSON.stringify(messageData)
+    });
+
+    if (!response.ok) {
+      throw new Error("Gửi tin nhắn thất bại!");
+    }
+  } catch (error) {
+  }
 }

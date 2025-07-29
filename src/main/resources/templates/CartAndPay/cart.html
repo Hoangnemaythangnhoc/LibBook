@@ -9,8 +9,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
     <link rel="stylesheet" href="/css/cart-styles.css"/>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        /* Modified: Increase width of modal-lg for better data display */
+        .modal-lg .modal-dialog {
+            max-width: 1000px !important; /* Increased from default 800px */
+        }
+        #orderStatusModal .modal-xl .modal-dialog {
+            max-width: 1500px !important; /* Increased from default 1140px */
+        }
+    </style>
 </head>
 <body class="cart-content">
+<input type="hidden" id="currentUserId" th:value="${session.USER.userId}" />
 <main class="wrapper">
     <main class="main">
         <nav class="breadcrumb">
@@ -34,133 +44,6 @@
                         <i class="ri-delete-bin-line"></i>
                         Xóa tất cả
                     </button>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Giỏ hàng - LibBooks</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-  <link rel="stylesheet" href="/css/cart-styles.css"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-</head>
-<body class="cart-content">
-<main class="wrapper">
-  <main class="main">
-    <nav class="breadcrumb">
-      <a href="/home">Trang chủ</a>
-      <i class="ri-arrow-right-s-line"></i>
-      <span>Giỏ hàng</span>
-    </nav>
-    <div class="page-header">
-      <h1>Giỏ hàng của bạn</h1>
-      <p>Xem lại và hoàn tất đơn hàng</p>
-      <button class="btn btn-link position-relative ms-2" id="orderStatusBtn" data-bs-toggle="modal"
-              data-bs-target="#orderStatusModal">
-        <i class="ri-file-list-3-line fs-5"></i> Đơn Hàng Của Bạn
-      </button>
-    </div>
-    <div class="cart-layout">
-      <div class="cart-section">
-        <div class="cart-header">
-          <h2>Sản phẩm trong giỏ</h2>
-          <button class="clear-cart-btn" onclick="clearCart()">
-            <i class="ri-delete-bin-line"></i>
-            Xóa tất cả
-          </button>
-        </div>
-        <div class="cart-items" id="cartItems"></div>
-        <div class="empty-cart" id="emptyCart" style="display: none">
-          <div class="empty-icon">
-            <i class="ri-shopping-cart-line"></i>
-          </div>
-          <h3>Giỏ hàng của bạn đang trống</h3>
-          <p>Hãy khám phá và thêm những cuốn sách yêu thích vào giỏ hàng</p>
-          <a href="/home" class="btn btn-primary">
-            <i class="ri-book-open-line"></i>
-            Khám phá sách
-          </a>
-        </div>
-        <div id="bankTransferContainer" class="bank-transfer-container" style="display: none;">
-          <h4 id="paymentTitle" class="gradient-text">Vui lòng quét mã QR để thanh toán</h4>
-          <div class="qr-container">
-            <div class="qr-card">
-              <img id="qrCode" class="qr-img" src="" alt="Mã QR"/>
-            </div>
-            <p class="vnd-coin">Số tiền: <span id="totalAmountQR"></span></p>
-            <p class="content-transfer">
-              <!--              Nội dung chuyển khoản: <span id="transferContent"></span>-->
-              <!--              <button onclick="copyToClipboard(document.getElementById('transferContent').textContent)" class="btn btn-secondary">-->
-              <!--                <i class="ri-file-copy-line"></i> Sao chép-->
-              <!--              </button>-->
-            </p>
-            <p class="countdown-timer">Thời gian còn lại: <span id="paymentCountdown">30:00</span></p>
-          </div>
-        </div>
-      </div>
-      <div class="summary-section">
-        <div class="order-summary">
-          <h2>Tóm tắt đơn hàng</h2>
-          <div class="summary-row">
-            <span>Tạm tính (<span id="itemCount">0</span> sản phẩm):</span>
-            <span id="subtotal">0 VNĐ</span>
-          </div>
-          <div class="summary-row">
-            <span>Giảm giá:</span>
-            <span class="discount-amount">0 VNĐ</span>
-          </div>
-          <div class="summary-row">
-            <span>Phí vận chuyển:</span>
-            <span id="shippingFee">0 VNĐ</span>
-          </div>
-          <div class="summary-row">
-            <span>Thuế VAT (10%):</span>
-            <span id="tax">0 VNĐ</span>
-          </div>
-          <div class="summary-row total-row">
-            <span>Tổng cộng:</span>
-            <span id="totalAmount">0 VNĐ</span>
-          </div>
-          <div class="promo-section">
-            <h4>Mã giảm giá</h4>
-            <form class="promo-form" id="promoForm">
-              <div class="promo-input-group">
-                <input type="text" id="promoCode" placeholder="Nhập mã giảm giá" maxlength="20"/>
-                <button type="submit" class="apply-btn">Áp dụng</button>
-              </div>
-            </form>
-            <div class="applied-promos" id="appliedPromos"></div>
-            <button class="checkout-btn" onclick="proceedToCheckout()">
-              <i class="ri-lock-line"></i>
-              Tiến hành thanh toán
-            </button>
-            <div class="security-badge">
-              <i class="ri-shield-check-line"></i>
-              <span>Thanh toán an toàn & bảo mật</span>
-            </div>
-          </div>
-          <div id="shippingSection" class="shipping-section" style="display: none;">
-            <div class="shipping-form">
-              <h3>Thông tin giao hàng</h3>
-              <form id="shippingForm">
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="fullName">Họ và tên</label>
-                    <input type="text" id="fullName" name="fullName" placeholder="Nhập họ và tên"
-                           required/>
-                  </div>
-                  <div class="form-group">
-                    <label for="phone">Số điện thoại</label>
-                    <input type="tel" id="phone" name="phone" placeholder="Nhập số điện thoại"
-                           required/>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="email">Email</label>
-                  <input type="email" id="email" name="email" placeholder="Nhập email" required/>
-                </div>
-                <div class="form-group">
-                  <label for="address">Địa chỉ</label>
-                  <input type="text" id="address" name="address" placeholder="Nhập địa chỉ" required/>
                 </div>
                 <div class="cart-items" id="cartItems"></div>
                 <div class="empty-cart" id="emptyCart" style="display: none">
@@ -182,46 +65,13 @@
                         </div>
                         <p class="vnd-coin">Số tiền: <span id="totalAmountQR"></span></p>
                         <p class="content-transfer">
-                            <!--              Nội dung chuyển khoản: <span id="transferContent"></span>-->
-                            <!--              <button onclick="copyToClipboard(document.getElementById('transferContent').textContent)" class="btn btn-secondary">-->
-                            <!--                <i class="ri-file-copy-line"></i> Sao chép-->
-                            <!--              </button>-->
+                            <!-- Nội dung chuyển khoản: <span id="transferContent"></span>-->
+                            <!-- <button onclick="copyToClipboard(document.getElementById('transferContent').textContent)" class="btn btn-secondary">-->
+                            <!--   <i class="ri-file-copy-line"></i> Sao chép-->
+                            <!-- </button>-->
                         </p>
                         <p class="countdown-timer">Thời gian còn lại: <span id="paymentCountdown">30:00</span></p>
                     </div>
-                <div class="shipping-options">
-                  <h4>Phương thức vận chuyển</h4>
-                  <div class="shipping-option">
-                    <input type="radio" id="standard" name="shippingMethod" value="30000" checked
-                           onchange="updateShippingFeeAndBill()"/>
-                    <label for="standard">
-                      <div class="option-info">
-                        <span class="option-name">Giao hàng tiêu chuẩn</span>
-                        <span class="option-time">3-5 ngày</span>
-                      </div>
-                      <span class="option-price">30,000 đ</span>
-                    </label>
-                  </div>
-                  <div class="shipping-option">
-                    <input type="radio" id="express" name="shippingMethod" value="60000"
-                           onchange="updateShippingFeeAndBill()"/>
-                    <label for="express">
-                      <div class="option-info">
-                        <span class="option-name">Giao hàng nhanh</span>
-                        <span class="option-time">1-2 ngày</span>
-                      </div>
-                      <span class="option-price">60,000 đ</span>
-                    </label>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="note">Ghi chú</label>
-                  <textarea id="note" name="note" placeholder="Nhập ghi chú (nếu có)"></textarea>
-                </div>
-                <div class="form-actions">
-                  <button type="button" class="btn btn-secondary" onclick="backToSummary()">Quay lại
-                  </button>
-                  <button type="submit" class="btn btn-primary">Xác nhận đơn</button>
                 </div>
             </div>
             <div class="summary-section">
@@ -230,14 +80,6 @@
                     <div class="summary-row">
                         <span>Tạm tính (<span id="itemCount">0</span> sản phẩm):</span>
                         <span id="subtotal">0 VNĐ</span>
-            <div class="payment-section">
-              <h3>Phương thức thanh toán</h3>
-              <div class="payment-options">
-                <div class="payment-option">
-                  <input type="radio" id="cod" name="paymentMethod" value="cod" checked/>
-                  <label for="cod">
-                    <div class="payment-icon">
-                      <i class="ri-cash-line"></i>
                     </div>
                     <div class="summary-row">
                         <span>Giảm giá:</span>
@@ -271,13 +113,6 @@
                             <i class="ri-shield-check-line"></i>
                             <span>Thanh toán an toàn & bảo mật</span>
                         </div>
-                  </label>
-                </div>
-                <div class="payment-option">
-                  <input type="radio" id="bank_transfer" name="paymentMethod" value="bank_transfer"/>
-                  <label for="bank_transfer">
-                    <div class="payment-icon">
-                      <i class="ri-qr-code-line"></i>
                     </div>
                     <div id="shippingSection" class="shipping-section" style="display: none;">
                         <div class="shipping-form">
@@ -325,7 +160,7 @@
                                         <label for="standard">
                                             <div class="option-info">
                                                 <span class="option-name">Giao hàng tiêu chuẩn</span>
-                                                    <span class="option-time">3-5 ngày</span>
+                                                <span class="option-time">3-5 ngày</span>
                                             </div>
                                             <span class="option-price">30,000 đ</span>
                                         </label>
@@ -389,101 +224,6 @@
             <!-- Loading Overlay -->
             <div class="loading-overlay" id="loadingOverlay">
                 <div class="loading-spinner"></div>
-          </div>
-        </div>
-      </div>
-      <div th:include="fragments/footer :: footer"></div>
-      <!-- Loading Overlay -->
-      <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-      </div>
-
-      <!-- Toast Notifications -->
-      <div class="toast-container" id="toastContainer"></div>
-
-      <!-- Order Status Modal -->
-      <div class="modal fade" id="orderStatusModal" tabindex="-1" aria-labelledby="orderStatusModalLabel"
-           aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="orderStatusModalLabel">Đơn Hàng Của Bạn</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-            </div>
-            <div class="modal-body">
-              <!-- Search Bar -->
-              <div class="search-bar">
-                <input type="text" class="form-control" id="orderSearch"
-                       placeholder="Tìm kiếm theo mã đơn hàng hoặc địa chỉ..."/>
-              </div>
-              <!-- Sort Buttons -->
-              <div class="sort-buttons">
-                <button class="btn btn-outline-primary" id="sortByStatus">
-                  Sắp Xếp Theo Trạng Thái
-                  <i class="ri-arrow-down-s-line"></i>
-                </button>
-                <button class="btn btn-outline-primary" id="sortByDate">
-                  Sắp Xếp Theo Ngày Tạo
-                  <i class="ri-arrow-down-s-line"></i>
-                </button>
-              </div>
-              <div id="orderStatusContent">
-                <!-- Order data will be loaded here -->
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Order Details Modal -->
-      <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel"
-           aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="orderDetailsModalLabel">Chi Tiết Đơn Hàng</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-            </div>
-            <div class="modal-body">
-              <table class="table table-striped">
-                <thead>
-                <tr>
-                  <th>Ảnh Sản Phẩm</th>
-                  <th>Tên Sản Phẩm</th>
-                  <th>Giá</th>
-                  <th>Số Lượng</th>
-                  <th>Đánh Giá</th>
-                  <th>Tác Giả</th>
-                  <th>Giảm Giá</th>
-                </tr>
-                </thead>
-                <tbody id="orderDetailsBody">
-                </tbody>
-              </table>
-              <div class="order-summary mt-3">
-                <p><strong>Tổng Tiền:</strong> <span id="orderTotal">0.00 ₫</span></p>
-                <p><strong>Tổng Số Lượng:</strong> <span id="orderQuantity">0</span></p>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" id="cancel">Hủy Đơn Hàng</button>
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Bootstrap Modal for Confirmation -->
-      <div class="modal fade" id="confirmModal" tabindex="-1">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="modalTitle">Xác Nhận</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Hủy"></button>
             </div>
 
             <!-- Toast Notifications -->
@@ -492,7 +232,7 @@
             <!-- Order Status Modal -->
             <div class="modal fade" id="orderStatusModal" tabindex="-1" aria-labelledby="orderStatusModalLabel"
                  aria-hidden="true">
-                <div class="modal-dialog modal-lg">
+                <div class="modal-dialog modal-xl">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="orderStatusModalLabel">Đơn Hàng Của Bạn</h5>
@@ -559,13 +299,9 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" id="cancel">Hủy Đơn Hàng</button>
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-
                         </div>
                     </div>
                 </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-              <button type="button" class="btn btn-primary" id="modalConfirm">Xác Nhận</button>
             </div>
 
             <!-- Bootstrap Modal for Confirmation -->
@@ -665,7 +401,7 @@
         renderOrders(sortedOrders);
     });
 
-    // Render orders to table
+    // Modified: Added payment method column to the orders table
     function renderOrders(orders) {
         const orderStatusContent = document.getElementById('orderStatusContent');
         if (orders.length === 0) {
@@ -673,81 +409,6 @@
             return;
         }
         orderStatusContent.innerHTML = `
-  const user = [[${session.USER}]];
-  let userOrders = [];
-  let sortByStatusAsc = true;
-  let sortByDateAsc = true;
-
-  // Fetch and display order status
-  document.getElementById('orderStatusBtn').addEventListener('click', async () => {
-    const orderStatusContent = document.getElementById('orderStatusContent');
-    if (user && user.userId) {
-      try {
-        const response = await fetch('http://localhost:8080/api/orders');
-        if (!response.ok) throw new Error('Không thể tải đơn hàng');
-        const orders = await response.json();
-
-        // Filter orders by userId
-        userOrders = orders.filter(order => order.userId === user.userId);
-
-        if (userOrders.length === 0) {
-          orderStatusContent.innerHTML = '<p class="text-center text-muted">Không tìm thấy đơn hàng nào.</p>';
-        } else {
-          renderOrders(userOrders);
-        }
-      } catch (error) {
-        orderStatusContent.innerHTML = '<p class="text-center text-danger">Lỗi khi tải đơn hàng. Vui lòng thử lại sau.</p>';
-        console.error('Lỗi khi tải đơn hàng:', error);
-      }
-    } else {
-      orderStatusContent.innerHTML = '<p class="text-center text-muted">Vui lòng đăng nhập để xem đơn hàng của bạn.</p>';
-    }
-  });
-
-  // Search functionality
-  document.getElementById('orderSearch').addEventListener('input', () => {
-    const searchQuery = document.getElementById('orderSearch').value.toLowerCase();
-    const filteredOrders = userOrders.filter(order =>
-            order.orderId.toString().includes(searchQuery) ||
-            (order.address || '').toLowerCase().includes(searchQuery)
-    );
-    renderOrders(filteredOrders);
-  });
-
-  // Sort by Status
-  document.getElementById('sortByStatus').addEventListener('click', () => {
-    sortByStatusAsc = !sortByStatusAsc;
-    const sortedOrders = [...userOrders].sort((a, b) =>
-            sortByStatusAsc ? a.orderStatusId - b.orderStatusId : b.orderStatusId - a.orderStatusId
-    );
-    document.getElementById('sortByStatus').innerHTML = `
-            Sắp Xếp Theo Trạng Thái
-            <i class="ri-arrow-${sortByStatusAsc ? 'down' : 'up'}-s-line"></i>
-        `;
-    renderOrders(sortedOrders);
-  });
-
-  // Sort by Date
-  document.getElementById('sortByDate').addEventListener('click', () => {
-    sortByDateAsc = !sortByDateAsc;
-    const sortedOrders = [...userOrders].sort((a, b) =>
-            sortByDateAsc ? new Date(a.createDate) - new Date(b.createDate) : new Date(b.createDate) - new Date(a.createDate)
-    );
-    document.getElementById('sortByDate').innerHTML = `
-            Sắp Xếp Theo Ngày Tạo
-            <i class="ri-arrow-${sortByDateAsc ? 'down' : 'up'}-s-line"></i>
-        `;
-    renderOrders(sortedOrders);
-  });
-
-  // Render orders to table
-  function renderOrders(orders) {
-    const orderStatusContent = document.getElementById('orderStatusContent');
-    if (orders.length === 0) {
-      orderStatusContent.innerHTML = '<p class="text-center text-muted">Không tìm thấy đơn hàng nào.</p>';
-      return;
-    }
-    orderStatusContent.innerHTML = `
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -755,6 +416,8 @@
                         <th>Trạng Thái</th>
                         <th>Ngày Tạo</th>
                         <th>Địa Chỉ</th>
+                        <!-- Modified: Added column for payment method -->
+                        <th>Phương Thức Thanh Toán</th>
                         <th>Hành Động</th>
                     </tr>
                 </thead>
@@ -762,9 +425,11 @@
                     ${orders.map(order => `
                         <tr>
                             <td>${order.orderId}</td>
-                            <td>${order.orderStatusId === 1 ? 'Đang Chờ Xử Lý' : order.orderStatusId === 2 ? 'Đang Xử Lý' : order.orderStatusId === 3 ? 'Đã Giao' : 'Đã Hủy'}</td>
+                            <td>${order.orderStatusId === 1 ? 'Đang Chờ Xử Lý' : order.orderStatusId === 2 ? 'Đang Xử Lý' : order.orderStatusId === 3 ? 'Đang Giao' : 'Đã Hủy'}</td>
                             <td>${new Date(order.createDate).toLocaleString('vi-VN', {timeZone: 'Asia/Ho_Chi_Minh'})}</td>
                             <td>${order.address || 'N/A'}</td>
+                            <!-- Modified: Display payment method based on value -->
+                            <td>${order.paymentStatus === 1 ? 'Chuyển khoản' : 'Ship COD'}</td>
                             <td><button class="btn btn-info btn-sm" onclick="showOrderDetails(${order.orderId})">Chi Tiết</button></td>
                         </tr>
                     `).join('')}
@@ -814,49 +479,6 @@
 
                     const row = document.createElement('tr');
                     row.innerHTML = `
-  }
-
-  // Function to show order details
-  async function showOrderDetails(orderId) {
-    try {
-      const response = await fetch(`http://localhost:8080/api/orders/${orderId}`);
-      if (!response.ok) throw new Error(`Không thể tải chi tiết đơn hàng: ${response.statusText}`);
-      const order = await response.json();
-      const details = order.orderDetails || [];
-      const tbody = document.getElementById('orderDetailsBody');
-      tbody.innerHTML = '';
-
-      let totalAmount = 0;
-      let totalQuantity = 0;
-
-      if (details.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7">Không có chi tiết đơn hàng.</td></tr>';
-      } else {
-        for (const detail of details) {
-          let product = {
-            productName: 'N/A',
-            imageFile: '',
-            rating: 'N/A',
-            author: 'N/A',
-            discount: 'N/A'
-          };
-          try {
-            const productResponse = await fetch(`http://localhost:8080/api/products/${detail.productId}`);
-            if (productResponse.ok) {
-              product = await productResponse.json();
-            } else {
-              console.warn(`Sản phẩm với id ${detail.productId} không tìm thấy, trạng thái: ${productResponse.status}`);
-            }
-          } catch (productError) {
-            console.error(`Lỗi khi tải sản phẩm với id ${detail.productId}:`, productError);
-          }
-
-          const discountedPrice = detail.price * ((100 - (product.discount || 0)) / 100);
-          totalAmount += discountedPrice * detail.quantity;
-          totalQuantity += detail.quantity;
-
-          const row = document.createElement('tr');
-          row.innerHTML = `
                         <td><img src="${product.imageFile || ''}" alt="Ảnh Sản Phẩm" class="product-image" style="width: 40px; height: 50px"></td>
                         <td>${product.productName}</td>
                         <td>${discountedPrice.toFixed(2)} ₫</td>
@@ -930,73 +552,7 @@
                 }
             }
         );
-        }
-          tbody.appendChild(row);
-        }
-      }
-
-      document.getElementById('orderTotal').textContent = `${totalAmount.toFixed(2)} ₫`;
-      document.getElementById('orderQuantity').textContent = totalQuantity;
-
-      const modalElement = document.getElementById('orderDetailsModal');
-      const modal = new bootstrap.Modal(modalElement);
-
-      const cancelButton = document.getElementById('cancel');
-      cancelButton.onclick = () => cancelOrder(orderId, modal);
-      modal.show();
-    } catch (error) {
-      console.error('Lỗi khi tải chi tiết đơn hàng:', error);
-      const tbody = document.getElementById('orderDetailsBody');
-      tbody.innerHTML = '<tr><td colspan="7">Lỗi khi tải chi tiết đơn hàng: ' + error.message + '</td></tr>';
-      document.getElementById('orderTotal').textContent = '0.00 ₫';
-      document.getElementById('orderQuantity').textContent = '0';
-      new bootstrap.Modal(document.getElementById('orderDetailsModal')).show();
     }
-  }
-
-  async function cancelOrder(orderId, orderDetailsModal) {
-    if (!user || !user.userId) {
-      showToast("Vui lòng đăng nhập để hủy đơn hàng", "error");
-      return;
-    }
-
-    showModal(
-            "Xác nhận hủy đơn hàng",
-            `Bạn có chắc chắn muốn hủy đơn hàng này?`,
-            async () => {
-              try {
-                showLoading(true);
-                const response = await fetch("/api/cancel", {
-                  method: "PATCH",
-                  headers: {
-                    "Content-Type": "application/json",
-                    "X-Requested-With": "XMLHttpRequest",
-                  },
-                  body: JSON.stringify({ orderId, userId: user.userId }),
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                  showToast("Hủy đơn hàng thành công!", "success");
-                  // Update userOrders to reflect canceled status
-                  userOrders = userOrders.map(order =>
-                          order.orderId === orderId ? { ...order, orderStatusId: 4 } : order
-                  );
-                  renderOrders(userOrders);
-                  orderDetailsModal.hide(); // Close the order details modal
-                } else {
-                  showToast(result.message || "Có lỗi xảy ra khi hủy đơn hàng", "error");
-                }
-              } catch (error) {
-                console.error("Lỗi khi hủy đơn hàng:", error);
-                showToast("Có lỗi xảy ra khi hủy đơn hàng", "error");
-              } finally {
-                showLoading(false);
-              }
-            }
-    );
-  }
 </script>
 </body>
 </html>

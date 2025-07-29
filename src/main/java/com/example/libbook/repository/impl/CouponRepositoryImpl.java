@@ -48,9 +48,11 @@ public class CouponRepositoryImpl implements CouponRepository {
     }
 
     public Coupon findByCode(String code) {
-        String sql = "SELECT * FROM Coupon WHERE CouponId = ?";
+        String sql = "SELECT * FROM Coupon WHERE Code = ?";
         return jdbcTemplate.queryForObject(sql, new Object[]{code}, rowMapper);
     }
+
+
 
     @Override
     public int checkCouponCode(String code) {
@@ -67,6 +69,19 @@ public class CouponRepositoryImpl implements CouponRepository {
                 return 0; // Return 0 if no valid coupon is found
             }
         }
+
+    @Override
+    public void updateAmountCoupon(int couponId, BigDecimal amount) {
+        String sql = "UPDATE Coupon SET Quantity = ? WHERE CouponId = ?";
+        double quantity = amount.subtract(BigDecimal.ONE).doubleValue();
+        try {
+            jdbcTemplate.update(sql, quantity, couponId);
+        } catch (Exception e) {
+            // Log the exception (recommended to use a proper logging framework like SLF4J)
+            System.err.println("Error updating coupon amount: " + e.getMessage());
+            throw new RuntimeException("Failed to update coupon amount", e);
+        }
+    }
 
 
     @Override
@@ -111,3 +126,4 @@ public class CouponRepositoryImpl implements CouponRepository {
     }
 
 }
+
