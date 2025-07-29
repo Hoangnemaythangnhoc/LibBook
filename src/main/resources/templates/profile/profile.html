@@ -6,19 +6,12 @@
     <title>Hồ Sơ Cá Nhân - LibBook</title>
 
     <link rel="stylesheet" href="/css/ProfileUser.css"/>
+    <link rel="shortcut icon"
+          href="https://rails-assets-us.bookshop.org/assets/favicon-63cb20989e2516343feeab429626798a43afdaa28eeaba777b7e0acde8a25dd2.png"/>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <script src="/js/profile.js"></script>
-    <style>
-        /* CSS cho tab Đánh giá */
-        .reviews-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-
     <style>
         /* CSS cho tab Đánh giá */
         .reviews-list {
@@ -134,7 +127,18 @@
                 Home
             </button>
         </a>
-
+        <a href="/admin" th:if="${session.USER.roleId == 1}">
+            <button class="btn btn-primary position-absolute top-0 start-0 m-3">Home</button>
+        </a>
+        <a href="/staff" th:if="${session.USER.roleId == 3}">
+            <button class="btn btn-primary position-absolute top-0 start-0 m-3">Home</button>
+        </a>
+        <a href="/shipper" th:if="${session.USER.roleId == 5}">
+            <button class="btn btn-primary position-absolute top-0 start-0 m-3">Home</button>
+        </a>
+        <a href="/customer-care" th:if="${session.USER.roleId == 4}">
+            <button class="btn btn-primary position-absolute top-0 start-0 m-3">Home</button>
+        </a>
         <!-- Profile Header -->
         <section class="profile-header">
             <div class="profile-avatar">
@@ -151,7 +155,7 @@
                 </div>
             </div>
             <div class="profile-info">
-                <h1 class="profile-name" id="firstname"
+                <h1 class="profile-name" id="profile-infor"
                     th:text="${userProfile != null and (userProfile.firstName != null or userProfile.lastName != null)} ? ${userProfile.firstName + ' ' + userProfile.lastName} : ''">
                 </h1>
                 <h5 class="profile-name" id="userName"
@@ -284,15 +288,6 @@
                             </div>
                             <div class="form-group">
                                 <label for="confirmPassword">Xác nhận mật khẩu mới</label>
-                                <label for="currentPassword">Current Password</label>
-                                <input type="password" id="currentPassword" name="currentPassword" required/>
-                            </div>
-                            <div class="form-group">
-                                <label for="newPassword">New Password</label>
-                                <input type="password" id="newPassword" name="newPassword" required/>
-                            </div>
-                            <div class="form-group">
-                                <label for="confirmPassword">Confirm New Password</label>
                                 <input type="password" id="confirmPassword" name="confirmPassword" required/>
                             </div>
                             <button type="submit" class="btn btn-primary">Đổi mật khẩu</button>

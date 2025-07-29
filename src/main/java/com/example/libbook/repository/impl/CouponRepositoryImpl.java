@@ -83,19 +83,6 @@ public class CouponRepositoryImpl implements CouponRepository {
         }
     }
 
-    @Override
-    public void updateAmountCoupon(int couponId, BigDecimal amount) {
-        String sql = "UPDATE Coupon SET Quantity = ? WHERE CouponId = ?";
-        double quantity = amount.subtract(BigDecimal.ONE).doubleValue();
-        try {
-            jdbcTemplate.update(sql, quantity, couponId);
-        } catch (Exception e) {
-            // Log the exception (recommended to use a proper logging framework like SLF4J)
-            System.err.println("Error updating coupon amount: " + e.getMessage());
-            throw new RuntimeException("Failed to update coupon amount", e);
-        }
-    }
-
 
     @Override
     public void save(Coupon coupon) {

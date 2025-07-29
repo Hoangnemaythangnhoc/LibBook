@@ -1058,3 +1058,10 @@ function updateSubscription(isChecked) {
             document.getElementById('subscribeSwitch').checked = !isChecked;
         });
 }
+
+// Hàm tiện ích để lấy query parameter từ URL
+function getQueryParam(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+}
+
