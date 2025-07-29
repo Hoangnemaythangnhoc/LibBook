@@ -23,10 +23,16 @@ let shippingInform = {
   email : null,
   address: null,
 }
+
 let description = null;
 if (userInSession.phoneNumber !== null) {
   description = userInSession.phoneNumber.slice(5, 10);
 }
+
+
+
+const description = userInSession.phoneNumber.slice(5,10);
+
 
 const MY_BANK = {
   BANK_ID: "970422", // MB Bank

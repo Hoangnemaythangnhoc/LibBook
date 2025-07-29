@@ -65,6 +65,7 @@ public class UserController {
             Model model) {
         try {
             System.out.println(email + pass + " : " + newpass);
+
             if (!pass.equals(newpass)) {
                 model.addAttribute("message", "Password not match!");
                 model.addAttribute("messageType", "error");
@@ -81,6 +82,7 @@ public class UserController {
                 model.addAttribute("message", "Registration failed!");
                 model.addAttribute("messageType", "error");
                 return "Login/signup";
+
             }
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
@@ -104,7 +106,11 @@ public class UserController {
                         HttpSession session,
                         HttpServletResponse response,
                         RedirectAttributes redirectAttributes) {
-
+        boolean accountBan = userService.checkBanAccount(email);
+        if (!accountBan){
+            redirectAttributes.addFlashAttribute("error", "tài khoản của bạn đã bị vô hiệu hóa");
+            return "redirect:/login";
+        }
         User user = userService.checkLogin(email, pass);
         if (user == null) {
             redirectAttributes.addFlashAttribute("error", "Username hoặc Password sai!");
@@ -134,7 +140,6 @@ public class UserController {
                 case 2: return "redirect:/home";
                 case 3: return "profile/staff";
                 case 4: return  "profile/customer-care";
-                case 4: return  "";
                 case 5: return "profile/shipper";
             }
         }

@@ -833,6 +833,7 @@
                     <th>Người dùng</th>
                     <th>Trạng thái</th>
                     <th>Địa chỉ</th>
+                    <th>Phương thức thanh toán</th>
                     <th>Hành động</th>
                 </tr>
                 </thead>
@@ -904,6 +905,7 @@
             <div class="modal-content1">
                 <span id="close-staff-modal" class="close">&times;</span>
                 <h4 class="mb-3">Tạo tài khoản Nhân viên</h4>
+                <div id="staff-alert" class="alert alert-danger d-none" role="alert"></div>
                 <form id="staff-form">
                     <div class="form-group mb-2">
                         <label>Email</label>
@@ -1584,6 +1586,7 @@
                         </select>
                     </td>
                     <td>${order.address ?? "Unknown"}</td>
+                    <td>${order.paymentStatus === 1 ? 'Chuyển khoản' : 'Ship COD'}</td>
                     <td>
                         <button class="btn-update" onclick="updateStatus(${order.orderId})" ${isLocked ? 'disabled' : ''}>Cập nhật</button>
                         <button class="btn-details" onclick="showDetails(${order.orderId})">Chi tiết</button>

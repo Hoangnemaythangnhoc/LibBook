@@ -17,3 +17,4 @@ public interface CouponRepository {
     int checkCouponCode(String Code);
     void updateAmountCoupon(int couponId, BigDecimal amount);
 }
+}

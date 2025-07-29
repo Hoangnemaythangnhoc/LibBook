@@ -1,4 +1,4 @@
-\package com.example.libbook.repository;
+package com.example.libbook.repository;
 
 import com.example.libbook.dto.UserDTO;
 
@@ -24,4 +24,5 @@ public interface UserRepository {
     void updateUser(User user);
     void updateUserSubscription(int userId, boolean isSubscribed);
     List<String> getSubscribedEmails();
+    boolean checkBanAccount(String email);
 }

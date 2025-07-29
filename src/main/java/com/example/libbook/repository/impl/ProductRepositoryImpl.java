@@ -5,6 +5,7 @@ import com.example.libbook.entity.Tag;
 import com.example.libbook.repository.ProductRepository;
 import com.example.libbook.service.NotificationService;
 import com.example.libbook.service.impl.NotificationServiceImpl;
+import com.example.libbook.utils.ConnectUtils;
 import com.example.libbook.utils.ImageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -161,11 +162,10 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public Long addProduct(Product product, List<Long> tagIds) throws IOException {
+    public long addProduct(Product product, List<Long> tagIds) throws IOException {
         byte[] baseImage = imageUtils.decodeBase64(product.getImageFile());
         String image = imageUtils.uploadAvatar(baseImage, 2);
         product.setImageFile(image);
-        notificationService.sendNewProductNotification(product);
         String sql = "INSERT INTO product (productName, description, price, imageFile, buys, available, userId, status, rating, author, discount, publisher) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection connection = dataSource.getConnection();
@@ -189,28 +189,30 @@ public class ProductRepositoryImpl implements ProductRepository {
 
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                     product.setProductId(generatedKeys.getLong(1));
-                     return generatedKeys.getLong(1);
-
-                }
-            }
-
-            if (tagIds != null && !tagIds.isEmpty()) {
-                String insertTagSql = "INSERT INTO ProductTag (ProductId, TagId) VALUES (?, ?)";
-                try (PreparedStatement tagStatement = connection.prepareStatement(insertTagSql)) {
-                    for (Long tagId : tagIds) {
-                        tagStatement.setLong(1, product.getProductId());
-                        tagStatement.setLong(2, tagId);
-                        tagStatement.addBatch();
+                    long generatedId = generatedKeys.getLong(1);
+                    product.setProductId(generatedId);
+                    notificationService.sendNewProductNotification(product);
+                    // Xử lý tag
+                    if (tagIds != null && !tagIds.isEmpty()) {
+                        String insertTagSql = "INSERT INTO ProductTag (ProductId, TagId) VALUES (?, ?)";
+                        try (PreparedStatement tagStatement = connection.prepareStatement(insertTagSql)) {
+                            for (Long tagId : tagIds) {
+                                tagStatement.setLong(1, generatedId);
+                                tagStatement.setLong(2, tagId);
+                                tagStatement.addBatch();
+                            }
+                            tagStatement.executeBatch();
+                        }
                     }
-                    tagStatement.executeBatch();
+                    return generatedId;
+                } else {
+                    throw new SQLException("Failed to retrieve generated product ID.");
                 }
             }
         } catch (Exception e) {
             System.err.println("Error adding product: " + e.getMessage());
             throw new RuntimeException("Error adding product", e);
         }
-        return null;
     }
 
     @Override
@@ -413,5 +415,20 @@ public class ProductRepositoryImpl implements ProductRepository {
     @Override
     public List<Product> getAllDataChart() {
         return List.of();
+    }
+
+    @Override
+    public void updateAmountBuys(int productID, int amount) {
+        String sql = "UPDATE [product] SET Buys = ? WHERE ProductId = ?";
+        try (Connection con = ConnectUtils.getInstance().openConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setInt(1, amount);
+            stmt.setInt(2, productID);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("lỗi thêm sản phẩm mới", e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

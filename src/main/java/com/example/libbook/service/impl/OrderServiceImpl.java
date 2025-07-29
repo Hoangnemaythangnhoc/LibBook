@@ -1,6 +1,8 @@
 package com.example.libbook.service.impl;
 
 import com.example.libbook.entity.Coupon;
+import com.example.libbook.entity.OrderDetail;
+import com.example.libbook.entity.Product;
 import com.example.libbook.repository.*;
 import com.example.libbook.repository.impl.CheckBuyRepositoryImpl;
 import com.example.libbook.utils.Converter;
@@ -59,14 +61,19 @@ public class OrderServiceImpl implements OrderService {
     public void updateOrderStatus(Integer orderId, Integer newStatusId) {
         System.out.println("OrderService: Updating status for order id: " + orderId + " to status: " + newStatusId);
         orderRepository.updateOrderStatus(orderId, newStatusId);
-        if(newStatusId == 4) {
-            checkBuyRepository.save(orderId, orderRepository.getOrderById(orderId).getUserId());
+        Order order =orderRepository.getOrderById(orderId);
+        List<OrderDetail> orders = orderDetailRepository.findByOrderId(orderId);
+        if(newStatusId == 3) {
+            for(OrderDetail orderDetail : orders) {
+                checkBuyRepository.save(orderDetail.getProductId(), order.getUserId());
+            }
         }
         System.out.println("OrderService: Updated status for order id: " + orderId);
     }
 
     @Override
     public boolean addOrder(Map<String, Object> orderData) {
+
         try {
             ObjectMapper mapper = new ObjectMapper();
 
@@ -86,16 +93,18 @@ public class OrderServiceImpl implements OrderService {
             }
             Converter converter = new Converter();
             Order order = converter.convertOrderDTOOrder(orderDataDTO);
-
             int orderID = orderRepository.addNewOrder(order);
             if (orderID <= 0) {
                 System.err.println("Lỗi khi tạo order.");
                 return false;
             }
             for (CartItemDTO cart : order.getCartItemDTOS()) {
+                Product product = productRepository.getProductById(cart.getProductId());
                 productRepository.updateQuantityProduct(Math.toIntExact(cart.getProductId()), cart.getQuantity());
+                productRepository.updateAmountBuys(Math.toIntExact(cart.getProductId()),product.getBuys()+ cart.getQuantity());
             }
-
+            if(order.getCouponId() != 0)
+            {couponRepository.updateAmountCoupon(couponRepository.findByCode(code).getCouponId(),couponRepository.findByCode(code).getQuantity());}
             boolean orderDetailCheck = orderDetailRepository.addNewOrderDetail(order, orderID);
             return orderDetailCheck;
         } catch (Exception e) {

@@ -76,7 +76,7 @@ public class UserRepositoryImpl implements UserRepository {
             statement.setInt(2, 2);
             statement.setString(3, userDTO.getEmail());
             statement.setString(4, hashPassword(userDTO.getPassword()));
-            statement.setBoolean(5, userDTO.isStatus());
+            statement.setBoolean(5, true);
 
             statement.executeUpdate();
         } catch (Exception e) {
@@ -96,7 +96,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     public User checkLogin(String email, String pass) {
-        String sql = "Select Top 1 *  from [User] where Email = ?";
+        String sql = "Select Top 1 *  from [User] where Email = ? and [Status] = 1";
         ConnectUtils db = ConnectUtils.getInstance();
         User userDTO = null ;
         String password = null;
@@ -107,17 +107,16 @@ public class UserRepositoryImpl implements UserRepository {
             while (resultSet.next()) {
                 userDTO = new User();
                 userDTO.setEmail(resultSet.getString("Email"));
-                 userDTO.setUserName(resultSet.getString("UserName"));
-                 userDTO.setUserId(resultSet.getInt("UserId"));
-                 userDTO.setRoleId(resultSet.getInt("RoleId"));
-                 password = resultSet.getString("Password");
-                 userDTO.setProfilePicture(resultSet.getString("ProfilePicture"));
-                 userDTO.setPhoneNumber(resultSet.getString("Phonenumber"));
                 userDTO.setUserName(resultSet.getString("UserName"));
                 userDTO.setUserId(resultSet.getInt("UserId"));
                 userDTO.setRoleId(resultSet.getInt("RoleId"));
                 password = resultSet.getString("Password");
                 userDTO.setProfilePicture(resultSet.getString("ProfilePicture"));
+                userDTO.setPhoneNumber(resultSet.getString("Phonenumber"));
+                userDTO.setAddress(resultSet.getString("Address"));
+                userDTO.setFirstName(resultSet.getString("FirstName"));
+                userDTO.setLastName(resultSet.getString("LastName"));
+
             }
             if (password.equals(hashPassword(pass)))
                 return userDTO;
@@ -145,6 +144,9 @@ public class UserRepositoryImpl implements UserRepository {
                 userDTO.setRoleId(resultSet.getInt("RoleId"));
                 userDTO.setProfilePicture(resultSet.getString("ProfilePicture"));
                 userDTO.setPhoneNumber(resultSet.getString("Phonenumber"));
+                userDTO.setAddress(resultSet.getString("Address"));
+                userDTO.setFirstName(resultSet.getString("FirstName"));
+                userDTO.setLastName(resultSet.getString("LastName"));
 
             }
             return userDTO;
@@ -229,10 +231,10 @@ public class UserRepositoryImpl implements UserRepository {
         String sql = "UPDATE [User] SET [Password] = ? WHERE [Email] = ? ";
         try (Connection connection = db.openConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
-                statement.setString(1, hashPass);
-                statement.setString(2, email);
-                int check = statement.executeUpdate();
-                return check > 0;
+            statement.setString(1, hashPass);
+            statement.setString(2, email);
+            int check = statement.executeUpdate();
+            return check > 0;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } catch (Exception e) {
@@ -399,5 +401,27 @@ public class UserRepositoryImpl implements UserRepository {
         }
         return emails;
     }
+
+    @Override
+    public boolean checkBanAccount(String email) {
+        String sql = "SELECT [Status] FROM [User] WHERE [Email] = ?";
+        try (Connection con = ConnectUtils.getInstance().openConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setString(1, email);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Byte status = rs.getByte("Status");
+                    if(status == 0) {
+                        return false;
+                    }
+                    else return true;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 
 }

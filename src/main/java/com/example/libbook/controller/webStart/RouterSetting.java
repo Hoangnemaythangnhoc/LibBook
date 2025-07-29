@@ -149,7 +149,7 @@ public class RouterSetting {
     }
 
     @GetMapping("/product/{id}")
-    public String productDetail(@PathVariable("id") Long id, Model model) {
+    public String productDetail(@PathVariable("id") Long id, Model model, HttpSession session) {
         Product product = productService.getProductById(id);
         List<Tag> tags = tagService.getAllTags();
         if (product != null) {
@@ -157,6 +157,8 @@ public class RouterSetting {
             model.addAttribute("product", product);
             model.addAttribute("relatedProducts", productService.getAllProduct().stream().limit(4).toList());
             model.addAttribute("tags", tags);
+            User user = (User) session.getAttribute("USER");
+            model.addAttribute("USER", user);
             return "Mainpage/product";
         } else {
             return "redirect:/";
@@ -197,7 +199,7 @@ public class RouterSetting {
         System.out.println("Products for search: " + (products != null ? products.size() : "0"));
         System.out.println("Tags for search page: " + (tags != null ? tags : "No tags fetched"));
         model.addAttribute("products", products);
-        model.addAttribute("tagName", "Search Results");
+        model.addAttribute("tagName", "Kết quả tìm kiếm");
         model.addAttribute("tags", tags);
         return "Mainpage/category";
     }

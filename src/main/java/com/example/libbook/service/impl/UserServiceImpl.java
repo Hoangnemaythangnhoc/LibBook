@@ -103,4 +103,9 @@ public class UserServiceImpl implements UserService {
         return userRepository.getSubscribedEmails();
     }
 
+    @Override
+    public boolean checkBanAccount(String email) {
+        return userRepository.checkBanAccount(email);
+    }
+
 }

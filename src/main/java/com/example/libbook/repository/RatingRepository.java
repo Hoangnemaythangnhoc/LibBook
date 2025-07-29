@@ -9,8 +9,4 @@ public interface RatingRepository {
     boolean saveRating(Rating rating);
     List<Rating> getAllRatings();
     boolean updateRatingStatus(int ratingId, boolean status);
-
 }
-
-}
-
