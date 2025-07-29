@@ -606,11 +606,13 @@
     document.addEventListener('DOMContentLoaded', () => {
         sections.forEach(section => section.style.display = 'none');
         document.getElementById('manage-orders-section').style.display = 'block';
+        fetchOrders();
+
     });
 
     sidebarItems.forEach((item, index) => {
         item.addEventListener('click', () => {
-            const sectionId = item.getAttribute('data-section');
+            const sectionId = 'manage-orders-section';
             const currentSection = document.getElementById(sectionId);
 
             if (activeSectionIndex === index && currentSection.style.display === 'block') {
@@ -623,9 +625,7 @@
             if (currentSection) {
                 currentSection.style.display = 'block';
                 item.classList.add('active');
-                if (sectionId === 'manage-orders-section') {
-                    fetchOrders();
-                }
+                fetchOrders();
             }
 
             activeSectionIndex = index;
@@ -676,7 +676,7 @@
                     if (userResponse.ok) {
                         const user = await userResponse.json();
                         order.customerName = `${user.firstName || 'Unknown'} ${user.lastName || 'Unknown'}`.trim() || 'Unknown Unknown';
-                        order.phoneNumber = user.phoneNumber || 'N/A';
+                        order.phoneNumber =   order.phoneNumber || user.phoneNumber;
                     } else {
                         order.customerName = 'Unknown Unknown';
                         order.phoneNumber = 'N/A';

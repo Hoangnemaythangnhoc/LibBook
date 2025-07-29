@@ -22,6 +22,15 @@ public class Order {
     private List<CartItemDTO> cartItemDTOS;
     private String paymentMethod;
     private String transCode;
+    private String phoneNumber;
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
 
     public String getTransCode() {
         return transCode;

@@ -20,6 +20,7 @@ public class Converter {
         order.setPaymentStatus(0);
         order.setUserId(dto.getUserID());
         order.setTransCode(dto.getTransCode());
+        order.setPhoneNumber(dto.getShipping().getPhone());
         return order;
     }
 }

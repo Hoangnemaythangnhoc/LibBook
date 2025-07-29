@@ -86,7 +86,7 @@ public class OrderRepositoryImpl implements OrderRepository {
 
     public int addNewOrder(Order order) {
         int generatedId = 0;
-        String sql = "INSERT INTO [Order](UserId, CreateDate, OrderStatusId, Address, Paymentstatus, PaymentID) VALUES (?,?,?,?,?,?)";
+        String sql = "INSERT INTO [Order](UserId, CreateDate, OrderStatusId, Address, Paymentstatus, PaymentID, PhoneNumber) VALUES (?,?,?,?,?,?,?)";
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -108,6 +108,7 @@ public class OrderRepositoryImpl implements OrderRepository {
                 pstmt.setInt(5, order.getPaymentStatus()); // Paymentstatus từ Order
                 pstmt.setNull(6, java.sql.Types.VARCHAR); // PaymentID = NULL cho cod
             }
+            pstmt.setString(7, order.getPhoneNumber());
 
             int affectedRows = pstmt.executeUpdate();
 
@@ -158,6 +159,7 @@ public class OrderRepositoryImpl implements OrderRepository {
         order.setOrderStatusId(rs.getInt("OrderStatusId"));
         order.setAddress(rs.getString("Address"));
         order.setPaymentStatus(rs.getInt("PaymentStatus"));
+        order.setPhoneNumber(rs.getString("PhoneNumber"));
         return order;
     }
 
