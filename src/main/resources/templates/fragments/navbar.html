@@ -159,6 +159,23 @@
             color: #0d6efd;
             font-weight: 600;
         }
+
+        .navbar-search-form .input-group {
+            min-width: 300px;
+        }
+
+        .navbar-search-form .form-control {
+            border-radius: 0.25rem 0 0 0.25rem;
+        }
+
+        .navbar-search-form .btn {
+            border-radius: 0 0.25rem 0.25rem 0;
+        }
+
+        .navbar-search-form .form-select {
+            max-width: 150px;
+            border-radius: 0;
+        }
     </style>
 </head>
 
@@ -466,6 +483,25 @@
             text-align: center;
             width: 180px;
         }
+
+        /* SỬA: Thêm CSS để form tìm kiếm trông giống trong home.html */
+        .navbar-search-form .input-group {
+            min-width: 300px;
+        }
+
+        .navbar-search-form .form-control {
+            border-radius: 0.25rem 0 0 0.25rem;
+        }
+
+        .navbar-search-form .btn {
+            border-radius: 0 0.25rem 0.25rem 0;
+        }
+
+        /* SỬA: Thêm style để dropdown thể loại gọn gàng hơn */
+        .navbar-search-form .form-select {
+            max-width: 150px;
+            border-radius: 0;
+        }
     </style>
     <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
         <div class="container">
@@ -497,51 +533,49 @@
                     </li>
                 </ul>
 
-                <form class="d-flex mx-auto" style="min-width: 300px" action="/category/search" method="get">
+                <!-- SỬA: Cập nhật form tìm kiếm để giống hệt form trong home.html -->
+                <form class="d-flex mx-auto navbar-search-form" th:action="@{/category/search}" method="get">
                     <div class="input-group">
-                        <input class="form-control" type="search" placeholder="Tìm kiếm sách, tác giả..."
-                               aria-label="Search"/>
+                        <input class="form-control" type="search" name="searchQuery"
+                               placeholder="Tìm kiếm sách, tác giả..." aria-label="Search"/>
+                        <!--                        <select class="form-select" name="selectedTag" id="navbarCategorySelect">-->
+                        <!--                            <option value="" selected>Tất cả thể loại</option>-->
+                        <!--                            <option th:each="tag : ${tags}" th:value="${tag.tagName}" th:text="${tag.tagName}"></option>-->
+                        <!--                        </select>-->
                         <button class="btn btn-outline-primary" type="submit">
                             <i class="ri-search-line"></i>
                         </button>
                     </div>
                 </form>
 
-
+                <!-- GIỮ NGUYÊN: Phần này không liên quan đến tìm kiếm nên không sửa -->
                 <div class="d-flex align-items-center ms-auto" style="gap: 7px">
-
-
                     <th:block th:if="${session.USER != null}">
-                        <!--                        <button class="btn btn-link position-relative ms-2" id="orderStatusBtn" data-bs-toggle="modal"-->
-                        <!--                                data-bs-target="#orderStatusModal">-->
-                        <!--                            <i class="ri-file-list-3-line fs-5"></i> Your order-->
-                        <!--                        </button>-->
-                        <a href="/chat-widget" class="btn btn-link position-relative ms-2 p-0 me-2" id="navbarChatBtn" style="height: 20px; width: 20px">
+                        <a href="/chat-widget" class="btn btn-link position-relative ms-2 p-0 me-2" id="navbarChatBtn"
+                           style="height: 20px; width: 20px">
                             <i class="ri-chat-3-line fs-6"></i>
                             <span class="position-absolute top-45 start-100 translate-middle badge rounded-pill bg-danger"
                                   id="NumberOfChat"
                                   style="margin-right: 60px">
-                            0
-
+                                0
                             </span>
                         </a>
-                        <a href="/cart" class="btn btn-link position-relative ms-2 p-0 me-2" style="height: 20px; width: 20px">
+                        <a href="/cart" class="btn btn-link position-relative ms-2 p-0 me-2"
+                           style="height: 20px; width: 20px">
                             <i class="ri-shopping-cart-2-line fs-5"></i>
                             <span class="position-absolute top-45 start-100 translate-middle badge rounded-pill bg-danger"
                                   id="NumberOfCart"
                                   style="margin-right: 60px">
-                            0
-                        </span>
+                                0
+                            </span>
                         </a>
                         <form th:action="@{/profile/{id}(id=${session.USER.getUserId()})}" method="get">
                             <button class="btn btn-primary">Hồ sơ</button>
                         </form>
-
                         <form action="/custom-logout" method="post">
                             <button class="btn btn-warning" type="submit">Đăng xuất</button>
                         </form>
                     </th:block>
-                    <!-- Nếu chưa đăng nhập -->
                     <th:block th:if="${session.USER == null}">
                         <a href="/login" class="btn btn-outline-primary me-2">Đăng nhập</a>
                         <a href="/register" class="btn btn-primary">Đăng ký</a>
@@ -551,6 +585,7 @@
         </div>
     </nav>
 
+    <!-- GIỮ NGUYÊN: Script cho giỏ hàng, WebSocket và toast không liên quan đến tìm kiếm -->
     <script src="/js/chat-script.js" defer></script>
     <script th:inline="javascript">
         const user = [[${session.USER}]];
@@ -573,11 +608,7 @@
             fetchContCart();
         }
 
-
-
         //TOAST MESSAGE
-        <!--    Message-->
-
         function showToast(message, type = 'success') {
             const toastEl = document.getElementById('notificationToast');
             const toast = new bootstrap.Toast(toastEl, {delay: 5000});
@@ -587,8 +618,10 @@
             toastEl.classList.add(type === 'success' ? 'bg-light' : 'bg-danger');
             toast.show();
         }
-        //////STOMJS REAL-TIME NOTIFICATION
+
+        //STOMPJS REAL-TIME NOTIFICATION
         const _chat = []
+
         function connectWebSocket() {
             let stompClient = null;
             const socket = new SockJS('/ws');
@@ -610,6 +643,29 @@
         });
     </script>
 
+    <!-- SỬA: Thêm script để hỗ trợ redirect khi chọn thể loại, giống home.html -->
+    <script>
+        function redirectToCategoryNavbar() {
+            var select = document.getElementById('navbarCategorySelect');
+            var selectedTag = select.value;
+            if (selectedTag) {
+                window.location.href = '/category/' + encodeURIComponent(selectedTag);
+            }
+        }
+
+        document.getElementById('navbarCategorySelect').addEventListener('change', redirectToCategoryNavbar);
+    </script>
+    <script>
+        function redirectToCategoryNavbar() {
+            var select = document.getElementById('navbarCategorySelect');
+            var selectedTag = select.value;
+            if (selectedTag) {
+                window.location.href = '/category/' + encodeURIComponent(selectedTag);
+            }
+        }
+
+        document.getElementById('navbarCategorySelect').addEventListener('change', redirectToCategoryNavbar);
+    </script>
 </th:block>
 </body>
 </html>

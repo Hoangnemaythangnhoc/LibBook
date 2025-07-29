@@ -17,8 +17,10 @@ public class RoleRepositoryImpl implements RoleRepository {
             rs.getInt("RoleId"),
             rs.getString("RoleName")
     );
-    public List<Role> inra() {
+    public List<Role> getAllRole() {
         String selectSql = "SELECT * FROM [role]";
         return jdbcTemplate.query(selectSql, ROLE_ROW_MAPPER);
     }
+
+
 }

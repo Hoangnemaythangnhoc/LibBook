@@ -5,5 +5,5 @@ import com.example.libbook.entity.Role;
 import java.util.List;
 
 public interface RoleRepository {
-    public List<Role> inra();
+    public List<Role> getAllRole();
 }
