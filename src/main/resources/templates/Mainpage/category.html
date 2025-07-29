@@ -139,6 +139,7 @@
                     <div class="card-body">
                         <p class="text-primary mb-1">Sách</p>
                         <h5 class="card-title" th:text="${product.productName}"></h5>
+                        <p hidden="hidden" class="card-author" th:text="${product.author}"></p>
                         <p class="card-text text-muted" th:text="${product.description}"></p>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="h5 mb-0" th:text="${product.price}+' ₫'"></span>
@@ -195,8 +196,13 @@
             const price = parseFloat(product.dataset.price);
             const productRating = parseFloat(product.dataset.rating) || 0;
             const title = product.querySelector('.card-title').textContent.toLowerCase();
+            const author = product.querySelector('.card-author').textContent.toLowerCase();
 
-            const matchesSearch = searchQuery ? title.includes(searchQuery) : true;
+            let matchesSearch = true;
+            if (searchQuery) {
+                matchesSearch = title.includes(searchQuery) || author.includes(searchQuery);
+            }
+
             const matchesPrice = price >= minPrice && (maxPrice === Infinity || price <= maxPrice);
             const matchesRating = rating === 0 || (productRating >= rating && productRating < (rating + 1));
 

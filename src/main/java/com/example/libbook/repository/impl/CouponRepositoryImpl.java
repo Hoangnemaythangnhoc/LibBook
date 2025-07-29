@@ -85,23 +85,6 @@ public class CouponRepositoryImpl implements CouponRepository {
 
 
     @Override
-    public int checkCouponCode(String code) {
-            String sql = "SELECT DiscountPercent FROM Coupon " +
-                    "WHERE Code = ? " +
-                    "AND IsActive = 1 " +
-                    "AND Quantity > 0 " +
-                    "AND StartDate <= CURRENT_TIMESTAMP " +
-                    "AND EndDate >= CURRENT_TIMESTAMP";
-            try {
-                Integer discountPercent = jdbcTemplate.queryForObject(sql, new Object[]{code}, Integer.class);
-                return discountPercent != null ? discountPercent : 0;
-            } catch (EmptyResultDataAccessException e) {
-                return 0; // Return 0 if no valid coupon is found
-            }
-        }
-
-
-    @Override
     public void save(Coupon coupon) {
         String sql = "INSERT INTO Coupon (Code, DiscountPercent, Quantity, StartDate, EndDate, IsActive) " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
@@ -143,3 +126,4 @@ public class CouponRepositoryImpl implements CouponRepository {
     }
 
 }
+

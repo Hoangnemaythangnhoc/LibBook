@@ -2,6 +2,7 @@ package com.example.libbook.service.impl;
 
 import com.example.libbook.entity.Coupon;
 import com.example.libbook.entity.OrderDetail;
+import com.example.libbook.entity.Product;
 import com.example.libbook.repository.*;
 import com.example.libbook.repository.impl.CheckBuyRepositoryImpl;
 import com.example.libbook.utils.Converter;
@@ -92,14 +93,15 @@ public class OrderServiceImpl implements OrderService {
             }
             Converter converter = new Converter();
             Order order = converter.convertOrderDTOOrder(orderDataDTO);
-
             int orderID = orderRepository.addNewOrder(order);
             if (orderID <= 0) {
                 System.err.println("Lỗi khi tạo order.");
                 return false;
             }
             for (CartItemDTO cart : order.getCartItemDTOS()) {
+                Product product = productRepository.getProductById(cart.getProductId());
                 productRepository.updateQuantityProduct(Math.toIntExact(cart.getProductId()), cart.getQuantity());
+                productRepository.updateAmountBuys(Math.toIntExact(cart.getProductId()),product.getBuys()+ cart.getQuantity());
             }
             if(order.getCouponId() != 0)
             {couponRepository.updateAmountCoupon(couponRepository.findByCode(code).getCouponId(),couponRepository.findByCode(code).getQuantity());}
