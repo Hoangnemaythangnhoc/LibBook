@@ -12,3 +12,4 @@ public interface TagRepository  {
     List<Long> getTagByTagName(String tags);
     List<Tag> getTagsByProductId(Long productId);
 }
+

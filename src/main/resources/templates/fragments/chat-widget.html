@@ -16,9 +16,21 @@
 
 </head>
 <body>
-<form action="/home" method="GET" class="p-2 position-absolute">
+<form action="/home" method="GET" class="p-2 position-absolute" th:if="${session.USER.roleId == 2}">
     <button class="btn btn-dark" type="submit">Home</button>
 </form>
+<a href="/admin" class="p-2 position-absolute" th:if="${session.USER.roleId == 1}">
+    <button class="btn btn-dark" type="submit">Home</button>
+</a>
+<a href="/staff" class="p-2 position-absolute" th:if="${session.USER.roleId == 3}">
+    <button class="btn btn-dark" type="submit">Home</button>
+</a>
+<a href="/shipper" class="p-2 position-absolute" th:if="${session.USER.roleId == 5}">
+    <button class="btn btn-dark" type="submit">Home</button>
+</a>
+<a href="/customer-care" class="p-2 position-absolute" th:if="${session.USER.roleId == 4}">
+    <button class="btn btn-dark" type="submit">Home</button>
+</a>
 <div class="chat-container">
     <input type="hidden" id="currentUserId" th:value="${session.USER.userId}" />
     <!-- Sidebar với danh sách contacts -->

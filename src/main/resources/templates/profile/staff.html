@@ -484,20 +484,20 @@
         <header class="topbar">
             <h1>Staff Dashboard</h1>
             <div class="staff-info">
-                <span th:if="${session.USER != null}" th:text="'xin chào ' + ${session.USER.userName}"></span>
-                <div class="dropdown">
-                    <img th:if="${session.USER != null}" th:src="${session.USER.profilePicture}" alt="Avatar" data-bs-toggle="dropdown" aria-expanded="false" id="avatarDropdown"/>
-                    <ul class="dropdown-menu" aria-labelledby="avatarDropdown">
-                        <li>
-                            <form th:action="@{/profile/{id}(id=${session.USER.getUserId()})}" method="get">
-                                <button type="submit" class="dropdown-item">Hồ sơ</button>
-                            </form>
-                            <form action="/custom-logout" method="post" style="margin: 0;">
-                                <button type="submit" class="dropdown-item">Thoát</button>
-                            </form>
-                        </li>
-                    </ul>
-                </div>
+                    <span th:if="${session.USER != null}" th:text="'xin chào ' + ${session.USER.userName}"></span>
+                    <div class="dropdown">
+                        <img th:if="${session.USER != null}" th:src="${session.USER.profilePicture}" alt="Avatar" data-bs-toggle="dropdown" aria-expanded="false" id="avatarDropdown"/>
+                        <ul class="dropdown-menu" aria-labelledby="avatarDropdown">
+                            <li>
+                                <form th:action="@{/profile/{id}(id=${session.USER.getUserId()})}" method="get">
+                                    <button type="submit" class="dropdown-item">Hồ sơ</button>
+                                </form>
+                                <form action="/custom-logout" method="post" style="margin: 0;">
+                                    <button type="submit" class="dropdown-item">Thoát</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
             </div>
         </header>
 

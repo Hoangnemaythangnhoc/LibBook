@@ -78,7 +78,7 @@ public class RouterSetting {
         model.addAttribute("tags", tags);
         return "Mainpage/home";
     }
-
+    
 
     @GetMapping("/login")
     public String login(Model model) {

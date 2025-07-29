@@ -8,7 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
-
+    <link rel="shortcut icon"
+          href="https://rails-assets-us.bookshop.org/assets/favicon-63cb20989e2516343feeab429626798a43afdaa28eeaba777b7e0acde8a25dd2.png"/>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -391,7 +392,10 @@
         <header class="topbar">
             <h1>Customer Care Dashboard</h1>
             <div class="staff-info">
-                <span th:if="${session.USER != null}" th:text="'xin chào' + ${session.USER.userName}"></span>
+                <a href="/chat-widget" class="btn btn-link position-relative ms-2" id="navbarChatBtn">
+                    <i class="ri-chat-3-line fs-6"></i>
+                </a>
+                <span th:if="${session.USER != null}" th:text="'xin chào ' + ${session.USER.userName}"></span>
                 <div class="dropdown">
                     <img th:if="${session.USER != null}" th:src="${session.USER.profilePicture}" alt="Avatar" data-bs-toggle="dropdown" aria-expanded="false" id="avatarDropdown"/>
                     <ul class="dropdown-menu" aria-labelledby="avatarDropdown">
