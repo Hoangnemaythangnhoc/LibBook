@@ -147,7 +147,7 @@ public class UserRepositoryImpl implements UserRepository {
                 userDTO.setAddress(resultSet.getString("Address"));
                 userDTO.setFirstName(resultSet.getString("FirstName"));
                 userDTO.setLastName(resultSet.getString("LastName"));
-
+                userDTO.setStatus(resultSet.getString("Status"));
             }
             return userDTO;
         } catch (Exception e) {

@@ -23,6 +23,24 @@ public class Order {
     private String paymentMethod;
     private String transCode;
     private String phoneNumber;
+    private int shippingFee;
+    private int tax;
+
+    public int getTax() {
+        return tax;
+    }
+
+    public void setTax(int tax) {
+        this.tax = tax;
+    }
+
+    public int getShippingFee() {
+        return shippingFee;
+    }
+
+    public void setShippingFee(int shippingFee) {
+        this.shippingFee = shippingFee;
+    }
 
     public String getPhoneNumber() {
         return phoneNumber;

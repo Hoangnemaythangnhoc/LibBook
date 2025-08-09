@@ -698,6 +698,55 @@
         }
     }
 
+    // function renderOrderTable() {
+    //     const tableBody = document.getElementById('order-table-body-admin');
+    //     tableBody.innerHTML = '';
+    //     const startIndex = (currentOrderPage - 1) * itemsPerPage;
+    //     const endIndex = startIndex + itemsPerPage;
+    //     const paginatedOrders = allOrders.slice(startIndex, endIndex);
+    //     paginatedOrders.forEach(order => {
+    //         const status = orderStatuses.find(s => s.orderStatusId === order.orderStatusId)?.statusName || 'Unknown';
+    //         const statusClass = `status-${status.toLowerCase().replace(/\s+/g, '-')}`;
+    //         const isLocked = order.orderStatusId === 3 || order.orderStatusId === 4; // Delivered (3) or Cancelled (4)
+    //         const row = `
+    //             <tr>
+    //                 <td>${order.orderId}</td>
+    //                 <td>${order.customerName || 'Unknown Unknown'}</td>
+    //                 <td>${order.phoneNumber || 'N/A'}</td>
+    //                 <td>${order.address || 'N/A'}</td>
+    //                 <td>${(() => {
+    //             const date = new Date(order.createDate);
+    //             return date.toLocaleString('sv-SE', {timeZone: 'Asia/Ho_Chi_Minh'}).slice(0, 19).replace('T', ' ');
+    //         })()}</td>
+    //                 <td>${order.couponId || 'N/A'}</td>
+    //                 <td>
+    //                     <select class="status-select ${statusClass}" id="status-${order.orderId}" onchange="updateStatusColor(this, ${order.orderId})" ${isLocked ? 'disabled' : ''}>
+    //                         ${orderStatuses.map(s => `
+    //                             <option value="${s.orderStatusId}" ${s.orderStatusId === order.orderStatusId ? 'selected' : ''}>
+    //                                 ${s.statusName}
+    //                             </option>
+    //                         `).join('')}
+    //                     </select>
+    //                 </td>
+    //                 <td>${order.paymentStatus === 1 ? 'Chuyển khoản' : 'Ship COD'}</td>
+    //                 <td style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
+    //                     <button class="btn btn-primary btn-sm btn-update"
+    //                         onclick="updateStatus(${order.orderId})" ${isLocked ? 'disabled' : ''}
+    //                         style="width: 100px;">
+    //                         Cập nhật
+    //                 </button>
+    //                     <button class="btn btn-info btn-sm btn-details"
+    //                         onclick="showDetails(${order.orderId})"
+    //                         style="width: 100px;">
+    //                         Chi tiết
+    //                 </button>
+    //                 </td>
+    //             </tr>
+    //         `;
+    //         tableBody.innerHTML += row;
+    //     });
+    // }
+
     function renderOrderTable() {
         const tableBody = document.getElementById('order-table-body-admin');
         tableBody.innerHTML = '';
@@ -707,7 +756,7 @@
         paginatedOrders.forEach(order => {
             const status = orderStatuses.find(s => s.orderStatusId === order.orderStatusId)?.statusName || 'Unknown';
             const statusClass = `status-${status.toLowerCase().replace(/\s+/g, '-')}`;
-            const isLocked = order.orderStatusId === 3 || order.orderStatusId === 4; // Delivered (3) or Cancelled (4)
+            const isLocked = order.orderStatusId === 3 || order.orderStatusId === 4; // Delivered (3) hoặc Cancelled (4)
             const row = `
                 <tr>
                     <td>${order.orderId}</td>
@@ -722,7 +771,7 @@
                     <td>
                         <select class="status-select ${statusClass}" id="status-${order.orderId}" onchange="updateStatusColor(this, ${order.orderId})" ${isLocked ? 'disabled' : ''}>
                             ${orderStatuses.map(s => `
-                                <option value="${s.orderStatusId}" ${s.orderStatusId === order.orderStatusId ? 'selected' : ''}>
+                                <option value="${s.orderStatusId}" ${s.orderStatusId === order.orderStatusId ? 'selected' : ''} ${s.orderStatusId < order.orderStatusId ? 'disabled' : ''}>
                                     ${s.statusName}
                                 </option>
                             `).join('')}
@@ -734,12 +783,12 @@
                             onclick="updateStatus(${order.orderId})" ${isLocked ? 'disabled' : ''}
                             style="width: 100px;">
                             Cập nhật
-                    </button>
+                        </button>
                         <button class="btn btn-info btn-sm btn-details"
                             onclick="showDetails(${order.orderId})"
                             style="width: 100px;">
                             Chi tiết
-                    </button>
+                        </button>
                     </td>
                 </tr>
             `;
@@ -834,22 +883,56 @@
         renderOrderTable();
     }
 
-    function updateStatus(orderId) {
-        const newStatusId = document.getElementById(`status-${orderId}`).value;
-        fetch(`http://localhost:8080/api/orders/${orderId}/status`, {
-            method: 'PUT',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({orderStatusId: parseInt(newStatusId)})
-        })
-            .then(response => {
-                if (!response.ok) throw new Error('Failed to update status: ' + response.statusText);
-                alert('Status updated successfully!');
-                fetchOrders();
-            })
-            .catch(error => {
-                console.error('Error updating status:', error);
-                alert('Failed to update status. Check console for details.');
+    // function updateStatus(orderId) {
+    //     const newStatusId = document.getElementById(`status-${orderId}`).value;
+    //     fetch(`http://localhost:8080/api/orders/${orderId}/status`, {
+    //         method: 'PUT',
+    //         headers: {'Content-Type': 'application/json'},
+    //         body: JSON.stringify({orderStatusId: parseInt(newStatusId)})
+    //     })
+    //         .then(response => {
+    //             if (!response.ok) throw new Error('Failed to update status: ' + response.statusText);
+    //             alert('Status updated successfully!');
+    //             fetchOrders();
+    //         })
+    //         .catch(error => {
+    //             console.error('Error updating status:', error);
+    //             alert('Failed to update status. Check console for details.');
+    //         });
+    // }
+
+    async function updateStatus(orderId) {
+        const selectElement = document.getElementById(`status-${orderId}`);
+        const newStatusId = parseInt(selectElement.value);
+        const currentOrder = allOrders.find(order => order.orderId === orderId);
+        if (!currentOrder) {
+            alert('Không tìm thấy đơn hàng.');
+            return;
+        }
+        if (currentOrder.orderStatusId === 3 || currentOrder.orderStatusId === 4) {
+            alert('Không thể thay đổi trạng thái đơn hàng này vì nó đã ở trạng thái Giao hàng hoặc Hủy.');
+            renderOrderTable();
+            return;
+        }
+        if (newStatusId <= currentOrder.orderStatusId) {
+            alert('Chỉ có thể cập nhật sang trạng thái cao hơn trạng thái hiện tại.');
+            renderOrderTable();
+            return;
+        }
+        try {
+            const response = await fetch(`http://localhost:8080/api/orders/${orderId}/status`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({orderStatusId: newStatusId})
             });
+            if (!response.ok) throw new Error('Không thể cập nhật trạng thái: ' + response.statusText);
+            alert('Cập nhật trạng thái thành công!');
+            await fetchOrders();
+        } catch (error) {
+            console.error('Lỗi khi cập nhật trạng thái:', error);
+            alert('Không thể cập nhật trạng thái. Vui lòng kiểm tra console để biết chi tiết.');
+            await fetchOrders();
+        }
     }
 
     async function showDetails(orderId) {

@@ -112,6 +112,8 @@ public class ProductServiceImpl implements ProductService {
                 product.setRating(0.0); // Default rating
                 List<Long> tags = tagRepository.getTagByTagName((String) productData.getOrDefault("Tags",""));
                 productRepository.addProductFromCSV(product,tags);
+                NotificationServiceImpl notificationService = new NotificationServiceImpl();
+                notificationService.sendNewProductNotification(product);
                 successCount++;
             } catch (Exception e) {
                 failureCount++;

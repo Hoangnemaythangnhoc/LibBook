@@ -21,6 +21,8 @@ public class Converter {
         order.setUserId(dto.getUserID());
         order.setTransCode(dto.getTransCode());
         order.setPhoneNumber(dto.getShipping().getPhone());
+        order.setShippingFee((int) Math.round(dto.getTotals().getShipping()));
+        order.setTax((int) Math.round(dto.getTotals().getTax()));
         return order;
     }
 }

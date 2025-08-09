@@ -14,8 +14,9 @@
         .modal-lg .modal-dialog {
             max-width: 1000px !important; /* Increased from default 800px */
         }
-        #orderStatusModal .modal-xl .modal-dialog {
-            max-width: 1500px !important; /* Increased from default 1140px */
+        #orderStatusModal .modal-body {
+            max-height: 70vh;
+            overflow-y: auto;
         }
     </style>
 </head>
@@ -70,7 +71,7 @@
                             <!--   <i class="ri-file-copy-line"></i> Sao chép-->
                             <!-- </button>-->
                         </p>
-                        <p class="countdown-timer">Thời gian còn lại: <span id="paymentCountdown">30:00</span></p>
+<!--                        <p class="countdown-timer">Thời gian còn lại: <span id="paymentCountdown">30:00</span><-->
                     </div>
                 </div>
             </div>
@@ -292,8 +293,12 @@
                                 </tbody>
                             </table>
                             <div class="order-summary mt-3">
-                                <p><strong>Tổng Tiền:</strong> <span id="orderTotal">0.00 ₫</span></p>
                                 <p><strong>Tổng Số Lượng:</strong> <span id="orderQuantity">0</span></p>
+                                <p><strong>Tạm Tính :</strong> <span id="fee">0.00 ₫</span></p>
+                                <p><strong>Thuế :</strong> <span id="taxF">0.00 ₫</span></p>
+                                <p><strong>Phí Giao Hàng:</strong> <span id="shippingF">0.00 ₫</span></p>
+                                <p style="color: red"><strong>Tổng Tiền:</strong> <span id="orderTotal">0.00 ₫</span></p>
+
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -416,6 +421,7 @@
                         <th>Trạng Thái</th>
                         <th>Ngày Tạo</th>
                         <th>Địa Chỉ</th>
+                        <th>Số điện thoại</th>
                         <!-- Modified: Added column for payment method -->
                         <th>Phương Thức Thanh Toán</th>
                         <th>Hành Động</th>
@@ -425,9 +431,10 @@
                     ${orders.map(order => `
                         <tr>
                             <td>${order.orderId}</td>
-                            <td>${order.orderStatusId === 1 ? 'Đang Chờ Xử Lý' : order.orderStatusId === 2 ? 'Đang Xử Lý' : order.orderStatusId === 3 ? 'Đã Giao' : 'Đã Hủy'}</td>
+                            <td>${order.orderStatusId === 1 ? 'Đang Chờ Xử Lý' : order.orderStatusId === 2 ? 'Đang Xử Lý' : order.orderStatusId === 3 ? 'Đang Giao' : 'Đã Hủy'}</td>
                             <td>${new Date(order.createDate).toLocaleString('vi-VN', {timeZone: 'Asia/Ho_Chi_Minh'})}</td>
                             <td>${order.address || 'N/A'}</td>
+                            <td>${order.phoneNumber}</td>
                             <!-- Modified: Display payment method based on value -->
                             <td>${order.paymentStatus === 1 ? 'Chuyển khoản' : 'Ship COD'}</td>
                             <td><button class="btn btn-info btn-sm" onclick="showOrderDetails(${order.orderId})">Chi Tiết</button></td>
@@ -450,6 +457,9 @@
 
             let totalAmount = 0;
             let totalQuantity = 0;
+            let taxF = 0;
+            let shippingF = 0;
+            let Fee = 0;
 
             if (details.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7">Không có chi tiết đơn hàng.</td></tr>';
@@ -474,8 +484,12 @@
                     }
 
                     const discountedPrice = detail.price * ((100 - (product.discount || 0)) / 100);
-                    totalAmount += discountedPrice * detail.quantity;
+                    taxF = order.tax;
+                    Fee = discountedPrice
+                    shippingF = order.complete;
                     totalQuantity += detail.quantity;
+                    totalAmount += (discountedPrice * detail.quantity)+ taxF + shippingF;
+
 
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -490,9 +504,12 @@
                     tbody.appendChild(row);
                 }
             }
-
             document.getElementById('orderTotal').textContent = `${totalAmount.toFixed(2)} ₫`;
+            document.getElementById('taxF').textContent =  taxF;
+            document.getElementById('shippingF').textContent = shippingF;
             document.getElementById('orderQuantity').textContent = totalQuantity;
+            document.getElementById('fee').textContent = Fee;
+
 
             const modalElement = document.getElementById('orderDetailsModal');
             const modal = new bootstrap.Modal(modalElement);

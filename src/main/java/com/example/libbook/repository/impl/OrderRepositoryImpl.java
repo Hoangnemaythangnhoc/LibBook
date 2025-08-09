@@ -86,13 +86,13 @@ public class OrderRepositoryImpl implements OrderRepository {
 
     public int addNewOrder(Order order) {
         int generatedId = 0;
-        String sql = "INSERT INTO [Order](UserId, CreateDate, OrderStatusId, Address, Paymentstatus, PaymentID, PhoneNumber) VALUES (?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO [Order](UserId, CreateDate, OrderStatusId, Address, Paymentstatus, PaymentID, PhoneNumber,tax, [Complete]) VALUES (?,?,?,?,?,?,?,?,?)";
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             pstmt.setInt(1, order.getUserId());
-            pstmt.setDate(2, java.sql.Date.valueOf(order.getCreateDate().toLocalDate()));
+            pstmt.setTimestamp(2, java.sql.Timestamp.valueOf(order.getCreateDate()));
 
             pstmt.setString(4, order.getAddress());
 
@@ -109,6 +109,9 @@ public class OrderRepositoryImpl implements OrderRepository {
                 pstmt.setNull(6, java.sql.Types.VARCHAR); // PaymentID = NULL cho cod
             }
             pstmt.setString(7, order.getPhoneNumber());
+            pstmt.setInt(8, order.getTax());
+            pstmt.setInt(9, order.getShippingFee());
+
 
             int affectedRows = pstmt.executeUpdate();
 
@@ -160,6 +163,8 @@ public class OrderRepositoryImpl implements OrderRepository {
         order.setAddress(rs.getString("Address"));
         order.setPaymentStatus(rs.getInt("PaymentStatus"));
         order.setPhoneNumber(rs.getString("PhoneNumber"));
+        order.setTax(rs.getInt("tax"));
+        order.setShippingFee(rs.getInt("Complete"));
         return order;
     }
 

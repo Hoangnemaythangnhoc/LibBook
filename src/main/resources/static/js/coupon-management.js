@@ -13,8 +13,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (couponSaveSuccess) {
             Swal.fire({
                 icon: 'success',
-                title: 'Success',
-                text: 'Coupon saved successfully!',
+                title: 'Thành công',
+                text: 'Lưu coupon thành công!',
                 timer: 1500,
                 showConfirmButton: false
             });
@@ -47,7 +47,7 @@ function loadCoupons(search = "", page = 0) {
             renderPagination(result.totalPages, result.currentPage);
         })
         .catch(error => {
-            console.error("Error loading coupons: ", error);
+            console.error("Lỗi khi tải Coupon: ", error);
         });
 }
 
@@ -97,14 +97,42 @@ function openCreateCouponForm() {
 }
 
 function saveCoupon() {
+    const startDateStr = document.getElementById("startDate").value;
+    const endDateStr = document.getElementById("endDate").value;
+
+    if (startDateStr && endDateStr) {
+        const start = new Date(startDateStr);
+        const end = new Date(endDateStr);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // chỉ lấy ngày
+
+        if (start <= today) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Ngày bắt đầu không hợp lệ',
+                text: 'Ngày bắt đầu phải lớn hơn ngày hiện tại.'
+            });
+            return;
+        }
+
+        if (end <= start) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Ngày kết thúc không hợp lệ',
+                text: 'Ngày kết thúc phải lớn hơn ngày bắt đầu.'
+            });
+            return;
+        }
+    }
+
     const couponId = document.getElementById("couponId").value;
 
     const couponData = {
         code: document.getElementById("code").value,
         discountPercent: parseFloat(document.getElementById("discountPercent").value),
         quantity: parseFloat(document.getElementById("quantity").value),
-        startDate: document.getElementById("startDate").value ? document.getElementById("startDate").value + "T00:00:00" : null,
-        endDate: document.getElementById("endDate").value ? document.getElementById("endDate").value + "T23:59:59" : null,
+        startDate: startDateStr ? startDateStr + "T00:00:00" : null,
+        endDate: endDateStr ? endDateStr + "T23:59:59" : null,
         isActive: document.getElementById("isActive").checked
     };
 
@@ -126,22 +154,23 @@ function saveCoupon() {
     })
         .then(response => {
             if (!response.ok) {
-                throw new Error("Failed to save coupon");
+                throw new Error("Lưu coupon thất bại!");
             }
         })
         .then(() => {
-            couponSaveSuccess = true; // set flag
-            couponModal.hide();       // ẩn modal, phần còn lại đã nằm trong event 'hidden.bs.modal'
+            couponSaveSuccess = true;
+            couponModal.hide();
         })
         .catch(error => {
-            console.error("Error saving coupon: ", error);
+            console.error("Lỗi khi lưu coupon: ", error);
             Swal.fire({
                 icon: 'error',
                 title: 'Oops!',
-                text: 'An error occurred while saving.'
+                text: 'Có lỗi xảy ra khi lưu.'
             });
         });
 }
+
 
 
 function renderPagination(totalPages, currentPage) {

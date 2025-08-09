@@ -330,7 +330,7 @@
                             <span class="mx-3" id="quantity">1</span>
                             <button class="btn btn-outline-secondary" onclick="increaseQuantity()">+</button>
                         </div>
-                        <button class="btn btn-primary btn-lg" onclick="addToCart(product)">
+                        <button class="btn btn-primary btn-lg" th:disabled="${product.getAvailable()} <= 0" onclick="addToCart(product)">
                             <i class="ri-shopping-cart-line me-2"></i>
                             Thêm Vào Giỏ Hàng
                         </button>

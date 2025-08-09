@@ -51,12 +51,7 @@ public class OrderDetailRepositoryImpl implements OrderDetailRepository {
                 try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
                     pstmt.setInt(1, OrderId);
                     pstmt.setLong(2, dto.getProductId());
-                    if (order.getPaymentMethod().equals("bank_transfer")){
-                        pstmt.setDouble(3, 0.0);  // Số lượng// Giả sử bạn có productId trong CartItemDTO
-                    }
-                    else {
-                        pstmt.setDouble(3, dto.getPrice());
-                    }// Số lượng
+                    pstmt.setDouble(3, dto.getPrice());
                     pstmt.setInt(4, dto.getQuantity());
                     int affectedRows = pstmt.executeUpdate();
                     if (affectedRows == 0) {

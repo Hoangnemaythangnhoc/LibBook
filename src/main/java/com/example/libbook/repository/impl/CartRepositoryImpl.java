@@ -48,6 +48,7 @@ public class CartRepositoryImpl implements CartRepository {
                 item.setUserId(rs.getLong("UserId"));
                 item.setAuthor(rs.getString("Author"));
                 item.setRating(rs.getInt("Rating"));
+                item.setDiscount(rs.getInt("Discount"));
                 item.setAvailable(rs.getInt("Available"));
                 return item;
             }

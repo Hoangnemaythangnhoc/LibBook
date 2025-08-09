@@ -370,29 +370,32 @@ public class ProductRepositoryImpl implements ProductRepository {
 
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    product.setProductId(generatedKeys.getLong(1));
-                    return generatedKeys.getLong(1);
-
-                }
-            }
-
-            if (tagIds != null && !tagIds.isEmpty()) {
-                String insertTagSql = "INSERT INTO ProductTag (ProductId, TagId) VALUES (?, ?)";
-                try (PreparedStatement tagStatement = connection.prepareStatement(insertTagSql)) {
-                    for (Long tagId : tagIds) {
-                        tagStatement.setLong(1, product.getProductId());
-                        tagStatement.setLong(2, tagId);
-                        tagStatement.addBatch();
+                    long generatedId = generatedKeys.getLong(1);
+                    product.setProductId(generatedId);
+                    notificationService.sendNewProductNotification(product);
+                    // Xử lý tag
+                    if (tagIds != null && !tagIds.isEmpty()) {
+                        String insertTagSql = "INSERT INTO ProductTag (ProductId, TagId) VALUES (?, ?)";
+                        try (PreparedStatement tagStatement = connection.prepareStatement(insertTagSql)) {
+                            for (Long tagId : tagIds) {
+                                tagStatement.setLong(1, generatedId);
+                                tagStatement.setLong(2, tagId);
+                                tagStatement.addBatch();
+                            }
+                            tagStatement.executeBatch();
+                        }
                     }
-                    tagStatement.executeBatch();
+                    return generatedId;
+                } else {
+                    throw new SQLException("Failed to retrieve generated product ID.");
                 }
             }
         } catch (Exception e) {
             System.err.println("Error adding product: " + e.getMessage());
             throw new RuntimeException("Error adding product", e);
         }
-        return null;
     }
+
 
     @Override
     public void updateQuantityProduct(int productID, int quantity) {

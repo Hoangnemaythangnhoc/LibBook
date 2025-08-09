@@ -49,23 +49,22 @@ public class DynamicHtml {
         }
         String accessToken = getAccessToken(code);
         GoogleUser user = getUserInfo(accessToken);
-        boolean accountBan = userRepository.checkBanAccount(user.getEmail());
-        if (!accountBan){
-            redirectAttributes.addFlashAttribute("error", "tài khoản của bạn đã bị vô hiệu hóa");
-            return "redirect:/login";
-        }
         User u = userRepository.getUserByEmail(user.getEmail());
         if (u != null) {
+            if (u.getStatus().equals("0")){
+                redirectAttributes.addFlashAttribute("error", "tài khoản của bạn đã bị vô hiệu hóa");
+                return "redirect:/login";
+            }
             session.setAttribute("USER", u);
         }else {
-            UserDTO _u = new UserDTO();
-            _u.setEmail(user.getEmail());
-            _u.setUserName(user.getEmail().split("@")[0]);
-            _u.setPassword("");
-            userRepository.createAccount(_u);
-            session.setAttribute("USER", _u);
-            return "redirect:/home";
+            UserDTO _u2 = new UserDTO();
+            _u2.setEmail(user.getEmail());
+            _u2.setUserName(user.getEmail().split("@")[0]);
+            _u2.setPassword("");
+            userRepository.createAccount(_u2);
+            session.setAttribute("USER", userRepository.getUserByEmail(user.getEmail()));
 
+            return "redirect:/home";
         }
 
         if (u.getRoleId() == 1) return "redirect:/admin";

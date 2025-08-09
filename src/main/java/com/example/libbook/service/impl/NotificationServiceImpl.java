@@ -85,7 +85,7 @@ public class NotificationServiceImpl implements NotificationService {
                 "<img src='" + imageUrl + "' class='product-image' alt='Product Image'>" +
                 "<p class='product-name'>" + productName + "</p>" +
                 "<p><b>Mô tả:</b> " + description + "</p>" +
-                "<p><b>Giá:</b> $" + price + "</p>" +
+                "<p><b>Giá:</b> " + price + "đ</p>" +
                 "<p>Hãy xem ngay trên <a href='http://localhost:8080/product/" + productid + "'>website của chúng tôi</a>!</p>" +
                 "<div class='footer'>" +
                 "<p>Follow us on:</p>" +

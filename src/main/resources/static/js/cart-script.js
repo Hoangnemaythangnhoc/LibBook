@@ -98,32 +98,34 @@ function initializeShippingForm() {
 
 async function applyPromoCode(promoCode) {
   try {
-    // Fetch discount percentage from the API
     const response = await fetch(`/api/coupon/coupon-check-code?code=${encodeURIComponent(promoCode)}`);
 
-    // Check if the response is successful
     if (!response.ok) {
-      throw new Error('API request failed');
+      // Đọc chi tiết lỗi từ response
+      const errorMessage = await response.text();
+      showToast(errorMessage || "Mã giảm giá không hợp lệ", "error");
+
+      // Clear promo
+      appliedPromos.innerHTML = "";
+      cartData.appliedPromo = null;
+      calculateTotals();
+      return; // Không tiếp tục
     }
 
-    const discountPercent = await response.json(); // Expecting an integer (e.g., 20 for 20%)
+    const discountPercent = await response.json();
 
-    // Validate the response
     if (discountPercent > 0) {
-      // Apply the promo code
-      cartData.appliedPromo = { code: promoCode, discount: discountPercent / 100 }; // Convert to decimal (e.g., 0.2)
+      cartData.appliedPromo = { code: promoCode, discount: discountPercent / 100 };
       calculateTotals();
       showToast(`Mã ${promoCode} được áp dụng thành công!`, "success");
     } else {
-      // Invalid promo code
       showToast("Mã giảm giá không hợp lệ", "error");
       appliedPromos.innerHTML = "";
       cartData.appliedPromo = null;
       calculateTotals();
     }
   } catch (error) {
-    // Handle fetch or network errors
-    showToast("Đã xảy ra lỗi khi kiểm tra mã giảm giá", "error");
+    // showToast("Đã xảy ra lỗi hệ thống khi kiểm tra mã giảm giá", "error");
     appliedPromos.innerHTML = "";
     cartData.appliedPromo = null;
     calculateTotals();
@@ -415,6 +417,7 @@ function renderCartItems(items) {
 
   cartItemsContainer.style.display = "block";
   emptyCart.style.display = "none";
+  // console.log(items);
   const itemsHTML = items
       .map(
           (item) => `
@@ -555,17 +558,24 @@ function clearCart() {
 }
 
 function showEmptyCart() {
-  document.getElementById("cartItems").style.display = "none";
-  document.getElementById("emptyCart").style.display = "block";
+  const cartItemsEl = document.getElementById("cartItems");
+  const emptyCartEl = document.getElementById("emptyCart");
+  const appliedPromosEl = document.getElementById("appliedPromos");
+
+  if (cartItemsEl) cartItemsEl.style.display = "none";
+  if (emptyCartEl) emptyCartEl.style.display = "block";
   cartData.items = [];
   cartData.appliedPromo = null;
-  document.getElementById("appliedPromos").innerHTML = "";
+
+  if (appliedPromosEl) appliedPromosEl.innerHTML = "0";
+
   calculateTotals();
   updateBankTransferQR();
 }
 
+
 function calculateTotals() {
-  const subtotal = cartData.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = cartData.items.reduce((sum, item) => sum + (item.price * ((100 - (item.discount || 0)) / 100) * item.quantity), 0);
   let discount = calculateDiscount(subtotal);
   if (cartData.appliedPromo) {
     discount += Math.round(subtotal * cartData.appliedPromo.discount);
